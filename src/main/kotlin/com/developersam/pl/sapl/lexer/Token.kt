@@ -41,3 +41,27 @@ class TypeToken(val name: String, lineNumber: Int) : Token(lineNumber = lineNumb
  * @param lineNumber line number where the token appears.
  */
 class OperatorToken(val name: String, lineNumber: Int) : Token(lineNumber = lineNumber)
+
+/**
+ * [IntegerLiteralToken] is the type of the token that stores a long integer.
+ *
+ * @param value value of the long integer.
+ * @param lineNumber line number where the token appears.
+ */
+class IntegerLiteralToken(val value: Long, lineNumber: Int) : Token(lineNumber = lineNumber)
+
+/**
+ * [FloatLiteralToken] is the type of the token that stores a long float.
+ *
+ * @param value value of the long float.
+ * @param lineNumber line number where the token appears.
+ */
+class FloatLiteralToken(val value: Double, lineNumber: Int) : Token(lineNumber = lineNumber)
+
+/**
+ * [StringLiteralToken] is the type of the token that stores a string.
+ *
+ * @param value value of the string.
+ * @param lineNumber line number where the token appears.
+ */
+class StringLiteralToken(val value: String, lineNumber: Int) : Token(lineNumber = lineNumber)
