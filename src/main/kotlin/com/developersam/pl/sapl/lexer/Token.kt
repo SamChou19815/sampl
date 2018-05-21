@@ -59,6 +59,22 @@ class IntegerLiteralToken(val value: Long, lineNumber: Int) : Token(lineNumber =
 class FloatLiteralToken(val value: Double, lineNumber: Int) : Token(lineNumber = lineNumber)
 
 /**
+ * [BoolLiteralToken] is the type of the token that stores a boolean.
+ *
+ * @param value value of the boolean.
+ * @param lineNumber line number where the token appears.
+ */
+class BoolLiteralToken(val value: Boolean, lineNumber: Int) : Token(lineNumber = lineNumber)
+
+/**
+ * [CharLiteralToken] is the type of the token that stores a character.
+ *
+ * @param value value of the character.
+ * @param lineNumber line number where the token appears.
+ */
+class CharLiteralToken(val value: Char, lineNumber: Int) : Token(lineNumber = lineNumber)
+
+/**
  * [StringLiteralToken] is the type of the token that stores a string.
  *
  * @param value value of the string.
