@@ -3,82 +3,211 @@
  */
 grammar Language;
 
-compilationUnit : importDeclaration? classDeclaration;
+/** The start rule; begin parsing here. */
+compilationUnit : importDeclaration? classTypeDeclaration classMemberDeclaration+ EOF;
 
-importDeclaration : 'import' '{' Identifier (',' Identifier)* '}';
-
-classDeclaration : privateModifier? 'class' Identifier '{'
-    classTypeDeclaration
-    classMemberDeclaration+
-'}';
+importDeclaration : IMPORT LBRACE UpperIdentifier (COMMA UpperIdentifier)* RBRACE;
 
 classMemberDeclaration : classConstantDeclaration | classMethodDeclaration;
 
-classTypeDeclaration : 'type' Identifier '=' typeValue;
+classTypeDeclaration : TYPE typeIdentifier ASSIGN typeValue;
 
-typeValue : tupleTypeValue | variantTypeValue | structTypeValue;
-
-tupleTypeValue : typeIdentifier ('*' typeIdentifier)*;
-
-variantTypeValue : ('|' Identifier ('of' typeValue))+;
-
-structTypeValue : '{' annotatedVariable (';' annotatedVariable)* '}';
-
-classConstantDeclaration : privateModifier? 'const' annotatedVariable '=' expression;
-
-classMethodDeclaration : privateModifier? 'function' Identifier '('
-    (annotatedVariable (',' annotatedVariable)*)?
-')' ':' Identifier '{' expression '}';
-
-expression
-    : primaryExpression
-    | expression bitOperator expression
-    | expression factorOperator expression
-    | expression termOperator expression
-    | expression '^' expression
-    | expression '&&' expression
-    | expression '||' expression
-    | 'let' annotatedPattern '=' expression ';' expression
-    | Identifier '.' Identifier
-    | Identifier '.' Identifier '(' (Identifier (',' Identifier)*)? ')'
-    ; // TODO
-
-primaryExpression
-    : '(' expression ')'
-    | 'this'
-    | literal
-    | Identifier
+typeValue
+    : nestedTypeValue # NestedType
+    | tupleTypeValue # TupleType
+    | variantTypeValue # VariantType
+    | structTypeValue # StructType
+    | functionTypeValue # FunctionType
     ;
 
-annotatedVariable : Identifier ':' typeIdentifier;
+nestedTypeValue : LPAREN typeValue RPAREN;
 
-annotatedPattern : Identifier ':' typeIdentifier;
+tupleTypeValue : typeIdentifier (MUL typeIdentifier)*;
 
-typeIdentifier : Identifier ('<' Identifier (',' Identifier)* '>')?;
+variantTypeValue : (VARIANT_OR UpperIdentifier (OF typeValue)?)+;
 
-privateModifier : 'private';
+structTypeValue : LBRACE annotatedVariable (SEMICOLON annotatedVariable)* RBRACE;
 
-bitOperator : '<<' | '<<<' | '>>';
+functionTypeValue : typeIdentifier ARROW typeIdentifier;
 
-factorOperator : '*'|'/'|'*.'|'/.'|'%';
+classConstantDeclaration : PRIVATE? CONST LowerIdentifier ASSIGN expression;
 
-termOperator : '+'|'-'|'+.'|'-.';
+classMethodDeclaration :
+    PRIVATE? STATIC? FUNCTION LowerIdentifier
+        genericsDeclaration? argumentsDeclaration typeAnnotation
+    ASSIGN expression;
+
+expression
+    : LPAREN expression RPAREN #NestedExpr
+    | THIS # ThisExpr
+    | Literal # LiteralExpr
+    | LowerIdentifier # IdentifierExpr
+    | LowerIdentifier DOT LowerIdentifier (LPAREN LowerIdentifier RPAREN)* # AccessMemberExpr
+    | expression BitOperator expression # BitExpr
+    | expression FactorOperator expression # FactorExpr
+    | expression TermOperator expression # TermExpr
+    | expression STR_CONCAT expression # StringConcatExpr
+    | NOT expression # NotExpr
+    | expression BinaryLogicalOperator expression # BooleanExpr
+    | expression (COMMA expression)+ # TupleExpr
+    | LET pattern typeAnnotation? ASSIGN expression SEMICOLON expression # LetExpr
+    | FUNCTION genericsDeclaration? argumentsDeclaration ARROW expression # LambdaExpr
+    | MATCH LowerIdentifier WITH (VARIANT_OR pattern ARROW expression)+ # MatchExpr
+    ;
+
+pattern
+    : LPAREN pattern RPAREN # NestedPattern
+    | pattern (COMMA pattern)+ # TuplePattern
+    | typeIdentifier pattern # VariantPattern
+    | LowerIdentifier # VariablePattern
+    | WILDCARD # WildcardPattern
+    ;
+
+annotatedVariable : LowerIdentifier typeAnnotation;
+
+typeAnnotation : COLON (typeIdentifier | typeValue);
+
+typeIdentifier : UpperIdentifier genericsDeclaration?;
+
+argumentsDeclaration : (UNIT | (LPAREN annotatedVariable RPAREN)*);
+
+genericsDeclaration : LT UpperIdentifier (COMMA UpperIdentifier)* GT;
+
+// KEYWORDS
+
+THIS : 'this';
+
+IMPORT : 'import';
+
+CLASS : 'class';
+
+TYPE : 'type';
+
+OF : 'of';
+
+LET : 'let';
+
+CONST : 'const';
+
+FUNCTION : 'function';
+
+PRIVATE : 'private';
+
+STATIC : 'static';
+
+MATCH : 'match';
+
+WITH : 'with';
+
+UNIT : '()';
+
+WILDCARD : '_';
+
+// PARENTHESIS
+
+LPAREN : '(';
+
+RPAREN : ')';
+
+LBRACE : '{';
+
+RBRACE : '}';
+
+LBRACKET : '[';
+
+RBRACKER : ']';
+
+// SEPARATORS
+
+SEMICOLON : ';';
+
+COLON : ':';
+
+COMMA : ',';
+
+DOT : '.';
+
+ARROW : '->';
+
+VARIANT_OR : '|';
+
+// OPERATORS
+
+STR_CONCAT : '^';
+
+BitOperator : SHL | SHR | USHR | XOR | LAND | LOR;
+
+SHL : '<<';
+
+SHR : '>>';
+
+USHR : '>>>';
+
+XOR : 'xor';
+
+LAND : '&';
+
+LOR : '|';
+
+FactorOperator : MUL | DIV | MOD | F_MUL | F_DIV;
+
+MUL : '*';
+
+DIV : '/';
+
+MOD : '%';
+
+F_MUL : '*.';
+
+F_DIV : '/';
+
+TermOperator : PLUS | MINUS | F_PLUS | F_MINUS;
+
+PLUS : '+';
+
+MINUS : '-';
+
+F_PLUS : '+.';
+
+F_MINUS : '-.';
+
+BinaryLogicalOperator : AND | OR;
+
+AND : '&&';
+
+OR : '||';
+
+NOT : '!';
+
+ASSIGN : '=';
+
+REF_EQ : '===';
+
+STRUCT_EQ : '==';
+
+LT : '<';
+
+LE : '<=';
+
+GT : '>';
+
+GE : '>=';
+
+NE : '!=';
 
 // LITERALS
 
-literal
-    :   integerLiteral
+Literal
+    :   IntegerLiteral
     |   FloatingPointLiteral
     |   CharacterLiteral
     |   StringLiteral
-    |   booleanLiteral
+    |   BooleanLiteral
     ;
 
-integerLiteral : HexLiteral | OctalLiteral | DecimalLiteral;
+IntegerLiteral : HexLiteral | OctalLiteral | DecimalLiteral;
 
-booleanLiteral : 'true' | 'false';
-
-// LEXER
+BooleanLiteral : 'true' | 'false';
 
 HexLiteral : '0' ('x'|'X') HexDigit+ IntegerTypeSuffix? ;
 
@@ -138,48 +267,24 @@ UnicodeEscape
     :   '\\' 'u' HexDigit HexDigit HexDigit HexDigit
     ;
 
-Identifier
-    :   Letter (Letter|JavaIDDigit)*
-    ;
+LowerIdentifier : LowerLetter (Letter | Digit)*;
 
-/**I found this char range in JavaCC's grammar, but Letter and Digit overlap.
-   Still works, but...
- */
-fragment
-Letter
-    :  '\u0024' |
-       '\u0041'..'\u005a' |
-       '\u005f' |
-       '\u0061'..'\u007a' |
-       '\u00c0'..'\u00d6' |
-       '\u00d8'..'\u00f6' |
-       '\u00f8'..'\u00ff' |
-       '\u0100'..'\u1fff' |
-       '\u3040'..'\u318f' |
-       '\u3300'..'\u337f' |
-       '\u3400'..'\u3d2d' |
-       '\u4e00'..'\u9fff' |
-       '\uf900'..'\ufaff'
-    ;
+UpperIdentifier : UpperLetter (Letter | Digit)*;
+
+Letter : LowerLetter | UpperLetter;
+
+LowerLetter : 'a'..'z';
+
+UpperLetter : 'A'..'Z';
 
 fragment
-JavaIDDigit
-    :  '\u0030'..'\u0039' |
-       '\u0660'..'\u0669' |
-       '\u06f0'..'\u06f9' |
-       '\u0966'..'\u096f' |
-       '\u09e6'..'\u09ef' |
-       '\u0a66'..'\u0a6f' |
-       '\u0ae6'..'\u0aef' |
-       '\u0b66'..'\u0b6f' |
-       '\u0be7'..'\u0bef' |
-       '\u0c66'..'\u0c6f' |
-       '\u0ce6'..'\u0cef' |
-       '\u0d66'..'\u0d6f' |
-       '\u0e50'..'\u0e59' |
-       '\u0ed0'..'\u0ed9' |
-       '\u1040'..'\u1049'
-   ;
+Digit : NonZeroDigit | ZeroDigit;
+
+NonZeroDigit : '1'..'9';
+
+ZeroDigit : '0';
+
+// COMMENT
 
 COMMENT
     :   '/*' .*? '*/'    -> channel(HIDDEN) // match anything between /* and */
