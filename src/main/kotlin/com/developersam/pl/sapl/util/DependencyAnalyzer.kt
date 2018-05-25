@@ -7,7 +7,7 @@ package com.developersam.pl.sapl.util
  * @param dependencies a map of dependencies. The value is a list of items that the key depends on.
  * @param T type of the item for dependency analysis
  */
-internal class DependencyAnalyzer<T>(private val dependencies: Map<T, List<T>>) {
+internal class DependencyAnalyzer<T>(private val dependencies: Map<T, Set<T>>) {
 
     /**
      * [_sortedList] contains the sorted list of vertices in topological order.
@@ -72,6 +72,6 @@ internal class DependencyAnalyzer<T>(private val dependencies: Map<T, List<T>>) 
      * [sortedList] contains the sorted list of vertices if the dependency graph given is DAG.
      * `null` otherwise.
      */
-    private val sortedList: List<T>? = if (isDAG) _sortedList else null
+    val sortedList: List<T>? = if (isDAG) _sortedList else null
 
 }

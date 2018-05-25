@@ -3,6 +3,10 @@
  */
 grammar Language;
 
+@header {
+package com.developersam.pl.sapl.antlr;
+}
+
 /** The start rule; begin parsing here. */
 compilationUnit : importDeclaration? classTypeDeclaration classMemberDeclaration+ EOF;
 
