@@ -11,11 +11,6 @@ sealed class Pattern
 object UnitPattern : Pattern()
 
 /**
- * [TuplePattern] represents the tuple pattern in the [tupleList].
- */
-data class TuplePattern(val tupleList: List<Pattern>) : Pattern()
-
-/**
  * [VariantPattern] represents the variant pattern with [variantIdentifier] and potentially an
  * [associatedPattern].
  */

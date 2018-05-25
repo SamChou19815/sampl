@@ -38,7 +38,7 @@ classMethodDeclaration :
     ASSIGN expression;
 
 expression
-    : LPAREN expression RPAREN #NestedExpr
+    : LPAREN expression RPAREN # NestedExpr
     | THIS # ThisExpr
     | Literal # LiteralExpr
     | LowerIdentifier # IdentifierExpr
@@ -60,10 +60,8 @@ expression
     ;
 
 pattern
-    : LPAREN pattern RPAREN # NestedPattern
-    | UNIT # UnitPattern
-    | pattern (COMMA pattern)+ # TuplePattern
-    | typeIdentifier pattern # VariantPattern
+    : UNIT # UnitPattern
+    | typeIdentifier LowerIdentifier # VariantPattern
     | LowerIdentifier # VariablePattern
     | WILDCARD # WildcardPattern
     ;
