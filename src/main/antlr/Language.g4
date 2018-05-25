@@ -60,7 +60,7 @@ expression
 
 pattern
     : UNIT # UnitPattern
-    | typeIdentifier LowerIdentifier # VariantPattern
+    | UpperIdentifier LowerIdentifier # VariantPattern
     | LowerIdentifier # VariablePattern
     | WILDCARD # WildcardPattern
     ;

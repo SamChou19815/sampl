@@ -12,10 +12,10 @@ object UnitPattern : Pattern()
 
 /**
  * [VariantPattern] represents the variant pattern with [variantIdentifier] and potentially an
- * [associatedPattern].
+ * [associatedVariable].
  */
 data class VariantPattern(
-        val variantIdentifier: String, val associatedPattern: Pattern?
+        val variantIdentifier: String, val associatedVariable: String?
 ) : Pattern()
 
 /**
