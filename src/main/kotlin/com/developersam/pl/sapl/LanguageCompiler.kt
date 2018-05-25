@@ -27,9 +27,10 @@ class LanguageCompiler(private val directory: String) {
         val compilationUnitMap = getAllSourceFiles(directory)
                 .parallelStream()
                 .collect(Collectors.toMap(File::nameWithoutExtension) { file ->
-                    LanguageParser(CommonTokenStream(LanguageLexer(
-                            ANTLRInputStream(FileInputStream(file))
-                    ))).compilationUnit()
+                    val inStream = ANTLRInputStream(FileInputStream(file))
+                    val tokenStream = CommonTokenStream(LanguageLexer(inStream))
+                    val parser = LanguageParser(tokenStream)
+                    parser.compilationUnit()
                 })
         // Build Dependency Graph
         val dependencyGraph: HashMap<String, Set<String>> = hashMapOf()

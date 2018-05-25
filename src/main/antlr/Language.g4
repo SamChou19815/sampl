@@ -33,7 +33,7 @@ functionTypeValue : typeIdentifier ARROW typeIdentifier;
 classConstantDeclaration : PRIVATE? CONST LowerIdentifier ASSIGN expression;
 
 classMethodDeclaration :
-    PRIVATE? STATIC? FUNCTION LowerIdentifier
+    PRIVATE? FUNCTION LowerIdentifier
         genericsDeclaration? argumentsDeclaration typeAnnotation
     ASSIGN expression;
 
@@ -47,10 +47,9 @@ expression
     | expression FactorOperator expression # FactorExpr
     | expression TermOperator expression # TermExpr
     | expression STR_CONCAT expression # StringConcatExpr
-    | NOT expression # NotExpr
     | expression BinaryLogicalOperator expression # BooleanExpr
     | expression ComparisonOperator expression # ComparisonExpr
-    | expression (COMMA expression)+ # TupleExpr
+    | NOT expression # NotExpr
     | LET pattern typeAnnotation? ASSIGN expression SEMICOLON expression # LetExpr
     | FUNCTION genericsDeclaration? argumentsDeclaration ARROW expression # LambdaExpr
     | IF expression THEN expression ELSE expression # IfElseExpr
@@ -93,8 +92,6 @@ CONST : 'const';
 FUNCTION : 'function';
 
 PRIVATE : 'private';
-
-STATIC : 'static';
 
 IF : 'if';
 

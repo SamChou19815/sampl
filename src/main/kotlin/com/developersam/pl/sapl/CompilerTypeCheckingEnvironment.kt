@@ -31,6 +31,7 @@ class CompilerTypeCheckingEnvironment : LanguageBaseVisitor<Unit>() {
         val left = ctx.expression(0)
         val op = BinaryOperator.valueOf(value = ctx.BitOperator().symbolicName)
         val right = ctx.expression(1)
+
     }
 
 }

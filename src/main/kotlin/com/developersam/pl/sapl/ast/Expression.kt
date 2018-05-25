@@ -6,25 +6,21 @@ package com.developersam.pl.sapl.ast
 sealed class Expression : AstNode
 
 /**
- * [ThisExpr] represents this expression.
- */
-object ThisExpr : Expression()
-
-/**
  * [LiteralExpr] represents a [literal] as an expression.
  */
 data class LiteralExpr(val literal: Literal) : Expression()
 
 /**
- * [VariableIdentifier] represents a [variable] identifier as an expression.
+ * [VariableIdentifierExpr] represents a [variable] identifier as an expression.
  */
-data class VariableIdentifier(val variable: String) : Expression()
+data class VariableIdentifierExpr(val variable: String) : Expression()
 
 /**
- * [AccessMemberExpr] represents accessing object [obj]'s [member], with some optional [parameters].
+ * [FunctionApplicationExpr] is the function application expression, with [functionExpr] as the
+ * function and [arguments] as arguments of the function.
  */
-data class AccessMemberExpr(
-        val obj: Expression, val member: String, val parameters: List<Expression>? = null
+data class FunctionApplicationExpr(
+        val functionExpr: Expression, val arguments: List<Expression>
 ) : Expression()
 
 /**
@@ -38,11 +34,6 @@ data class BinaryExpr(
  * [NotExpr] represents the logical inversion of expression. [expr].
  */
 data class NotExpr(val expr: Expression) : Expression()
-
-/**
- * [TupleExpr] represents a [tuple] expression.
- */
-data class TupleExpr(val tuple: List<Expression>) : Expression()
 
 /**
  * [LetExpr] represents the let expression of the form `let` [pattern] `=` [e1] `;` [e2]
