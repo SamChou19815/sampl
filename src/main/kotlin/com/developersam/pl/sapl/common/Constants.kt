@@ -1,6 +1,6 @@
 @file:JvmName(name = "Constants")
 
-package com.developersam.pl.sapl
+package com.developersam.pl.sapl.common
 
 /**
  * [MAGIC_NUMBER] is the number used for validation.

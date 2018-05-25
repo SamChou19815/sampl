@@ -42,7 +42,7 @@ expression
     | THIS # ThisExpr
     | Literal # LiteralExpr
     | LowerIdentifier # IdentifierExpr
-    | LowerIdentifier DOT LowerIdentifier (LPAREN LowerIdentifier RPAREN)* # AccessMemberExpr
+    | expression DOT LowerIdentifier (LPAREN LowerIdentifier RPAREN)* # AccessMemberExpr
     | expression BitOperator expression # BitExpr
     | expression FactorOperator expression # FactorExpr
     | expression TermOperator expression # TermExpr
