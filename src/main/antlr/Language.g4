@@ -28,7 +28,7 @@ annotableTypeValue
     | annotableTypeValue ARROW annotableTypeValue # FunctionAnnotableType
     ;
 
-typeIdentifier : UpperIdentifier genericsDeclaration?;
+typeIdentifier : (UpperIdentifier DOT)? UpperIdentifier genericsDeclaration?;
 
 argumentsDeclaration : (UNIT | LPAREN annotatedVariable RPAREN)*;
 
