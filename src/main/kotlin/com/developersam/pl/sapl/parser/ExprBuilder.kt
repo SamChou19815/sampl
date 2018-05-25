@@ -8,6 +8,8 @@ import com.developersam.pl.sapl.ast.Expression
 import com.developersam.pl.sapl.ast.FunctionApplicationExpr
 import com.developersam.pl.sapl.ast.IfElseExpr
 import com.developersam.pl.sapl.ast.LetExpr
+import com.developersam.pl.sapl.ast.LiteralBuilder
+import com.developersam.pl.sapl.ast.LiteralExpr
 import com.developersam.pl.sapl.ast.MatchExpr
 import com.developersam.pl.sapl.ast.NotExpr
 import com.developersam.pl.sapl.ast.ThrowExpr
@@ -23,9 +25,8 @@ object ExprBuilder : LanguageBaseVisitor<Expression>() {
     override fun visitNestedExpr(ctx: NestedExprContext): Expression =
             ctx.expression().accept(this)
 
-    override fun visitLiteralExpr(ctx: LiteralExprContext): Expression {
-        TODO(reason = "Literal AST not setup yet.")
-    }
+    override fun visitLiteralExpr(ctx: LiteralExprContext): Expression =
+            LiteralExpr(literal = LiteralBuilder.from(text = ctx.Literal().text))
 
     override fun visitIdentifierExpr(ctx: IdentifierExprContext): Expression =
             VariableIdentifierExpr(variable = ctx.LowerIdentifier().text)
