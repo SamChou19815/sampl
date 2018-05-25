@@ -53,7 +53,7 @@ expression
     | LET pattern typeAnnotation? ASSIGN expression SEMICOLON expression # LetExpr
     | FUNCTION genericsDeclaration? argumentsDeclaration ARROW expression # LambdaExpr
     | IF expression THEN expression ELSE expression # IfElseExpr
-    | MATCH LowerIdentifier WITH (VARIANT_OR pattern ARROW expression)+ # MatchExpr
+    | MATCH LowerIdentifier WITH patternToExpr+ # MatchExpr
     | THROW expression # ThrowExpr
     | TRY expression CATCH LowerIdentifier expression (FINALLY expression)? # TryCatchFinallyExpr
     ;
@@ -72,6 +72,8 @@ typeAnnotation : COLON (typeIdentifier | typeValue);
 typeIdentifier : UpperIdentifier genericsDeclaration?;
 
 argumentsDeclaration : (UNIT | (LPAREN annotatedVariable RPAREN)*);
+
+patternToExpr : VARIANT_OR pattern ARROW expression;
 
 genericsDeclaration : LT UpperIdentifier (COMMA UpperIdentifier)* GT;
 
