@@ -39,10 +39,10 @@ classMethodDeclaration :
 
 expression
     : LPAREN expression RPAREN # NestedExpr
-    | THIS # ThisExpr
     | Literal # LiteralExpr
     | LowerIdentifier # IdentifierExpr
-    | expression DOT LowerIdentifier (LPAREN expression RPAREN)* # AccessMemberExpr
+    | UpperIdentifier DOT LowerIdentifier # IdentifierInModuleExpr
+    | expression (LPAREN expression+ RPAREN) # FunctionApplicationExpr
     | expression BitOperator expression # BitExpr
     | expression FactorOperator expression # FactorExpr
     | expression TermOperator expression # TermExpr
@@ -77,8 +77,6 @@ argumentsDeclaration : (UNIT | (LPAREN annotatedVariable RPAREN)*);
 genericsDeclaration : LT UpperIdentifier (COMMA UpperIdentifier)* GT;
 
 // KEYWORDS
-
-THIS : 'this';
 
 IMPORT : 'import';
 
