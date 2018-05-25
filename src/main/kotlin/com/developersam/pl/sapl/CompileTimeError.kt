@@ -1,4 +1,4 @@
-package com.developersam.pl.sapl.exceptions
+package com.developersam.pl.sapl
 
 /**
  * [CompileTimeError] reports the failure of compilation by giving a [message].

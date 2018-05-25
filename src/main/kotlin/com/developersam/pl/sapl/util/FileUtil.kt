@@ -2,7 +2,7 @@
 
 package com.developersam.pl.sapl.util
 
-import com.developersam.pl.sapl.common.EXTENSION
+import com.developersam.pl.sapl.EXTENSION
 import java.io.File
 
 /**

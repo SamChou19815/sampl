@@ -1,9 +1,8 @@
-package com.developersam.pl.sapl.console
+package com.developersam.pl.sapl
 
 import com.developersam.pl.sapl.antlr.LanguageLexer
 import com.developersam.pl.sapl.antlr.LanguageParser
 import com.developersam.pl.sapl.antlr.LanguageParser.CompilationUnitContext
-import com.developersam.pl.sapl.exceptions.CompileTimeError
 import com.developersam.pl.sapl.util.DependencyAnalyzer
 import com.developersam.pl.sapl.util.getAllSourceFiles
 import org.antlr.v4.runtime.ANTLRInputStream

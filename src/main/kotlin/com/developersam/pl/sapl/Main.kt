@@ -2,8 +2,6 @@
 
 package com.developersam.pl.sapl
 
-import com.developersam.pl.sapl.console.LanguageCompiler
-
 fun main(args: Array<String>) {
     if (args.isEmpty()) {
         println("Bad Usage!")

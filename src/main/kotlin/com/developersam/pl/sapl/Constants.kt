@@ -1,6 +1,6 @@
 @file:JvmName(name = "Constants")
 
-package com.developersam.pl.sapl.common
+package com.developersam.pl.sapl
 
 /**
  * [LANG_NAME] is the name of the language.
