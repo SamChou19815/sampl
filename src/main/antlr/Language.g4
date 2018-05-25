@@ -10,25 +10,31 @@ importDeclaration : IMPORT LBRACE UpperIdentifier (COMMA UpperIdentifier)* RBRAC
 
 classMemberDeclaration : classConstantDeclaration | classMethodDeclaration;
 
-classTypeDeclaration : PRIVATE? TYPE typeIdentifier ASSIGN typeValue;
+classTypeDeclaration : PRIVATE? TYPE typeIdentifier ASSIGN classTypeValue;
 
-typeValue
-    : nestedTypeValue # NestedType
-    | tupleTypeValue # TupleType
-    | variantTypeValue # VariantType
-    | structTypeValue # StructType
-    | functionTypeValue # FunctionType
+classTypeValue
+    : LPAREN classTypeValue RPAREN # NestedClassType
+    | (VARIANT_OR UpperIdentifier (OF typeIdentifier)?)+ # VariantClassType
+    | LBRACE annotatedVariable (SEMICOLON annotatedVariable)* RBRACE # StructClassType
     ;
 
-nestedTypeValue : LPAREN typeValue RPAREN;
+annotatedVariable : LowerIdentifier typeAnnotation;
 
-tupleTypeValue : typeIdentifier (MUL typeIdentifier)*;
+typeAnnotation : COLON annotableTypeValue;
 
-variantTypeValue : (VARIANT_OR UpperIdentifier (OF typeValue)?)+;
+annotableTypeValue
+    : LPAREN annotableTypeValue RPAREN # NestedAnnotableType
+    | typeIdentifier # SingleIdentifierAnnotableType
+    | annotableTypeValue ARROW annotableTypeValue # FunctionAnnotableType
+    ;
 
-structTypeValue : LBRACE annotatedVariable (SEMICOLON annotatedVariable)* RBRACE;
+typeIdentifier : UpperIdentifier genericsDeclaration?;
 
-functionTypeValue : typeIdentifier ARROW typeIdentifier;
+argumentsDeclaration : (UNIT | LPAREN annotatedVariable RPAREN)*;
+
+patternToExpr : VARIANT_OR pattern ARROW expression;
+
+genericsDeclaration : LT UpperIdentifier (COMMA UpperIdentifier)* GT;
 
 classConstantDeclaration : PRIVATE? CONST LowerIdentifier ASSIGN expression;
 
@@ -64,18 +70,6 @@ pattern
     | LowerIdentifier # VariablePattern
     | WILDCARD # WildcardPattern
     ;
-
-annotatedVariable : LowerIdentifier typeAnnotation;
-
-typeAnnotation : COLON (typeIdentifier | typeValue);
-
-typeIdentifier : UpperIdentifier genericsDeclaration?;
-
-argumentsDeclaration : (UNIT | (LPAREN annotatedVariable RPAREN)*);
-
-patternToExpr : VARIANT_OR pattern ARROW expression;
-
-genericsDeclaration : LT UpperIdentifier (COMMA UpperIdentifier)* GT;
 
 // KEYWORDS
 
