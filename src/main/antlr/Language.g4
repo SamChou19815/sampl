@@ -3,10 +3,6 @@
  */
 grammar Language;
 
-@header {
-package com.developersam.pl.sapl.antlr;
-}
-
 /** The start rule; begin parsing here. */
 compilationUnit : importDeclaration? classTypeDeclaration classMemberDeclaration+ EOF;
 
@@ -14,7 +10,7 @@ importDeclaration : IMPORT LBRACE UpperIdentifier (COMMA UpperIdentifier)* RBRAC
 
 classMemberDeclaration : classConstantDeclaration | classMethodDeclaration;
 
-classTypeDeclaration : TYPE typeIdentifier ASSIGN typeValue;
+classTypeDeclaration : PRIVATE? TYPE typeIdentifier ASSIGN typeValue;
 
 typeValue
     : nestedTypeValue # NestedType
@@ -46,21 +42,26 @@ expression
     | THIS # ThisExpr
     | Literal # LiteralExpr
     | LowerIdentifier # IdentifierExpr
-    | expression DOT LowerIdentifier (LPAREN LowerIdentifier RPAREN)* # AccessMemberExpr
+    | expression DOT LowerIdentifier (LPAREN expression RPAREN)* # AccessMemberExpr
     | expression BitOperator expression # BitExpr
     | expression FactorOperator expression # FactorExpr
     | expression TermOperator expression # TermExpr
     | expression STR_CONCAT expression # StringConcatExpr
     | NOT expression # NotExpr
     | expression BinaryLogicalOperator expression # BooleanExpr
+    | expression ComparisonOperator expression # ComparisonExpr
     | expression (COMMA expression)+ # TupleExpr
     | LET pattern typeAnnotation? ASSIGN expression SEMICOLON expression # LetExpr
     | FUNCTION genericsDeclaration? argumentsDeclaration ARROW expression # LambdaExpr
+    | IF expression THEN expression ELSE expression # IfElseExpr
     | MATCH LowerIdentifier WITH (VARIANT_OR pattern ARROW expression)+ # MatchExpr
+    | THROW expression # ThrowExpr
+    | TRY expression CATCH LowerIdentifier expression (FINALLY expression)? # TryCatchFinallyExpr
     ;
 
 pattern
     : LPAREN pattern RPAREN # NestedPattern
+    | UNIT # UnitPattern
     | pattern (COMMA pattern)+ # TuplePattern
     | typeIdentifier pattern # VariantPattern
     | LowerIdentifier # VariablePattern
@@ -99,9 +100,23 @@ PRIVATE : 'private';
 
 STATIC : 'static';
 
+IF : 'if';
+
+THEN : 'then';
+
+ELSE : 'else';
+
 MATCH : 'match';
 
 WITH : 'with';
+
+THROW : 'throw';
+
+TRY : 'try';
+
+CATCH : 'catch';
+
+FINALLY : 'finally';
 
 UNIT : '()';
 
@@ -185,6 +200,8 @@ NOT : '!';
 
 ASSIGN : '=';
 
+ComparisonOperator : REF_EQ | STRUCT_EQ | LT | LE | GT | GE;
+
 REF_EQ : '===';
 
 STRUCT_EQ : '==';
@@ -196,8 +213,6 @@ LE : '<=';
 GT : '>';
 
 GE : '>=';
-
-NE : '!=';
 
 // LITERALS
 

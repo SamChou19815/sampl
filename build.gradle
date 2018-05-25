@@ -33,4 +33,5 @@ compileTestKotlin {
 
 generateGrammarSource {
     outputDirectory = file("${project.rootDir}/src/main/java/com/developersam/pl/sapl/antlr")
+    arguments += ['-package', 'com.developersam.pl.sapl.antlr', '-no-listener', '-visitor']
 }
