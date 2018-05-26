@@ -1,6 +1,3 @@
-/**
- * Grammar for SAPL
- */
 grammar Language;
 
 /** The start rule; begin parsing here. */
@@ -34,7 +31,7 @@ argumentsDeclaration : (UNIT | LPAREN annotatedVariable RPAREN)*;
 
 patternToExpr : VARIANT_OR pattern ARROW expression;
 
-genericsDeclaration : LT UpperIdentifier (COMMA UpperIdentifier)* GT;
+genericsDeclaration : LBRACKET UpperIdentifier (COMMA UpperIdentifier)* RBRACKET;
 
 classConstantDeclaration : PRIVATE? CONST LowerIdentifier ASSIGN expression;
 
@@ -123,7 +120,7 @@ RBRACE : '}';
 
 LBRACKET : '[';
 
-RBRACKER : ']';
+RBRACKET : ']';
 
 // SEPARATORS
 
@@ -206,11 +203,11 @@ GE : '>=';
 // LITERALS
 
 Literal
-    :   IntegerLiteral
-    |   FloatingPointLiteral
-    |   CharacterLiteral
-    |   StringLiteral
-    |   BooleanLiteral
+    : IntegerLiteral
+    | FloatingPointLiteral
+    | CharacterLiteral
+    | StringLiteral
+    | BooleanLiteral
     ;
 
 IntegerLiteral : HexLiteral | OctalLiteral | DecimalLiteral;
@@ -223,11 +220,9 @@ DecimalLiteral : ('0' | '1'..'9' '0'..'9'*) IntegerTypeSuffix? ;
 
 OctalLiteral : '0' ('0'..'7')+ IntegerTypeSuffix? ;
 
-fragment
-HexDigit : ('0'..'9'|'a'..'f'|'A'..'F') ;
+fragment HexDigit : ('0'..'9'|'a'..'f'|'A'..'F') ;
 
-fragment
-IntegerTypeSuffix : ('l'|'L') ;
+fragment IntegerTypeSuffix : ('l'|'L') ;
 
 FloatingPointLiteral
     :   ('0'..'9')+ '.' ('0'..'9')* Exponent? FloatTypeSuffix?
@@ -242,65 +237,46 @@ FloatingPointLiteral
         FloatTypeSuffix?
     ;
 
-fragment
-Exponent : ('e'|'E') ('+'|'-')? ('0'..'9')+ ;
+fragment Exponent : ('e'|'E') ('+'|'-')? ('0'..'9')+ ;
 
-fragment
-FloatTypeSuffix : ('f'|'F'|'d'|'D') ;
+fragment FloatTypeSuffix : ('f'|'F'|'d'|'D') ;
 
-CharacterLiteral
-    :   '\'' ( EscapeSequence | ~('\''|'\\') ) '\''
+CharacterLiteral : '\'' ( EscapeSequence | ~('\''|'\\') ) '\'';
+
+StringLiteral : '"' ( EscapeSequence | ~('\\'|'"') )* '"';
+
+fragment EscapeSequence
+    : '\\' ('b'|'t'|'n'|'f'|'r'|'"'|'\''|'\\')
+    | UnicodeEscape
+    | OctalEscape
     ;
 
-StringLiteral
-    :  '"' ( EscapeSequence | ~('\\'|'"') )* '"'
+fragment OctalEscape
+    : '\\' ('0'..'3') ('0'..'7') ('0'..'7')
+    | '\\' ('0'..'7') ('0'..'7')
+    | '\\' ('0'..'7')
     ;
 
-fragment
-EscapeSequence
-    :   '\\' ('b'|'t'|'n'|'f'|'r'|'"'|'\''|'\\')
-    |   UnicodeEscape
-    |   OctalEscape
-    ;
-
-fragment
-OctalEscape
-    :   '\\' ('0'..'3') ('0'..'7') ('0'..'7')
-    |   '\\' ('0'..'7') ('0'..'7')
-    |   '\\' ('0'..'7')
-    ;
-
-fragment
-UnicodeEscape
-    :   '\\' 'u' HexDigit HexDigit HexDigit HexDigit
-    ;
+fragment UnicodeEscape : '\\' 'u' HexDigit HexDigit HexDigit HexDigit;
 
 LowerIdentifier : LowerLetter (Letter | Digit)*;
 
 UpperIdentifier : UpperLetter (Letter | Digit)*;
 
-Letter : LowerLetter | UpperLetter;
+fragment Letter : LowerLetter | UpperLetter;
 
-LowerLetter : 'a'..'z';
+fragment LowerLetter : 'a'..'z';
 
-UpperLetter : 'A'..'Z';
+fragment UpperLetter : 'A'..'Z';
 
-fragment
-Digit : NonZeroDigit | ZeroDigit;
+fragment Digit : NonZeroDigit | ZeroDigit;
 
-NonZeroDigit : '1'..'9';
+fragment NonZeroDigit : '1'..'9';
 
-ZeroDigit : '0';
+fragment ZeroDigit : '0';
 
 // COMMENT
 
-COMMENT
-    :   '/*' .*? '*/'    -> channel(HIDDEN) // match anything between /* and */
-    ;
-WS  :   [ \r\t\u000C\n]+ -> channel(HIDDEN)
-    ;
-
-LINE_COMMENT
-    : '//' ~[\r\n]* '\r'? '\n' -> channel(HIDDEN)
-    ;
-
+COMMENT : '/*' .*? '*/' -> channel(HIDDEN); // match anything between /* and */
+WS : [ \r\t\u000C\n]+ -> channel(HIDDEN); // white space
+LINE_COMMENT : '//' ~[\r\n]* '\r'? '\n' -> channel(HIDDEN);
