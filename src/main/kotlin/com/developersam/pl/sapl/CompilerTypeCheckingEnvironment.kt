@@ -1,8 +1,5 @@
 package com.developersam.pl.sapl
 
-import com.developersam.pl.sapl.antlr.LanguageBaseVisitor
-import com.developersam.pl.sapl.antlr.LanguageParser.*
-
 /**
  * [CompilerTypeCheckingEnvironment] creates an environment for the compiler to do the type checking
  * under the current context.

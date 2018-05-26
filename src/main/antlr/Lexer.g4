@@ -115,7 +115,8 @@ STRUCT_NE : '!=';
  */
 
 Literal
-    : IntegerLiteral
+    : UNIT
+    | IntegerLiteral
     | FloatingPointLiteral
     | CharacterLiteral
     | StringLiteral

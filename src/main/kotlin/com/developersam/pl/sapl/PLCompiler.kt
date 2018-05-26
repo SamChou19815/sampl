@@ -1,9 +1,5 @@
 package com.developersam.pl.sapl
 
-import java.io.File
-import java.io.FileInputStream
-import java.util.stream.Collectors
-
 import com.developersam.pl.sapl.antlr.PLLexer
 import com.developersam.pl.sapl.antlr.PLParser
 import com.developersam.pl.sapl.ast.CompilationUnit
@@ -12,6 +8,9 @@ import com.developersam.pl.sapl.parser.CompilationUnitBuilder
 import com.developersam.pl.sapl.util.getAllSourceFiles
 import org.antlr.v4.runtime.ANTLRInputStream
 import org.antlr.v4.runtime.CommonTokenStream
+import java.io.File
+import java.io.FileInputStream
+import java.util.stream.Collectors
 
 /**
  * [PLCompiler] is responsible for the compilation of all the source files in the given

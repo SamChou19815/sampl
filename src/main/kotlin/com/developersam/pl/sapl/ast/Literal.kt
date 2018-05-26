@@ -5,6 +5,7 @@ package com.developersam.pl.sapl.ast
  */
 sealed class Literal : AstNode
 
+object UnitLiteral: Literal()
 data class IntLiteral(val value: Long) : Literal()
 data class FloatLiteral(val value: Double) : Literal()
 data class BoolLiteral(val value: Boolean) : Literal()
@@ -19,6 +20,9 @@ object LiteralBuilder {
      * [from] creates a literal from a [text].
      */
     fun from(text: String): Literal {
+        if (text == "()") {
+            return UnitLiteral
+        }
         val longOpt = text.toLongOrNull()
         if (longOpt != null) {
             return IntLiteral(value = longOpt)

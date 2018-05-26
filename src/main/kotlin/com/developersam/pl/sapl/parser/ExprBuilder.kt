@@ -1,7 +1,23 @@
 package com.developersam.pl.sapl.parser
 
 import com.developersam.pl.sapl.antlr.PLBaseVisitor
-import com.developersam.pl.sapl.antlr.PLParser.*
+import com.developersam.pl.sapl.antlr.PLParser.BitExprContext
+import com.developersam.pl.sapl.antlr.PLParser.BooleanExprContext
+import com.developersam.pl.sapl.antlr.PLParser.ComparisonExprContext
+import com.developersam.pl.sapl.antlr.PLParser.FactorExprContext
+import com.developersam.pl.sapl.antlr.PLParser.FunExprContext
+import com.developersam.pl.sapl.antlr.PLParser.FunctionApplicationExprContext
+import com.developersam.pl.sapl.antlr.PLParser.IdentifierExprContext
+import com.developersam.pl.sapl.antlr.PLParser.IfElseExprContext
+import com.developersam.pl.sapl.antlr.PLParser.LetExprContext
+import com.developersam.pl.sapl.antlr.PLParser.LiteralExprContext
+import com.developersam.pl.sapl.antlr.PLParser.MatchExprContext
+import com.developersam.pl.sapl.antlr.PLParser.NestedExprContext
+import com.developersam.pl.sapl.antlr.PLParser.NotExprContext
+import com.developersam.pl.sapl.antlr.PLParser.StringConcatExprContext
+import com.developersam.pl.sapl.antlr.PLParser.TermExprContext
+import com.developersam.pl.sapl.antlr.PLParser.ThrowExprContext
+import com.developersam.pl.sapl.antlr.PLParser.TryCatchFinallyExprContext
 import com.developersam.pl.sapl.ast.BinaryExpr
 import com.developersam.pl.sapl.ast.BinaryOperator
 import com.developersam.pl.sapl.ast.Expression
@@ -15,11 +31,8 @@ import com.developersam.pl.sapl.ast.MatchExpr
 import com.developersam.pl.sapl.ast.NotExpr
 import com.developersam.pl.sapl.ast.ThrowExpr
 import com.developersam.pl.sapl.ast.TryCatchFinallyExpr
-import com.developersam.pl.sapl.ast.TypeExprInAnnotation
-import com.developersam.pl.sapl.ast.UnitNode
 import com.developersam.pl.sapl.ast.VariableIdentifierExpr
 import org.antlr.v4.runtime.tree.TerminalNode
-import java.util.stream.Collectors
 
 /**
  * [ExprBuilder] builds expression AST from parse tree.

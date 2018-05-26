@@ -1,12 +1,15 @@
 package com.developersam.pl.sapl.parser
 
 import com.developersam.pl.sapl.antlr.PLBaseVisitor
-import com.developersam.pl.sapl.antlr.PLParser.*
+import com.developersam.pl.sapl.antlr.PLParser.ModuleConstantDeclarationContext
+import com.developersam.pl.sapl.antlr.PLParser.ModuleFunctionDeclarationContext
+import com.developersam.pl.sapl.antlr.PLParser.ModuleTypeDeclarationContext
+import com.developersam.pl.sapl.antlr.PLParser.NestedModuleDeclarationContext
 import com.developersam.pl.sapl.ast.ModuleConstantMember
 import com.developersam.pl.sapl.ast.ModuleFunctionMember
 import com.developersam.pl.sapl.ast.ModuleTypeMember
-import com.developersam.pl.sapl.ast.ModuleMember as M
 import com.developersam.pl.sapl.ast.NestedModule
+import com.developersam.pl.sapl.ast.ModuleMember as M
 
 /**
  * [ModuleBuilder] builds module members into AST.
