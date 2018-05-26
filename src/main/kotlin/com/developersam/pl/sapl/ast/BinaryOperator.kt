@@ -91,7 +91,15 @@ enum class BinaryOperator(val symbol: String) {
     /**
      * Greater than or equal to.
      */
-    GE(symbol = ">=");
+    GE(symbol = ">="),
+    /**
+     * Referential NOT equality.
+     */
+    REF_NE(symbol = "!=="),
+    /**
+     * Structural NOT equality.
+     */
+    STRUCT_NE(symbol = "!=");
 
     companion object {
         /**

@@ -35,17 +35,14 @@ class LanguageCompiler(private val directory: String) {
         // Build Dependency Graph
         val dependencyGraph: HashMap<String, Set<String>> = hashMapOf()
         for ((filename, compilationUnit) in compilationUnitMap) {
-            val className = compilationUnit.classTypeDeclaration()
-                    .typeIdentifier().UpperIdentifier(0).text
-            // Check name consistency
-            if (className != filename) {
-                throw CompileTimeError(message = "Disagreement in file name and type name." +
-                        "Filename: $filename, type name: $className.")
-            }
-            val dependsOn = compilationUnit.importDeclaration().UpperIdentifier().stream()
-                    .map { it.symbol.text }
-                    .collect(Collectors.toSet())
-            dependencyGraph[className] = dependsOn
+            val importDeclarationContext = compilationUnit.importDeclaration()
+            val dependsOn: Set<String> = importDeclarationContext
+                    ?.UpperIdentifier()
+                    ?.stream()
+                    ?.map { it.symbol.text }
+                    ?.collect(Collectors.toSet())
+                    ?: emptySet()
+            dependencyGraph[filename] = dependsOn
         }
         // Construct sequence of compilation
         val compilationSequence: List<CompilationUnitContext> = DependencyAnalyzer(dependencyGraph)
