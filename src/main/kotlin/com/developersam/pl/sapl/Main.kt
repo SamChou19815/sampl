@@ -7,6 +7,5 @@ fun main(args: Array<String>) {
         println("Bad Usage!")
     }
     val directory = args[0]
-    val compiler = PLCompiler(directory = directory)
-    compiler.compile()
+    PLCompiler.compileFromDirectory(directory = directory)
 }
