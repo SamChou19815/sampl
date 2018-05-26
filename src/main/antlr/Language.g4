@@ -11,7 +11,7 @@ classTypeDeclaration : PRIVATE? TYPE typeIdentifier ASSIGN classTypeValue;
 
 classTypeValue
     : LPAREN classTypeValue RPAREN # NestedClassType
-    | (VARIANT_OR UpperIdentifier (OF typeIdentifier)?)+ # VariantClassType
+    | (LOR UpperIdentifier (OF typeIdentifier)?)+ # VariantClassType
     | LBRACE annotatedVariable (SEMICOLON annotatedVariable)* RBRACE # StructClassType
     ;
 
@@ -29,7 +29,7 @@ typeIdentifier : (UpperIdentifier DOT)? UpperIdentifier genericsDeclaration?;
 
 argumentsDeclaration : (UNIT | LPAREN annotatedVariable RPAREN)*;
 
-patternToExpr : VARIANT_OR pattern ARROW expression;
+patternToExpr : LOR pattern ARROW expression;
 
 genericsDeclaration : LBRACKET UpperIdentifier (COMMA UpperIdentifier)* RBRACKET;
 
@@ -134,8 +134,6 @@ DOT : '.';
 
 ARROW : '->';
 
-VARIANT_OR : '|';
-
 // OPERATORS
 
 STR_CONCAT : '^';
@@ -164,7 +162,7 @@ MOD : '%';
 
 F_MUL : '*.';
 
-F_DIV : '/';
+F_DIV : '/.';
 
 TermOperator : PLUS | MINUS | F_PLUS | F_MINUS;
 

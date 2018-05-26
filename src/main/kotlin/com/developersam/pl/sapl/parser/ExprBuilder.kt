@@ -45,91 +45,88 @@ object ExprBuilder : LanguageBaseVisitor<Expression>() {
         return FunctionApplicationExpr(functionExpr, arguments)
     }
 
-    override fun visitBitExpr(ctx: BitExprContext): Expression {
-        val left = ctx.expression(0).accept(this)
-        val op = BinaryOperator.valueOf(value = ctx.BitOperator().symbolicName)
-        val right = ctx.expression(1).accept(this)
-        return BinaryExpr(left, op, right)
-    }
+    override fun visitBitExpr(ctx: BitExprContext): Expression =
+            BinaryExpr(
+                    left = ctx.expression(0).accept(this),
+                    op = BinaryOperator.fromRaw(text = ctx.BitOperator().text),
+                    right = ctx.expression(1).accept(this)
+            )
 
-    override fun visitFactorExpr(ctx: FactorExprContext): Expression {
-        val left = ctx.expression(0).accept(this)
-        val op = BinaryOperator.valueOf(value = ctx.FactorOperator().symbolicName)
-        val right = ctx.expression(1).accept(this)
-        return BinaryExpr(left, op, right)
-    }
+    override fun visitFactorExpr(ctx: FactorExprContext): Expression =
+            BinaryExpr(
+                    left = ctx.expression(0).accept(this),
+                    op = BinaryOperator.fromRaw(text = ctx.FactorOperator().text),
+                    right = ctx.expression(1).accept(this)
+            )
 
-    override fun visitTermExpr(ctx: TermExprContext): Expression {
-        val left = ctx.expression(0).accept(this)
-        val op = BinaryOperator.valueOf(value = ctx.TermOperator().symbolicName)
-        val right = ctx.expression(1).accept(this)
-        return BinaryExpr(left, op, right)
-    }
+    override fun visitTermExpr(ctx: TermExprContext): Expression =
+            BinaryExpr(
+                    left = ctx.expression(0).accept(this),
+                    op = BinaryOperator.fromRaw(text = ctx.TermOperator().text),
+                    right = ctx.expression(1).accept(this)
+            )
 
-    override fun visitStringConcatExpr(ctx: StringConcatExprContext): Expression {
-        val left = ctx.expression(0).accept(this)
-        val op = BinaryOperator.valueOf(value = ctx.STR_CONCAT().symbolicName)
-        val right = ctx.expression(1).accept(this)
-        return BinaryExpr(left, op, right)
-    }
+    override fun visitStringConcatExpr(ctx: StringConcatExprContext): Expression =
+            BinaryExpr(
+                    left = ctx.expression(0).accept(this),
+                    op = BinaryOperator.fromRaw(text = ctx.STR_CONCAT().text),
+                    right = ctx.expression(1).accept(this)
+            )
 
-    override fun visitBooleanExpr(ctx: BooleanExprContext): Expression {
-        val left = ctx.expression(0).accept(this)
-        val op = BinaryOperator.valueOf(value = ctx.BinaryLogicalOperator().symbolicName)
-        val right = ctx.expression(1).accept(this)
-        return BinaryExpr(left, op, right)
-    }
+    override fun visitBooleanExpr(ctx: BooleanExprContext): Expression =
+            BinaryExpr(
+                    left = ctx.expression(0).accept(this),
+                    op = BinaryOperator.fromRaw(text = ctx.BinaryLogicalOperator().text),
+                    right = ctx.expression(1).accept(this)
+            )
 
-    override fun visitComparisonExpr(ctx: ComparisonExprContext): Expression {
-        val left = ctx.expression(0).accept(this)
-        val op = BinaryOperator.valueOf(value = ctx.ComparisonOperator().symbolicName)
-        val right = ctx.expression(1).accept(this)
-        return BinaryExpr(left, op, right)
-    }
+    override fun visitComparisonExpr(ctx: ComparisonExprContext): Expression =
+            BinaryExpr(
+                    left = ctx.expression(0).accept(this),
+                    op = BinaryOperator.fromRaw(text = ctx.ComparisonOperator().text),
+                    right = ctx.expression(1).accept(this)
+            )
 
     override fun visitNotExpr(ctx: NotExprContext): Expression =
             NotExpr(expr = ctx.expression().accept(this))
 
-    override fun visitLetExpr(ctx: LetExprContext): Expression {
-        val pattern = ctx.pattern().accept(PatternBuilder)
-        val e1 = ctx.expression(0).accept(this)
-        val e2 = ctx.expression(1).accept(this)
-        return LetExpr(pattern, e1, e2)
-    }
+    override fun visitLetExpr(ctx: LetExprContext): Expression =
+            LetExpr(
+                    pattern = ctx.pattern().accept(PatternBuilder),
+                    e1 = ctx.expression(0).accept(this),
+                    e2 = ctx.expression(1).accept(this)
+            )
 
     override fun visitLambdaExpr(ctx: LambdaExprContext): Expression {
         TODO(reason = "Lambda not setup yet.")
     }
 
-    override fun visitIfElseExpr(ctx: IfElseExprContext): Expression {
-        val condition = ctx.expression(0).accept(this)
-        val e1 = ctx.expression(1).accept(this)
-        val e2 = ctx.expression(2).accept(this)
-        return IfElseExpr(condition, e1, e2)
-    }
+    override fun visitIfElseExpr(ctx: IfElseExprContext): Expression =
+            IfElseExpr(
+                    condition = ctx.expression(0).accept(this),
+                    e1 = ctx.expression(1).accept(this),
+                    e2 = ctx.expression(2).accept(this)
+            )
 
-    override fun visitMatchExpr(ctx: MatchExprContext): Expression {
-        val id = ctx.LowerIdentifier().text
-        val matching = ctx.patternToExpr().map { c ->
-            val pattern = c.pattern().accept(PatternBuilder)
-            val expr = c.expression().accept(this)
-            pattern to expr
-        }
-        return MatchExpr(identifier = id, matchingList = matching)
-    }
+    override fun visitMatchExpr(ctx: MatchExprContext): Expression =
+            MatchExpr(
+                    identifier = ctx.LowerIdentifier().text,
+                    matchingList = ctx.patternToExpr().map { c ->
+                        val pattern = c.pattern().accept(PatternBuilder)
+                        val expr = c.expression().accept(this)
+                        pattern to expr
+                    }
+            )
 
     override fun visitThrowExpr(ctx: ThrowExprContext): Expression =
             ThrowExpr(ctx.expression().accept(this))
 
-    override fun visitTryCatchFinallyExpr(ctx: TryCatchFinallyExprContext): Expression {
-        val tryExpr = ctx.expression(0).accept(this)
-        val exception = ctx.LowerIdentifier().text
-        val catchExpr = ctx.expression(1).accept(this)
-        val finallyExpr = ctx.expression(2).accept(this)
-        return TryCatchFinallyExpr(
-                tryExpr = tryExpr, exception = exception,
-                catchHandler = catchExpr, finallyHandler = finallyExpr
-        )
-    }
+    override fun visitTryCatchFinallyExpr(ctx: TryCatchFinallyExprContext): Expression =
+            TryCatchFinallyExpr(
+                    tryExpr = ctx.expression(0).accept(this),
+                    exception = ctx.LowerIdentifier().text,
+                    catchHandler = ctx.expression(1).accept(this),
+                    finallyHandler = ctx.expression(2).accept(this)
+            )
 
 }

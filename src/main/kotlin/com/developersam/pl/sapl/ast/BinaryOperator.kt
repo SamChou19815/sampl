@@ -1,89 +1,113 @@
 package com.developersam.pl.sapl.ast
 
-enum class BinaryOperator {
+import com.developersam.pl.sapl.util.toTable
+
+/**
+ * [BinaryOperator] is a collection of supported binary operators.
+ *
+ * @param symbol the text symbol defined in the lexer.
+ */
+enum class BinaryOperator(val symbol: String) {
     /**
      * Shift left.
      */
-    SHL,
+    SHL(symbol = "<<"),
     /**
      * Shift right.
      */
-    SHR,
+    SHR(symbol = ">>"),
     /**
      * Unsigned shift right.
      */
-    USHR,
+    USHR(symbol = ">>>"),
     /**
      * Xor.
      */
-    XOR,
+    XOR(symbol = "xor"),
     /**
      * Logical And.
      */
-    LAND,
+    LAND(symbol = "&"),
     /**
      * Logical Or.
      */
-    LOR,
+    LOR(symbol = "|"),
     /**
      * Integer multiplication.
      */
-    MUL,
+    MUL(symbol = "*"),
     /**
      * Integer division.
      */
-    DIV,
+    DIV(symbol = "/"),
     /**
      * Integer mod.
      */
-    MOD,
+    MOD(symbol = "%"),
     /**
      * Float multiplication.
      */
-    F_MUL,
+    F_MUL(symbol = "*."),
     /**
      * Float division.
      */
-    F_DIV,
+    F_DIV(symbol = "/."),
     /**
      * Integer addition.
      */
-    PLUS,
+    PLUS(symbol = "+"),
     /**
      * Integer subtraction.
      */
-    MINUS,
+    MINUS(symbol = "-"),
     /**
      * Float addition.
      */
-    F_PLUS,
+    F_PLUS(symbol = "+."),
     /**
      * Float subtraction.
      */
-    F_MINUS,
+    F_MINUS(symbol = "-."),
     /**
      * Referential equality.
      */
-    REF_EQ,
+    REF_EQ(symbol = "==="),
     /**
      * Structural equality.
      */
-    STRUCT_EQ,
+    STRUCT_EQ(symbol = "=="),
     /**
      * Less then.
      */
-    LT,
+    LT(symbol = "<"),
     /**
      * Less then or equal to.
      */
-    LE,
+    LE(symbol = "<="),
     /**
      * Greater than.
      */
-    GT,
+    GT(symbol = ">"),
     /**
      * Greater than or equal to.
      */
-    GE;
+    GE(symbol = ">=");
+
+    companion object {
+        /**
+         * [symbolTable] is the map that converts a string to the enum value.
+         */
+        private val symbolTable: Map<String, BinaryOperator> =
+                BinaryOperator.values().toTable(BinaryOperator::symbol)
+
+        /**
+         * [fromRaw] converts a raw string binary operator to the binary operator in the enum mode.
+         *
+         * @param text the binary operator in the string form.
+         * @throws IllegalArgumentException if the given [text] is not a binary operator.
+         */
+        fun fromRaw(text: String): BinaryOperator = symbolTable[text]
+                ?: throw IllegalArgumentException("Not a supported binary operator.")
+    }
 
 }

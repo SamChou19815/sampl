@@ -36,7 +36,7 @@ class LanguageCompiler(private val directory: String) {
         val dependencyGraph: HashMap<String, Set<String>> = hashMapOf()
         for ((filename, compilationUnit) in compilationUnitMap) {
             val className = compilationUnit.classTypeDeclaration()
-                    .typeIdentifier().UpperIdentifier().symbol.text
+                    .typeIdentifier().UpperIdentifier(0).text
             // Check name consistency
             if (className != filename) {
                 throw CompileTimeError(message = "Disagreement in file name and type name." +

@@ -29,3 +29,6 @@ hs_err_pid*
 
 # Generated Parser
 /src/main/java/
+
+# Temp Test File
+/src/main/kotlin/com/developersam/pl/sapl/Test.kt
