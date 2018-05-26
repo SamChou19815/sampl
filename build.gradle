@@ -22,6 +22,11 @@ repositories {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     antlr "org.antlr:antlr4:4.5" // use ANTLR version 4
+    // functional java
+    compile "org.functionaljava:functionaljava:4.7"
+    compile "org.functionaljava:functionaljava-java8:4.7"
+    compile "org.functionaljava:functionaljava-quickcheck:4.7"
+    compile "org.functionaljava:functionaljava-java-core:4.7"
 }
 
 compileKotlin {
