@@ -12,11 +12,6 @@ class FunctionalEnvironment<T> private constructor(
         private val map: TreeMap<String, T>
 ) : Environment<T> {
 
-    /**
-     * Creates an empty map.
-     */
-    constructor() : this(map = TreeMap.empty(Ord.stringOrd))
-
     override fun contains(identifier: String): Boolean = map.contains(identifier)
 
     @Suppress(names = ["UNCHECKED_CAST"])
@@ -32,5 +27,19 @@ class FunctionalEnvironment<T> private constructor(
 
     override fun set(identifier: String, value: T): Environment<T> =
             FunctionalEnvironment(map = map.set(identifier, value))
+
+    companion object {
+        /**
+         * [_empty] is the singleton empty environment.
+         */
+        private val _empty: Environment<Any> =
+                FunctionalEnvironment(map = TreeMap.empty(Ord.stringOrd))
+
+        /**
+         * [getEmpty] returns the singleton empty environment.
+         */
+        @Suppress(names = ["UNCHECKED_CAST"])
+        fun <T> getEmpty(): Environment<T> = _empty as Environment<T>
+    }
 
 }
