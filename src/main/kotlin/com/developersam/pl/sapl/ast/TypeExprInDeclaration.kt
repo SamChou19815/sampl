@@ -5,6 +5,17 @@ package com.developersam.pl.sapl.ast
  */
 sealed class TypeExprInDeclaration
 
-// data class VariantTypeInDeclaration() : TypeExprInDeclaration()
+/**
+ * [VariantTypeInDeclaration] represents the constructor and an optional associated type all defined
+ * in [map].
+ */
+data class VariantTypeInDeclaration(
+        val map: Map<String, TypeExprInAnnotation?>
+) : TypeExprInDeclaration()
 
-// data class StructTypeInDeclaration() : TypeExprInDeclaration()
+/**
+ * [StructTypeInDeclaration] represents the struct declaration with all those info defined in [map].
+ */
+data class StructTypeInDeclaration(
+        val map: Map<String, TypeExprInAnnotation>
+) : TypeExprInDeclaration()

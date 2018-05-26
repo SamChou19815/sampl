@@ -6,17 +6,13 @@ package com.developersam.pl.sapl.ast
 sealed class TypeExprInAnnotation
 
 /**
- * [SingleIdentifierTypeInAnnotation] represents a single type identifier in the type annotation.
- *
- * @param identifier the single type identifier.
+ * [SingleIdentifierTypeInAnnotation] represents a single type [identifier] in the type annotation.
  */
 data class SingleIdentifierTypeInAnnotation(val identifier: TypeIdentifier) : TypeExprInAnnotation()
 
 /**
- * [FunctionTypeInAnnotation] represents the function type in the type annotation.
- *
- * @param argumentType the type of the argument.
- * @param returnType the type of the return value.
+ * [FunctionTypeInAnnotation] represents the function type in the type annotation of the form
+ * [argumentType] `->` [returnType].
  */
 data class FunctionTypeInAnnotation(
         val argumentType: TypeExprInAnnotation,

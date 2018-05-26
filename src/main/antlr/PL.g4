@@ -32,13 +32,14 @@ typeExprInAnnotation
     ;
 
 typeExprInDeclaration
-    : (LOR UpperIdentifier (OF typeExprInAnnotation)?)+ # VariantTypeInDeclaration
+    : (LOR variantConstructorDeclaration)+ # VariantTypeInDeclaration
     | LBRACE annotatedVariable (SEMICOLON annotatedVariable)* RBRACE # StructTypeInDeclaration
     ;
 
 // Some parser type fragment
 typeIdentifier : (UpperIdentifier DOT)* UpperIdentifier genericsBracket?;
 genericsBracket : LBRACKET UpperIdentifier (COMMA typeIdentifier)* RBRACKET;
+variantConstructorDeclaration : UpperIdentifier (OF typeExprInAnnotation)?;
 typeAnnotation : COLON typeExprInAnnotation;
 annotatedVariable : LowerIdentifier typeAnnotation;
 argumentDeclaration : UNIT | LPAREN annotatedVariable RPAREN;
