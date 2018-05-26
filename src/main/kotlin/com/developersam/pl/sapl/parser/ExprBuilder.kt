@@ -1,7 +1,7 @@
 package com.developersam.pl.sapl.parser
 
-import com.developersam.pl.sapl.antlr.LanguageBaseVisitor
-import com.developersam.pl.sapl.antlr.LanguageParser.*
+import com.developersam.pl.sapl.antlr.PLBaseVisitor
+import com.developersam.pl.sapl.antlr.PLParser.*
 import com.developersam.pl.sapl.ast.BinaryExpr
 import com.developersam.pl.sapl.ast.BinaryOperator
 import com.developersam.pl.sapl.ast.Expression
@@ -15,12 +15,11 @@ import com.developersam.pl.sapl.ast.NotExpr
 import com.developersam.pl.sapl.ast.ThrowExpr
 import com.developersam.pl.sapl.ast.TryCatchFinallyExpr
 import com.developersam.pl.sapl.ast.VariableIdentifierExpr
-import com.developersam.pl.sapl.util.symbolicName
 
 /**
  * [ExprBuilder] builds expression AST from parse tree.
  */
-object ExprBuilder : LanguageBaseVisitor<Expression>() {
+object ExprBuilder : PLBaseVisitor<Expression>() {
 
     override fun visitNestedExpr(ctx: NestedExprContext): Expression =
             ctx.expression().accept(this)
@@ -92,7 +91,8 @@ object ExprBuilder : LanguageBaseVisitor<Expression>() {
 
     override fun visitLetExpr(ctx: LetExprContext): Expression =
             LetExpr(
-                    pattern = ctx.pattern().accept(PatternBuilder),
+                    identifier = ctx.LowerIdentifier().text,
+                    typeAnnotation = ctx.typeAnnotation().accept(TypeExprInAnnotationBuilder),
                     e1 = ctx.expression(0).accept(this),
                     e2 = ctx.expression(1).accept(this)
             )

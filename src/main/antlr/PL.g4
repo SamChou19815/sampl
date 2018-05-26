@@ -22,24 +22,25 @@ moduleValueMemberConcreteDeclaration
       # ModuleFunctionDeclaration
     ;
 
-typeExprInDeclaration
-    : (LOR UpperIdentifier (OF typeIdentifier)?)+ # VariantTypeInDeclaration
-    | LBRACE annotatedVariable (SEMICOLON annotatedVariable)* RBRACE # StructClassType
-    ;
-
 typeExprInAnnotation
     : LPAREN typeExprInAnnotation RPAREN
-      # NestedAnnotableType
+      # NestedTypeInAnnotation
     | typeIdentifier
-      # SingleIdentifierAnnotableType
-    | (LPAREN typeExprInAnnotation (COMMA typeExprInAnnotation) RPAREN)* ARROW typeExprInAnnotation
-      # FunctionAnnotableType
+      # SingleIdentifierTypeInAnnotation
+    | <assoc=right> typeExprInAnnotation ARROW typeExprInAnnotation
+      # FunctionTypeInAnnotation
     ;
 
-// Some parser fragment
-typeIdentifier : (UpperIdentifier DOT)* UpperIdentifier genericsDeclaration?;
-annotatedVariable : LowerIdentifier typeAnnotation;
+typeExprInDeclaration
+    : (LOR UpperIdentifier (OF typeExprInAnnotation)?)+ # VariantTypeInDeclaration
+    | LBRACE annotatedVariable (SEMICOLON annotatedVariable)* RBRACE # StructTypeInDeclaration
+    ;
+
+// Some parser type fragment
+typeIdentifier : (UpperIdentifier DOT)* UpperIdentifier genericsBracket?;
+genericsBracket : LBRACKET UpperIdentifier (COMMA typeIdentifier)* RBRACKET;
 typeAnnotation : COLON typeExprInAnnotation;
+annotatedVariable : LowerIdentifier typeAnnotation;
 argumentDeclaration : UNIT | LPAREN annotatedVariable RPAREN;
 patternToExpr : LOR pattern ARROW expression;
 genericsDeclaration : LBRACKET UpperIdentifier (COMMA UpperIdentifier)* RBRACKET;
@@ -57,7 +58,7 @@ expression
     | expression BinaryLogicalOperator expression # BooleanExpr
     | expression ComparisonOperator expression # ComparisonExpr
     | NOT expression # NotExpr
-    | LET pattern typeAnnotation? ASSIGN expression SEMICOLON expression # LetExpr
+    | LET LowerIdentifier typeAnnotation? ASSIGN expression SEMICOLON expression # LetExpr
     | FUNCTION genericsDeclaration? argumentDeclaration* ARROW expression # LambdaExpr
     | IF expression THEN expression ELSE expression # IfElseExpr
     | MATCH LowerIdentifier WITH patternToExpr+ # MatchExpr

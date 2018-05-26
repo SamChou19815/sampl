@@ -5,4 +5,6 @@ package com.developersam.pl.sapl.ast
  */
 sealed class TypeExprInDeclaration
 
+// data class VariantTypeInDeclaration() : TypeExprInDeclaration()
 
+// data class StructTypeInDeclaration() : TypeExprInDeclaration()

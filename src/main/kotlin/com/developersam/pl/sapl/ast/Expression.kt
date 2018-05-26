@@ -36,9 +36,13 @@ data class BinaryExpr(
 data class NotExpr(val expr: Expression) : Expression()
 
 /**
- * [LetExpr] represents the let expression of the form `let` [pattern] `=` [e1] `;` [e2]
+ * [LetExpr] represents the let expression of the form
+ * `let` [identifier] (: [typeAnnotation]) `=` [e1] `;` [e2]
  */
-data class LetExpr(val pattern: Pattern, val e1: Expression, val e2: Expression) : Expression()
+data class LetExpr(
+        val identifier: String, val typeAnnotation: TypeExprInAnnotation?,
+        val e1: Expression, val e2: Expression
+) : Expression()
 
 /**
  * [FunctionExpr] is the function expression with some [genericsDeclaration], some [arguments] and

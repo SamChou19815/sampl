@@ -1,7 +1,7 @@
 package com.developersam.pl.sapl.parser
 
-import com.developersam.pl.sapl.antlr.LanguageBaseVisitor
-import com.developersam.pl.sapl.antlr.LanguageParser.*
+import com.developersam.pl.sapl.antlr.PLBaseVisitor
+import com.developersam.pl.sapl.antlr.PLParser.*
 import com.developersam.pl.sapl.ast.Pattern
 import com.developersam.pl.sapl.ast.UnitPattern
 import com.developersam.pl.sapl.ast.VariablePattern
@@ -11,7 +11,7 @@ import com.developersam.pl.sapl.ast.WildCardPattern
 /**
  * [ExprBuilder] builds pattern AST from parse tree.
  */
-object PatternBuilder : LanguageBaseVisitor<Pattern>() {
+object PatternBuilder : PLBaseVisitor<Pattern>() {
 
     override fun visitUnitPattern(ctx: UnitPatternContext): Pattern = UnitPattern
 
