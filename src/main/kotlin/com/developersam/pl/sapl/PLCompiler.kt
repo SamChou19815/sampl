@@ -1,46 +1,53 @@
 package com.developersam.pl.sapl
 
-import com.developersam.pl.sapl.antlr.PLLexer
-import com.developersam.pl.sapl.antlr.PLParser
-import com.developersam.pl.sapl.ast.CompilationUnit
+import com.developersam.pl.sapl.ast.Module
 import com.developersam.pl.sapl.dependency.DependencyAnalyzer
 import com.developersam.pl.sapl.parser.CompilationUnitBuilder
-import com.developersam.pl.sapl.util.getAllSourceFiles
-import org.antlr.v4.runtime.ANTLRInputStream
-import org.antlr.v4.runtime.CommonTokenStream
+import com.developersam.pl.sapl.util.FileUtil
+import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileInputStream
+import java.nio.charset.Charset
 import java.util.stream.Collectors
 
 /**
- * [PLCompiler] is responsible for the compilation of all the source files in the given
- * [directory].
- *
- * @param directory the directory that contains all the source files.
+ * [PLCompiler] is responsible for the compilation of all the given source files.
  */
-class PLCompiler(private val directory: String) {
+object PLCompiler {
 
     /**
-     * [compile] tries to compile all the source files.
+     * [compile] tries to compile the given [module] node.
      */
-    fun compile() {
-        // Store everything into AST
-        val compilationUnitMap: Map<String, CompilationUnit> = getAllSourceFiles(directory)
-                .parallelStream()
-                .collect(Collectors.toMap(File::nameWithoutExtension) { file ->
-                    val inStream = ANTLRInputStream(FileInputStream(file))
-                    val tokenStream = CommonTokenStream(PLLexer(inStream))
-                    val parser = PLParser(tokenStream)
-                    CompilationUnitBuilder.visitCompilationUnit(parser.compilationUnit())
-                })
-        // Construct sequence of compilation
-        val compilationSequence: List<CompilationUnit> =
-                DependencyAnalyzer.getCompilationSequence(map = compilationUnitMap)
+    private fun compile(module: Module) {
         // TODO type checking
 
-        // TODO transpile to Java code
+        // TODO trans-pile to Java code
 
         // TODO invoke java compiler
+
+    }
+
+    /**
+     * [compileFromSource] tries to compile all the source files in the given [code].
+     */
+    fun compileFromSource(code: String) {
+        val input = ByteArrayInputStream(code.toByteArray(charset = Charset.defaultCharset()))
+        val unit = CompilationUnitBuilder.build(input)
+        val module = Module(name = "Main", members = unit.members)
+        compile(module = module)
+    }
+
+    /**
+     * [compileFromDirectory] tries to compile all the source files in the given [directory].
+     */
+    fun compileFromDirectory(directory: String) {
+        val compilationUnitMap = FileUtil.getAllSourceFiles(directory = directory)
+                .parallelStream()
+                .collect(Collectors.toMap(File::nameWithoutExtension) { file ->
+                    CompilationUnitBuilder.build(FileInputStream(file))
+                })
+        val module = DependencyAnalyzer.getCompilationSequence(map = compilationUnitMap)
+        compile(module = module)
     }
 
 }

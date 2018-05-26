@@ -13,7 +13,7 @@ moduleMemberDeclaration
     | PRIVATE? TYPE typeIdentifier ASSIGN typeExprInDeclaration # ModuleTypeDeclaration
     | PRIVATE? LET LowerIdentifier ASSIGN expression # ModuleConstantDeclaration
     | PRIVATE? LET LowerIdentifier genericsDeclaration?
-          argumentDeclaration* typeAnnotation
+          argumentDeclaration+ typeAnnotation
       ASSIGN expression # ModuleFunctionDeclaration
     ;
 
