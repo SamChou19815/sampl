@@ -6,6 +6,7 @@ import com.developersam.pl.sapl.ast.BinaryExpr
 import com.developersam.pl.sapl.ast.BinaryOperator
 import com.developersam.pl.sapl.ast.Expression
 import com.developersam.pl.sapl.ast.FunctionApplicationExpr
+import com.developersam.pl.sapl.ast.FunctionExpr
 import com.developersam.pl.sapl.ast.IfElseExpr
 import com.developersam.pl.sapl.ast.LetExpr
 import com.developersam.pl.sapl.ast.LiteralBuilder
@@ -14,7 +15,11 @@ import com.developersam.pl.sapl.ast.MatchExpr
 import com.developersam.pl.sapl.ast.NotExpr
 import com.developersam.pl.sapl.ast.ThrowExpr
 import com.developersam.pl.sapl.ast.TryCatchFinallyExpr
+import com.developersam.pl.sapl.ast.TypeExprInAnnotation
+import com.developersam.pl.sapl.ast.UnitNode
 import com.developersam.pl.sapl.ast.VariableIdentifierExpr
+import org.antlr.v4.runtime.tree.TerminalNode
+import java.util.stream.Collectors
 
 /**
  * [ExprBuilder] builds expression AST from parse tree.
@@ -27,11 +32,13 @@ object ExprBuilder : PLBaseVisitor<Expression>() {
     override fun visitLiteralExpr(ctx: LiteralExprContext): Expression =
             LiteralExpr(literal = LiteralBuilder.from(text = ctx.Literal().text))
 
-    override fun visitIdentifierExpr(ctx: IdentifierExprContext): Expression =
-            VariableIdentifierExpr(variable = ctx.LowerIdentifier().text)
-
-    override fun visitIdentifierInModuleExpr(ctx: IdentifierInModuleExprContext): Expression {
-        TODO(reason = "Module not setup yet.")
+    override fun visitIdentifierExpr(ctx: IdentifierExprContext): Expression {
+        var variable = ctx.LowerIdentifier().text
+        val prefixes: List<TerminalNode> = ctx.UpperIdentifier()
+        if (prefixes.isNotEmpty()) {
+            variable = prefixes.joinToString(separator = ".") { it.text } + "." + variable
+        }
+        return VariableIdentifierExpr(variable = variable)
     }
 
     override fun visitFunctionApplicationExpr(ctx: FunctionApplicationExprContext): Expression {
@@ -97,9 +104,16 @@ object ExprBuilder : PLBaseVisitor<Expression>() {
                     e2 = ctx.expression(1).accept(this)
             )
 
-    override fun visitLambdaExpr(ctx: LambdaExprContext): Expression {
-        TODO(reason = "Lambda not setup yet.")
-    }
+    override fun visitFunExpr(ctx: FunExprContext): Expression =
+            FunctionExpr(
+                    genericsDeclaration = ctx.genericsDeclaration()
+                            ?.accept(GenericsDeclarationBuilder) ?: emptySet(),
+                    arguments = ctx.argumentDeclaration()
+                            .map { it.accept(ArgumentDeclarationBuilder) },
+                    returnType = ctx.typeAnnotation().typeExprInAnnotation()
+                            .accept(TypeExprInAnnotationBuilder),
+                    body = ctx.expression().accept(this)
+            )
 
     override fun visitIfElseExpr(ctx: IfElseExprContext): Expression =
             IfElseExpr(

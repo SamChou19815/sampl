@@ -9,17 +9,12 @@ importDeclaration : IMPORT LBRACE UpperIdentifier (COMMA UpperIdentifier)* RBRAC
 moduleDeclaration : MODULE UpperIdentifier LBRACE moduleMemberDeclaration* RBRACE;
 
 moduleMemberDeclaration
-    : PRIVATE? moduleValueMemberConcreteDeclaration # ModuleValueMemberDeclaration
-    | moduleDeclaration # NestedModuleDeclaration
-    ;
-
-moduleValueMemberConcreteDeclaration
-    : TYPE typeIdentifier ASSIGN typeExprInDeclaration
-      # ModuleTypeDeclaration
-    | LET LowerIdentifier ASSIGN expression
-      # ModuleConstantDeclaration
-    | LET LowerIdentifier genericsDeclaration? argumentDeclaration* typeAnnotation ASSIGN expression
-      # ModuleFunctionDeclaration
+    : moduleDeclaration # NestedModuleDeclaration
+    | PRIVATE? TYPE typeIdentifier ASSIGN typeExprInDeclaration # ModuleTypeDeclaration
+    | PRIVATE? LET LowerIdentifier ASSIGN expression # ModuleConstantDeclaration
+    | PRIVATE? LET LowerIdentifier genericsDeclaration?
+          argumentDeclaration* typeAnnotation
+      ASSIGN expression # ModuleFunctionDeclaration
     ;
 
 typeExprInAnnotation
@@ -49,8 +44,7 @@ genericsDeclaration : LBRACKET UpperIdentifier (COMMA UpperIdentifier)* RBRACKET
 expression
     : LPAREN expression RPAREN # NestedExpr
     | Literal # LiteralExpr
-    | LowerIdentifier # IdentifierExpr
-    | UpperIdentifier DOT LowerIdentifier # IdentifierInModuleExpr
+    | (UpperIdentifier DOT)* LowerIdentifier # IdentifierExpr
     | expression (LPAREN expression+ RPAREN) # FunctionApplicationExpr
     | expression BitOperator expression # BitExpr
     | expression FactorOperator expression # FactorExpr
@@ -60,7 +54,7 @@ expression
     | expression ComparisonOperator expression # ComparisonExpr
     | NOT expression # NotExpr
     | LET LowerIdentifier typeAnnotation? ASSIGN expression SEMICOLON expression # LetExpr
-    | FUNCTION genericsDeclaration? argumentDeclaration* ARROW expression # LambdaExpr
+    | FUNCTION genericsDeclaration? argumentDeclaration+ typeAnnotation ARROW expression # FunExpr
     | IF expression THEN expression ELSE expression # IfElseExpr
     | MATCH LowerIdentifier WITH patternToExpr+ # MatchExpr
     | THROW expression # ThrowExpr

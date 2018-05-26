@@ -1,14 +1,17 @@
 package com.developersam.pl.sapl
 
-import com.developersam.pl.sapl.antlr.PLLexer
-import com.developersam.pl.sapl.antlr.PLParser
-import com.developersam.pl.sapl.dependency.DependencyAnalyzer
-import com.developersam.pl.sapl.util.getAllSourceFiles
-import org.antlr.v4.runtime.ANTLRInputStream
-import org.antlr.v4.runtime.CommonTokenStream
 import java.io.File
 import java.io.FileInputStream
 import java.util.stream.Collectors
+
+import com.developersam.pl.sapl.antlr.PLLexer
+import com.developersam.pl.sapl.antlr.PLParser
+import com.developersam.pl.sapl.ast.CompilationUnit
+import com.developersam.pl.sapl.dependency.DependencyAnalyzer
+import com.developersam.pl.sapl.parser.CompilationUnitBuilder
+import com.developersam.pl.sapl.util.getAllSourceFiles
+import org.antlr.v4.runtime.ANTLRInputStream
+import org.antlr.v4.runtime.CommonTokenStream
 
 /**
  * [PLCompiler] is responsible for the compilation of all the source files in the given
@@ -23,16 +26,17 @@ class PLCompiler(private val directory: String) {
      */
     fun compile() {
         // Store everything into AST
-        val compilationUnitMap = getAllSourceFiles(directory)
+        val compilationUnitMap: Map<String, CompilationUnit> = getAllSourceFiles(directory)
                 .parallelStream()
                 .collect(Collectors.toMap(File::nameWithoutExtension) { file ->
                     val inStream = ANTLRInputStream(FileInputStream(file))
                     val tokenStream = CommonTokenStream(PLLexer(inStream))
                     val parser = PLParser(tokenStream)
-                    parser.compilationUnit()
+                    CompilationUnitBuilder.visitCompilationUnit(parser.compilationUnit())
                 })
         // Construct sequence of compilation
-        val compilationSequence = DependencyAnalyzer.getCompilationSequence(compilationUnitMap)
+        val compilationSequence: List<CompilationUnit> =
+                DependencyAnalyzer.getCompilationSequence(map = compilationUnitMap)
         // TODO type checking
 
         // TODO transpile to Java code

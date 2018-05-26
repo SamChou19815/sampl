@@ -49,8 +49,8 @@ data class LetExpr(
  * a [returnType] and finally the function [body].
  */
 data class FunctionExpr(
-    val genericsDeclaration: Set<String>, val arguments: List<Pair<String, String>>,
-    val returnType: String, val body: Expression
+    val genericsDeclaration: Set<String>, val arguments: List<Pair<String, TypeExprInAnnotation>>,
+    val returnType: TypeExprInAnnotation, val body: Expression
 ) : Expression()
 
 /**

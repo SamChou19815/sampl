@@ -1,0 +1,16 @@
+package com.developersam.pl.sapl.parser
+
+import java.util.stream.Collectors
+
+import com.developersam.pl.sapl.antlr.PLBaseVisitor
+import com.developersam.pl.sapl.antlr.PLParser
+
+/**
+ * [GenericsDeclarationBuilder] builds a generics declaration into AST fragment.
+ */
+object GenericsDeclarationBuilder : PLBaseVisitor<Set<String>>() {
+
+    override fun visitGenericsDeclaration(ctx: PLParser.GenericsDeclarationContext): Set<String> =
+            ctx.UpperIdentifier().stream().map { it.text }.collect(Collectors.toSet())
+
+}
