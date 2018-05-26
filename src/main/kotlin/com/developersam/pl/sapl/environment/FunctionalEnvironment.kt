@@ -30,16 +30,16 @@ class FunctionalEnvironment<T> private constructor(
 
     companion object {
         /**
-         * [_empty] is the singleton empty environment.
+         * [emptyEnvironment] is the singleton empty environment.
          */
-        private val _empty: Environment<Any> =
+        private val emptyEnvironment: Environment<Any> =
                 FunctionalEnvironment(map = TreeMap.empty(Ord.stringOrd))
 
         /**
          * [getEmpty] returns the singleton empty environment.
          */
         @Suppress(names = ["UNCHECKED_CAST"])
-        fun <T> getEmpty(): Environment<T> = _empty as Environment<T>
+        fun <T> getEmpty(): Environment<T> = emptyEnvironment as Environment<T>
     }
 
 }
