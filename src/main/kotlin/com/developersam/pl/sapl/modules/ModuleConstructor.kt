@@ -53,5 +53,5 @@ internal object ModuleConstructor {
                 })
         return DependencyAnalyzer.getCompilationSequence(map = compilationUnitMap)
     }
-    
+
 }
