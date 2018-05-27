@@ -3,7 +3,11 @@ package com.developersam.pl.sapl.ast
 /**
  * [Pattern] is a collection of supported pattern for matching.
  */
-sealed class Pattern
+sealed class Pattern : AstNode {
+
+    final override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(pattern = this)
+
+}
 
 /**
  * [UnitPattern] represents the unit pattern.

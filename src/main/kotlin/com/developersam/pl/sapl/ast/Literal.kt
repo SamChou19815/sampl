@@ -3,7 +3,11 @@ package com.developersam.pl.sapl.ast
 /**
  * [Literal] represents a set of supported literal.
  */
-sealed class Literal : AstNode
+sealed class Literal : AstNode {
+
+    final override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(literal = this)
+
+}
 
 object UnitLiteral: Literal()
 data class IntLiteral(val value: Long) : Literal()

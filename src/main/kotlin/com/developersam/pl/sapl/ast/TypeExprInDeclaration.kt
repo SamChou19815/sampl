@@ -3,7 +3,12 @@ package com.developersam.pl.sapl.ast
 /**
  * [TypeExprInDeclaration] represents a set of supported type expression in type declaration.
  */
-sealed class TypeExprInDeclaration
+sealed class TypeExprInDeclaration : AstNode {
+
+    final override fun <T> accept(visitor: AstVisitor<T>): T =
+            visitor.visit(typeExprInDeclaration = this)
+
+}
 
 /**
  * [VariantTypeInDeclaration] represents the constructor and an optional associated type all defined

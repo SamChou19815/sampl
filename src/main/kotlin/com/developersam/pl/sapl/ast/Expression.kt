@@ -3,7 +3,11 @@ package com.developersam.pl.sapl.ast
 /**
  * [Expression] represents a set of supported expression.
  */
-sealed class Expression : AstNode
+sealed class Expression : AstNode {
+
+    final override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(expression = this)
+
+}
 
 /**
  * [LiteralExpr] represents a [literal] as an expression.

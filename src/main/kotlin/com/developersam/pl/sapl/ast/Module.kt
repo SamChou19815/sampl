@@ -3,12 +3,20 @@ package com.developersam.pl.sapl.ast
 /**
  * [Module] node has a [name] and a set of ordered [members].
  */
-data class Module(val name: String, val members: List<ModuleMember>)
+data class Module(val name: String, val members: List<ModuleMember>) : AstNode {
+
+    override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(module = this)
+
+}
 
 /**
  * [ModuleMember] represents a set of supported module members.
  */
-sealed class ModuleMember
+sealed class ModuleMember : AstNode {
+
+    final override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(moduleMember = this)
+
+}
 
 /**
  * [NestedModule] represents a nested [module], which is considered a member of a module.
