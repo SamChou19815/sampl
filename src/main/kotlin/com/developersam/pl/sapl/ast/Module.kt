@@ -14,6 +14,11 @@ data class Module(val name: String, val members: List<ModuleMember>) : AstNode {
  */
 sealed class ModuleMember : AstNode {
 
+    /**
+     * [name] is the name of the identifier of the module member.
+     */
+    abstract val name: String
+
     final override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(moduleMember = this)
 
 }
@@ -21,7 +26,9 @@ sealed class ModuleMember : AstNode {
 /**
  * [NestedModule] represents a nested [module], which is considered a member of a module.
  */
-data class NestedModule(val module: Module) : ModuleMember()
+data class NestedModule(val module: Module) : ModuleMember() {
+    override val name: String = module.name
+}
 
 /**
  * [ModuleTypeMember] represents a type declaration of the form:
@@ -30,7 +37,9 @@ data class NestedModule(val module: Module) : ModuleMember()
 class ModuleTypeMember(
         val isPublic: Boolean, val identifier: TypeIdentifier,
         val declaration: TypeExprInDeclaration
-) : ModuleMember()
+) : ModuleMember() {
+    override val name: String = identifier.type
+}
 
 /**
  * [ModuleConstantMember] represents a constant declaration of the form:
@@ -38,7 +47,9 @@ class ModuleTypeMember(
  */
 class ModuleConstantMember(
         val isPublic: Boolean, val identifier: String, val expr: Expression
-) : ModuleMember()
+) : ModuleMember() {
+    override val name: String = identifier
+}
 
 /**
  * [ModuleFunctionMember] represents a function declaration of the form:
@@ -50,4 +61,6 @@ class ModuleFunctionMember(
         val genericsDeclaration: Set<String>,
         val arguments: List<Pair<String, TypeExprInAnnotation>>,
         val returnType: TypeExprInAnnotation, val body: Expression
-) : ModuleMember()
+) : ModuleMember() {
+    override val name: String = identifier
+}
