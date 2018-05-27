@@ -8,7 +8,7 @@ import fj.data.TreeMap
  *
  * @param map map is the backing field of the environment.
  */
-class FunctionalEnvironment<T> private constructor(
+internal class FunctionalEnvironment<T> private constructor(
         private val map: TreeMap<String, T>
 ) : Environment<T> {
 

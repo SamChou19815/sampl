@@ -9,7 +9,7 @@ import com.developersam.pl.sapl.util.cons
  * [CurrentModuleTracker] is a functional data structure that keeps track of the current module's
  * fully qualified name and the full stack of modules.
  */
-data class CurrentModuleTracker(
+internal data class CurrentModuleTracker(
         val fullyQualifiedName: String,
         val moduleStack: FunctionalList<String>
 ) {

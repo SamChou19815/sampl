@@ -38,7 +38,7 @@ import org.antlr.v4.runtime.tree.TerminalNode
 /**
  * [ExprBuilder] builds expression AST from parse tree.
  */
-object ExprBuilder : PLBaseVisitor<Expression>() {
+internal object ExprBuilder : PLBaseVisitor<Expression>() {
 
     override fun visitNestedExpr(ctx: NestedExprContext): Expression =
             ctx.expression().accept(this)

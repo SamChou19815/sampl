@@ -4,7 +4,7 @@ package com.developersam.pl.sapl.ast
  * [AstNode] is a node in the AST.
  * It defines a set of operations that the AST must support.
  */
-interface AstNode {
+internal interface AstNode {
 
     /**
      * [accept] accepts the evaluation from the given [visitor] and returns the evaluation result

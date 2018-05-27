@@ -3,18 +3,20 @@ package com.developersam.pl.sapl.ast
 /**
  * [TypeExprInAnnotation] represents a set of supported type expression in type annotation.
  */
-sealed class TypeExprInAnnotation
+internal sealed class TypeExprInAnnotation
 
 /**
  * [SingleIdentifierTypeInAnnotation] represents a single type [identifier] in the type annotation.
  */
-data class SingleIdentifierTypeInAnnotation(val identifier: TypeIdentifier) : TypeExprInAnnotation()
+internal data class SingleIdentifierTypeInAnnotation(
+        val identifier: TypeIdentifier
+) : TypeExprInAnnotation()
 
 /**
  * [FunctionTypeInAnnotation] represents the function type in the type annotation of the form
  * [argumentType] `->` [returnType].
  */
-data class FunctionTypeInAnnotation(
+internal data class FunctionTypeInAnnotation(
         val argumentType: TypeExprInAnnotation,
         val returnType: TypeExprInAnnotation
 ) : TypeExprInAnnotation()

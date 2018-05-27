@@ -7,7 +7,7 @@ import com.developersam.pl.sapl.util.toTable
  *
  * @param symbol the text symbol defined in the lexer.
  */
-enum class BinaryOperator(val symbol: String) {
+internal enum class BinaryOperator(val symbol: String) {
     /**
      * Shift left.
      */

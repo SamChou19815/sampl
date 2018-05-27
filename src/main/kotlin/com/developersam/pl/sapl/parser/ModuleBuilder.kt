@@ -7,7 +7,7 @@ import com.developersam.pl.sapl.ast.Module
 /**
  * [ModuleBuilder] builds module into AST.
  */
-object ModuleBuilder : PLBaseVisitor<Module>() {
+internal object ModuleBuilder : PLBaseVisitor<Module>() {
 
     override fun visitModuleDeclaration(ctx: PLParser.ModuleDeclarationContext): Module =
             Module(

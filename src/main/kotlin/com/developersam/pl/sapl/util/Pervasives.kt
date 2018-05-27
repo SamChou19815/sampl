@@ -8,5 +8,5 @@ import java.util.stream.Collectors
  *
  * @param f the function that maps the an element in the array to a string.
  */
-fun <T> Array<T>.toTable(f: (T) -> String): Map<String, T> =
+internal fun <T> Array<T>.toTable(f: (T) -> String): Map<String, T> =
         Arrays.stream(this).collect(Collectors.toMap(f) { it })

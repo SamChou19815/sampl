@@ -8,7 +8,7 @@ import com.developersam.pl.sapl.ast.TypeExprInAnnotation as TA
 /**
  * [ArgumentDeclarationBuilder] builds argument declaration into AST.
  */
-object ArgumentDeclarationBuilder : PLBaseVisitor<Pair<String, TA>>() {
+internal object ArgumentDeclarationBuilder : PLBaseVisitor<Pair<String, TA>>() {
 
     override fun visitArgumentDeclaration(ctx: ArgumentDeclarationContext): Pair<String, TA> =
             if (ctx.UNIT() != null) {

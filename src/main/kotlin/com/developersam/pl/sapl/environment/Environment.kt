@@ -5,7 +5,7 @@ package com.developersam.pl.sapl.environment
  * This interface is designed to be purely functional. The implementing class should have no visible
  * side effects.
  */
-interface Environment<T> {
+internal interface Environment<T> {
 
     /**
      * [contains] checks whether the given [identifier] exists in the environment.

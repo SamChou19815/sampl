@@ -11,7 +11,7 @@ import com.developersam.pl.sapl.ast.TypeExprInAnnotation as T
 /**
  * [TypeExprInAnnotationBuilder] builds type annotation AST from parse tree.
  */
-object TypeExprInAnnotationBuilder : PLBaseVisitor<T>() {
+internal object TypeExprInAnnotationBuilder : PLBaseVisitor<T>() {
 
     override fun visitNestedTypeInAnnotation(ctx: Nested): T =
             ctx.typeExprInAnnotation().accept(this)

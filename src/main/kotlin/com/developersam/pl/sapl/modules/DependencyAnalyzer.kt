@@ -1,4 +1,4 @@
-package com.developersam.pl.sapl.dependency
+package com.developersam.pl.sapl.modules
 
 import com.developersam.pl.sapl.ast.CompilationUnit
 import com.developersam.pl.sapl.ast.Module
@@ -9,7 +9,7 @@ import com.developersam.pl.sapl.exceptions.CyclicDependencyError
 /**
  * [DependencyAnalyzer] can analyze the dependency relationship in source.
  */
-object DependencyAnalyzer {
+internal object DependencyAnalyzer {
 
     /**
      * [getCompilationSequence] obtains the correct sequence of compilation for the source file

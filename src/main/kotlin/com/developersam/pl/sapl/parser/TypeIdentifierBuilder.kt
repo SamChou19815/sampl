@@ -9,7 +9,7 @@ import java.util.stream.Collectors
 /**
  * [TypeIdentifierBuilder] builds type identifier AST from parse tree.
  */
-object TypeIdentifierBuilder : PLBaseVisitor<TypeIdentifier>() {
+internal object TypeIdentifierBuilder : PLBaseVisitor<TypeIdentifier>() {
 
     override fun visitTypeIdentifier(ctx: PLParser.TypeIdentifierContext): TypeIdentifier =
             TypeIdentifier(

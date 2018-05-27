@@ -14,7 +14,7 @@ import com.developersam.pl.sapl.ast.WildCardPattern
 /**
  * [ExprBuilder] builds pattern AST from parse tree.
  */
-object PatternBuilder : PLBaseVisitor<Pattern>() {
+internal object PatternBuilder : PLBaseVisitor<Pattern>() {
 
     override fun visitUnitPattern(ctx: UnitPatternContext): Pattern = UnitPattern
 

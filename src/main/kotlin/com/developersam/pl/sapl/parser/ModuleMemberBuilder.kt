@@ -14,7 +14,7 @@ import com.developersam.pl.sapl.ast.ModuleMember as M
 /**
  * [ModuleBuilder] builds module members into AST.
  */
-object ModuleMemberBuilder : PLBaseVisitor<M>() {
+internal object ModuleMemberBuilder : PLBaseVisitor<M>() {
 
     override fun visitNestedModuleDeclaration(ctx: NestedModuleDeclarationContext): M =
             NestedModule(module = ctx.moduleDeclaration().accept(ModuleBuilder))

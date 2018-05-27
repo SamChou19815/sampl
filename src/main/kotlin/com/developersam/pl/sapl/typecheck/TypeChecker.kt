@@ -6,7 +6,7 @@ import com.developersam.pl.sapl.environment.FunctionalEnvironment
 /**
  * [TypeChecker] defines how a type checker should work.
  */
-object TypeChecker {
+internal object TypeChecker {
 
     /**
      * [typeCheck] tries to type check the given [module].

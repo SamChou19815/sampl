@@ -3,23 +3,23 @@ package com.developersam.pl.sapl.ast
 /**
  * [Literal] represents a set of supported literal.
  */
-sealed class Literal : AstNode {
+internal sealed class Literal : AstNode {
 
     final override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(literal = this)
 
 }
 
-object UnitLiteral: Literal()
-data class IntLiteral(val value: Long) : Literal()
-data class FloatLiteral(val value: Double) : Literal()
-data class BoolLiteral(val value: Boolean) : Literal()
-data class CharLiteral(val value: Char) : Literal()
-data class StringLiteral(val value: String) : Literal()
+internal object UnitLiteral: Literal()
+internal data class IntLiteral(val value: Long) : Literal()
+internal data class FloatLiteral(val value: Double) : Literal()
+internal data class BoolLiteral(val value: Boolean) : Literal()
+internal data class CharLiteral(val value: Char) : Literal()
+internal data class StringLiteral(val value: String) : Literal()
 
 /**
  * [LiteralBuilder] builds literals.
  */
-object LiteralBuilder {
+internal object LiteralBuilder {
     /**
      * [from] creates a literal from a [text].
      */

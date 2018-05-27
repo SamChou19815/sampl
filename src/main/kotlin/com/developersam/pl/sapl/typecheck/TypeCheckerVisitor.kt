@@ -38,7 +38,7 @@ import com.developersam.pl.sapl.exceptions.UndefinedIdentifierError
  *
  * @param environment the environment that keeps track of the current module and type bindings.
  */
-class TypeCheckerVisitor(
+internal class TypeCheckerVisitor(
         private val environment: TypeCheckerEnvironment
 ) : AstVisitor<TypeIdentifier> {
 

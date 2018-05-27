@@ -5,7 +5,7 @@ package com.developersam.pl.sapl.ast
  *
  * @param T type of the return value.
  */
-interface AstVisitor<T> {
+internal interface AstVisitor<T> {
 
     /**
      * [visit] visits the given [compilationUnit] and returns the evaluation result.
@@ -15,7 +15,7 @@ interface AstVisitor<T> {
     fun visit(compilationUnit: CompilationUnit): T =
             throw UnsupportedOperationException(
                     message = "You are not supposed to visit a compilation unit. " +
-                            "This node is reserved for dependency analysis only."
+                            "This node is reserved for modules analysis only."
             )
 
     /**

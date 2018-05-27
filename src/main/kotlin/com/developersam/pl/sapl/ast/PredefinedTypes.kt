@@ -3,7 +3,7 @@ package com.developersam.pl.sapl.ast
 /**
  * [PredefinedTypes] contains a set of predefined types related AST nodes.
  */
-object PredefinedTypes {
+internal object PredefinedTypes {
 
     /**
      * [moduleTypeIdentifier] is the type identifier for the module type.

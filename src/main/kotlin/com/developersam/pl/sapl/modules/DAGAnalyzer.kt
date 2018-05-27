@@ -1,4 +1,4 @@
-package com.developersam.pl.sapl.dependency
+package com.developersam.pl.sapl.modules
 
 /**
  * [DAGAnalyzer] is responsible for understanding the DAG relationship between various
@@ -7,7 +7,7 @@ package com.developersam.pl.sapl.dependency
  * @param graph the graph to analyze. The value is a list of items that the key directs to.
  * @param T type of the item for DAG analysis analysis
  */
-class DAGAnalyzer<T>(private val graph: Map<T, Set<T>>) {
+internal class DAGAnalyzer<T>(private val graph: Map<T, Set<T>>) {
 
     /**
      * [_sortedList] contains the sorted list of vertices in topological order.

@@ -12,7 +12,7 @@ import com.developersam.pl.sapl.parser.TypeExprInAnnotationBuilder as B
 /**
  * [TypeExprInDeclarationBuilder] builds TypeExprInDeclaration AST from parse tree.
  */
-object TypeExprInDeclarationBuilder : PLBaseVisitor<T>() {
+internal object TypeExprInDeclarationBuilder : PLBaseVisitor<T>() {
 
     override fun visitVariantTypeInDeclaration(ctx: VariantTypeInDeclarationContext): T =
             VariantTypeInDeclaration(map = ctx.variantConstructorDeclaration().stream()

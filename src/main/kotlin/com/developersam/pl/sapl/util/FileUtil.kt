@@ -6,7 +6,7 @@ import java.io.File
 /**
  * [FileUtil] contains a set of source code file related utilities.
  */
-object FileUtil {
+internal object FileUtil {
 
     /**
      * [getAllSourceFiles] returns all the source files in the given [directory].

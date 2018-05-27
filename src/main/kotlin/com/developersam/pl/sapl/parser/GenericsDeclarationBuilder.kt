@@ -7,7 +7,7 @@ import java.util.stream.Collectors
 /**
  * [GenericsDeclarationBuilder] builds a generics declaration into AST fragment.
  */
-object GenericsDeclarationBuilder : PLBaseVisitor<Set<String>>() {
+internal object GenericsDeclarationBuilder : PLBaseVisitor<Set<String>>() {
 
     override fun visitGenericsDeclaration(ctx: PLParser.GenericsDeclarationContext): Set<String> =
             ctx.UpperIdentifier().stream().map { it.text }.collect(Collectors.toSet())
