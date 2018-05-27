@@ -38,7 +38,7 @@ import com.developersam.pl.sapl.exceptions.UndefinedIdentifierError
  *
  * @param environment the environment that keeps track of the current module and type bindings.
  */
-class TypeCheckerVisitor private constructor(
+class TypeCheckerVisitor(
         private val environment: TypeCheckerEnvironment
 ) : AstVisitor<TypeIdentifier> {
 
@@ -113,16 +113,6 @@ class TypeCheckerVisitor private constructor(
         }
         is TryCatchFinallyExpr -> {
             TODO()
-        }
-    }
-
-    companion object : TypeChecker {
-        override fun doesTypeCheck(module: Module) {
-            val environment = TypeCheckerEnvironment(
-                    currentModuleTracker = CurrentModuleTracker(module.name),
-                    typesEnvironment = FunctionalEnvironment.getEmpty()
-            )
-            TypeCheckerVisitor(environment = environment).visit(module = module)
         }
     }
 

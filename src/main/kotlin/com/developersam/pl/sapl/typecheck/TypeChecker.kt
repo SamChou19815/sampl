@@ -1,18 +1,26 @@
 package com.developersam.pl.sapl.typecheck
 
 import com.developersam.pl.sapl.ast.Module
+import com.developersam.pl.sapl.environment.FunctionalEnvironment
 
 /**
- * [TypeChecker] is defines how a type checker should work.
+ * [TypeChecker] defines how a type checker should work.
  */
-interface TypeChecker {
+object TypeChecker {
 
     /**
-     * [doesTypeCheck] reports whether the given [module] does type check.
+     * [typeCheck] tries to type check the given [module].
      *
      * It should run without error if the [module] type checks. Otherwise, it should throw an
      * unchecked exception.
      */
-    fun doesTypeCheck(module: Module)
+    fun typeCheck(module: Module) {
+
+        val environment = TypeCheckerEnvironment(
+                currentModuleTracker = CurrentModuleTracker(module.name),
+                typesEnvironment = FunctionalEnvironment.getEmpty()
+        )
+        TypeCheckerVisitor(environment = environment).visit(module = module)
+    }
 
 }

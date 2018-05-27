@@ -3,6 +3,7 @@ package com.developersam.pl.sapl
 import com.developersam.pl.sapl.ast.Module
 import com.developersam.pl.sapl.dependency.DependencyAnalyzer
 import com.developersam.pl.sapl.parser.CompilationUnitBuilder
+import com.developersam.pl.sapl.typecheck.TypeChecker
 import com.developersam.pl.sapl.util.FileUtil
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -19,8 +20,8 @@ object PLCompiler {
      * [compile] tries to compile the given [module] node.
      */
     private fun compile(module: Module) {
-        // TODO type checking
-
+        // Type checking
+        TypeChecker.typeCheck(module = module)
         // TODO trans-pile to Java code
 
         // TODO invoke java compiler
