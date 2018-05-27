@@ -6,6 +6,11 @@ package com.developersam.pl.sapl.ast
 object PredefinedTypes {
 
     /**
+     * [moduleTypeIdentifier] is the type identifier for the module type.
+     * It is used only as a type placeholder. This value has no meaning.
+     */
+    val moduleTypeIdentifier: TypeIdentifier = TypeIdentifier(type = "_ModuleType_")
+    /**
      * [unitTypeIdentifier] is the type identifier for the unit type.
      */
     val unitTypeIdentifier: TypeIdentifier = TypeIdentifier(type = "Unit")
@@ -34,7 +39,7 @@ object PredefinedTypes {
      * [annotatedUnit] is the annotated variable for unit.
      */
     val annotatedUnit = Pair<String, TypeExprInAnnotation>(
-            first = "___ILLEGAL_IDENTIFIER___",
+            first = "___ILLEGAL_IDENTIFIER_FOR_UNIT___",
             second = SingleIdentifierTypeInAnnotation(identifier = unitTypeIdentifier)
     )
 

@@ -28,6 +28,7 @@ import com.developersam.pl.sapl.ast.LetExpr
 import com.developersam.pl.sapl.ast.LiteralBuilder
 import com.developersam.pl.sapl.ast.LiteralExpr
 import com.developersam.pl.sapl.ast.MatchExpr
+import com.developersam.pl.sapl.ast.MemberAccessExpr
 import com.developersam.pl.sapl.ast.NotExpr
 import com.developersam.pl.sapl.ast.ThrowExpr
 import com.developersam.pl.sapl.ast.TryCatchFinallyExpr
@@ -46,12 +47,13 @@ object ExprBuilder : PLBaseVisitor<Expression>() {
             LiteralExpr(literal = LiteralBuilder.from(text = ctx.Literal().text))
 
     override fun visitIdentifierExpr(ctx: IdentifierExprContext): Expression {
-        var variable = ctx.LowerIdentifier().text
+        val last = ctx.LowerIdentifier().text
         val prefixes: List<TerminalNode> = ctx.UpperIdentifier()
-        if (prefixes.isNotEmpty()) {
-            variable = prefixes.joinToString(separator = ".") { it.text } + "." + variable
+        return if (prefixes.isEmpty()) {
+            VariableIdentifierExpr(variable = last)
+        } else{
+            MemberAccessExpr(moduleChain = prefixes.map(TerminalNode::getText), member = last)
         }
-        return VariableIdentifierExpr(variable = variable)
     }
 
     override fun visitFunctionApplicationExpr(ctx: FunctionApplicationExprContext): Expression {

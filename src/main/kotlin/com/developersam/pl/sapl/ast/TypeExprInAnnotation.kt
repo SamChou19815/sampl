@@ -3,12 +3,7 @@ package com.developersam.pl.sapl.ast
 /**
  * [TypeExprInAnnotation] represents a set of supported type expression in type annotation.
  */
-sealed class TypeExprInAnnotation : AstNode {
-
-    final override fun <T> accept(visitor: AstVisitor<T>): T =
-            visitor.visit(typeExprInAnnotation = this)
-
-}
+sealed class TypeExprInAnnotation
 
 /**
  * [SingleIdentifierTypeInAnnotation] represents a single type [identifier] in the type annotation.

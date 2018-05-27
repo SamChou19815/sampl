@@ -38,19 +38,4 @@ interface AstVisitor<T> {
      */
     fun visit(expression: Expression): T
 
-    /**
-     * [visit] visits the given [pattern] and returns the evaluation result.
-     */
-    fun visit(pattern: Pattern): T
-
-    /**
-     * [visit] visits the given [typeExprInAnnotation] and returns the evaluation result.
-     */
-    fun visit(typeExprInAnnotation: TypeExprInAnnotation): T
-
-    /**
-     * [visit] visits the given [typeExprInDeclaration] and returns the evaluation result.
-     */
-    fun visit(typeExprInDeclaration: TypeExprInDeclaration): T
-
 }

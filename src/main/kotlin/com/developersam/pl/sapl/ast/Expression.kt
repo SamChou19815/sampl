@@ -20,6 +20,12 @@ data class LiteralExpr(val literal: Literal) : Expression()
 data class VariableIdentifierExpr(val variable: String) : Expression()
 
 /**
+ * [MemberAccessExpr] represents the member access from modules with module [moduleChain]'s member
+ * [member].
+ */
+data class MemberAccessExpr(val moduleChain: List<String>, val member: String) : Expression()
+
+/**
  * [FunctionApplicationExpr] is the function application expression, with [functionExpr] as the
  * function and [arguments] as arguments of the function.
  */
