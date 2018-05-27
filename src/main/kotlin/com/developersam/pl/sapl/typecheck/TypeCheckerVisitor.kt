@@ -13,8 +13,12 @@ import com.developersam.pl.sapl.exceptions.NameConflictException
 
 /**
  * [TypeCheckerVisitor] visits the AST while doing type checking.
+ *
+ * @param environment the environment that keeps track of the current module and type bindings.
  */
-object TypeCheckerVisitor : AstVisitor<TypeIdentifier> {
+class TypeCheckerVisitor(
+        private val environment: TypeCheckerEnvironment
+) : AstVisitor<TypeIdentifier> {
 
     override fun visit(module: Module): TypeIdentifier {
         val members = module.members
@@ -25,6 +29,7 @@ object TypeCheckerVisitor : AstVisitor<TypeIdentifier> {
             if (!names.add(name)) {
                 throw NameConflictException(conflictedName = name)
             }
+            // TODO
         }
         TODO("not implemented")
     }
