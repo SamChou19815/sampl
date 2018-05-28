@@ -35,12 +35,4 @@ internal object PredefinedTypes {
      */
     val stringTypeIdentifier: TypeIdentifier = TypeIdentifier(type = "String")
 
-    /**
-     * [annotatedUnit] is the annotated variable for unit.
-     */
-    val annotatedUnit = Pair<String, TypeExprInAnnotation>(
-            first = "___ILLEGAL_IDENTIFIER_FOR_UNIT___",
-            second = SingleIdentifierTypeInAnnotation(identifier = unitTypeIdentifier)
-    )
-
 }

@@ -121,8 +121,6 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
 
     override fun visitFunExpr(ctx: FunExprContext): Expression =
             FunctionExpr(
-                    genericsDeclaration = ctx.genericsDeclaration()
-                            ?.accept(GenericsDeclarationBuilder) ?: emptySet(),
                     arguments = ctx.argumentDeclaration()
                             .map { it.accept(ArgumentDeclarationBuilder) },
                     returnType = ctx.typeAnnotation().typeExprInAnnotation()

@@ -108,11 +108,11 @@ internal data class LetExpr(
 }
 
 /**
- * [FunctionExpr] is the function expression with some [genericsDeclaration], some [arguments] and
- * a [returnType] and finally the function [body].
+ * [FunctionExpr] is the function expression with some [arguments], a [returnType] and finally the
+ * function [body].
  */
 internal data class FunctionExpr(
-        val genericsDeclaration: Set<String>, val arguments: List<Pair<String, TypeExprInAnnotation>>,
+        val arguments: List<Pair<String, TypeExprInAnnotation>>,
         val returnType: TypeExprInAnnotation, val body: Expression
 ) : Expression() {
 

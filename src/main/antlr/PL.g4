@@ -37,7 +37,7 @@ genericsBracket : LBRACKET UpperIdentifier (COMMA typeIdentifier)* RBRACKET;
 variantConstructorDeclaration : UpperIdentifier (OF typeExprInAnnotation)?;
 typeAnnotation : COLON typeExprInAnnotation;
 annotatedVariable : LowerIdentifier typeAnnotation;
-argumentDeclaration : UNIT | LPAREN annotatedVariable RPAREN;
+argumentDeclaration : LPAREN annotatedVariable RPAREN;
 patternToExpr : LOR pattern ARROW expression;
 genericsDeclaration : LBRACKET UpperIdentifier (COMMA UpperIdentifier)* RBRACKET;
 
@@ -54,7 +54,7 @@ expression
     | expression ComparisonOperator expression # ComparisonExpr
     | NOT expression # NotExpr
     | LET LowerIdentifier typeAnnotation? ASSIGN expression SEMICOLON expression # LetExpr
-    | FUNCTION genericsDeclaration? argumentDeclaration+ typeAnnotation ARROW expression # FunExpr
+    | FUNCTION argumentDeclaration+ typeAnnotation ARROW expression # FunExpr
     | IF expression THEN expression ELSE expression # IfElseExpr
     | MATCH LowerIdentifier WITH patternToExpr+ # MatchExpr
     | THROW expression # ThrowExpr
