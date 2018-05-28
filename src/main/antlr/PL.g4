@@ -1,6 +1,6 @@
 grammar PL;
 
-import Lexer;
+import PLLexerPart;
 
 compilationUnit : importDeclaration? moduleMemberDeclaration* EOF;
 

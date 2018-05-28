@@ -17,16 +17,15 @@ apply plugin: 'antlr'
 
 repositories {
     mavenCentral()
+    maven { url "https://jitpack.io" }
 }
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     antlr "org.antlr:antlr4:4.5" // use ANTLR version 4
-    // functional java
-    compile "org.functionaljava:functionaljava:4.7"
-    compile "org.functionaljava:functionaljava-java8:4.7"
-    compile "org.functionaljava:functionaljava-quickcheck:4.7"
-    compile "org.functionaljava:functionaljava-java-core:4.7"
+    testCompile 'junit:junit:4.12'
+    // OKaml-Lib
+    compile 'com.github.SamChou19815:okaml-lib:0.1.0'
 }
 
 compileKotlin {

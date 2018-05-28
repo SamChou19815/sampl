@@ -1,9 +1,7 @@
 package com.developersam.pl.sapl.typecheck
 
-import com.developersam.pl.sapl.util.FunctionalList
-import com.developersam.pl.sapl.util.FunctionalListNil
-import com.developersam.pl.sapl.util.FunctionalListNode
-import com.developersam.pl.sapl.util.cons
+import com.developersam.fp.FpList
+import com.developersam.fp.cons
 
 /**
  * [CurrentModuleTracker] is a functional data structure that keeps track of the current module's
@@ -11,7 +9,7 @@ import com.developersam.pl.sapl.util.cons
  */
 internal data class CurrentModuleTracker(
         val fullyQualifiedName: String,
-        val moduleStack: FunctionalList<String>
+        val moduleStack: FpList<String>
 ) {
 
     /**
@@ -19,7 +17,7 @@ internal data class CurrentModuleTracker(
      */
     constructor(topLevelModuleName: String) : this(
             fullyQualifiedName = topLevelModuleName,
-            moduleStack = FunctionalList.singletonList(data = topLevelModuleName)
+            moduleStack = FpList.singleton(data = topLevelModuleName)
     )
 
     /**
@@ -28,7 +26,7 @@ internal data class CurrentModuleTracker(
     fun enterSubModule(subModuleName: String): CurrentModuleTracker =
             CurrentModuleTracker(
                     fullyQualifiedName = "$fullyQualifiedName.$subModuleName",
-                    moduleStack = moduleStack.cons(data = subModuleName)
+                    moduleStack = subModuleName cons moduleStack
             )
 
     /**
@@ -38,13 +36,13 @@ internal data class CurrentModuleTracker(
      * @throws IllegalStateException if the current tracker is at the top level.
      */
     fun leaveSubModule(): CurrentModuleTracker = when (this.moduleStack) {
-        is FunctionalListNil -> throw IllegalStateException()
-        is FunctionalListNode<String> -> {
+        FpList.Nil -> throw IllegalStateException()
+        is FpList.Node<String> -> {
             val popped = moduleStack.data
             val remained = moduleStack.next
             when (remained) {
-                is FunctionalListNil -> throw IllegalStateException()
-                is FunctionalListNode<String> -> CurrentModuleTracker(
+                is FpList.Nil -> throw IllegalStateException()
+                is FpList.Node<String> -> CurrentModuleTracker(
                         fullyQualifiedName = fullyQualifiedName.substring(
                                 startIndex = 0,
                                 endIndex = fullyQualifiedName.length - popped.length - 1

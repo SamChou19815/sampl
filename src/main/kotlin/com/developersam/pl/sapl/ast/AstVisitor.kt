@@ -14,7 +14,7 @@ internal interface AstVisitor<T> {
      */
     fun visit(compilationUnit: CompilationUnit): T =
             throw UnsupportedOperationException(
-                    message = "You are not supposed to visit a compilation unit. " +
+                    "You are not supposed to visit a compilation unit. " +
                             "This node is reserved for modules analysis only."
             )
 
