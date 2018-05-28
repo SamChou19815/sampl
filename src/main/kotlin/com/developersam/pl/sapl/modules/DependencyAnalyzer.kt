@@ -34,7 +34,7 @@ internal object DependencyAnalyzer {
                     ?.map { it to (map[it]!!) }
                     ?: throw CyclicDependencyError()
         } catch (e: IllegalArgumentException) {
-            throw CompileTimeError(message = "Bad import statements!")
+            throw CompileTimeError(reason = "Bad import statements!")
         }
         // Construct a single module
         return Module(

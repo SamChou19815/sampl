@@ -29,11 +29,6 @@ internal interface AstVisitor<T> {
     fun visit(moduleMember: ModuleMember): T
 
     /**
-     * [visit] visits the given [literal] and returns the evaluation result.
-     */
-    fun visit(literal: Literal): T
-
-    /**
      * [visit] visits the given [expression] and returns the evaluation result.
      */
     fun visit(expression: Expression): T

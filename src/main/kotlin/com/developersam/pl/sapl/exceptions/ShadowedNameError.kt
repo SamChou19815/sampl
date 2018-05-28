@@ -5,5 +5,5 @@ package com.developersam.pl.sapl.exceptions
  * during compile time.
  */
 internal class ShadowedNameError(val shadowedName: String) : CompileTimeError(
-        message = "Identifier Shadowing Detected: $shadowedName."
+        reason = "Identifier Shadowing Detected: $shadowedName."
 )

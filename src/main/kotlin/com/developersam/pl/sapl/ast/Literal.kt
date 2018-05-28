@@ -3,18 +3,56 @@ package com.developersam.pl.sapl.ast
 /**
  * [Literal] represents a set of supported literal.
  */
-internal sealed class Literal : AstNode {
+internal sealed class Literal{
 
-    final override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(literal = this)
+    /**
+     * [inferredType] reports the inferred type from the literal.
+     */
+    abstract val inferredType: TypeIdentifier
 
 }
 
-internal object UnitLiteral: Literal()
-internal data class IntLiteral(val value: Long) : Literal()
-internal data class FloatLiteral(val value: Double) : Literal()
-internal data class BoolLiteral(val value: Boolean) : Literal()
-internal data class CharLiteral(val value: Char) : Literal()
-internal data class StringLiteral(val value: String) : Literal()
+/**
+ * [UnitLiteral] is the literal for unit.
+ */
+internal object UnitLiteral : Literal() {
+    override val inferredType: TypeIdentifier = PredefinedTypes.unitTypeIdentifier
+}
+
+/**
+ * [IntLiteral] is the literal for int with [value].
+ */
+internal data class IntLiteral(val value: Long) : Literal() {
+    override val inferredType: TypeIdentifier = PredefinedTypes.intTypeIdentifier
+}
+
+/**
+ * [FloatLiteral] is the literal for float with [value].
+ */
+internal data class FloatLiteral(val value: Double) : Literal() {
+    override val inferredType: TypeIdentifier = PredefinedTypes.floatTypeIdentifier
+}
+
+/**
+ * [BoolLiteral] is the literal for bool with [value].
+ */
+internal data class BoolLiteral(val value: Boolean) : Literal() {
+    override val inferredType: TypeIdentifier = PredefinedTypes.boolTypeIdentifier
+}
+
+/**
+ * [CharLiteral] is the literal for char with [value].
+ */
+internal data class CharLiteral(val value: Char) : Literal() {
+    override val inferredType: TypeIdentifier = PredefinedTypes.charTypeIdentifier
+}
+
+/**
+ * [StringLiteral] is the literal for string with [value].
+ */
+internal data class StringLiteral(val value: String) : Literal() {
+    override val inferredType: TypeIdentifier = PredefinedTypes.stringTypeIdentifier
+}
 
 /**
  * [LiteralBuilder] builds literals.
