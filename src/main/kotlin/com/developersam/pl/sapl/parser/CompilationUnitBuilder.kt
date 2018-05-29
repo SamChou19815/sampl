@@ -16,7 +16,7 @@ internal object CompilationUnitBuilder : PLBaseVisitor<CompilationUnit>() {
                             .stream()
                             .map { it.text }
                             .collect(Collectors.toSet()),
-                    members = ctx.moduleMemberDeclaration().map { it.accept(ModuleMemberBuilder) }
+                    members = ctx.moduleMembersDeclaration().accept(ModuleMembersBuilder)
             )
 
 }

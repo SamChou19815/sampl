@@ -12,7 +12,7 @@ internal object ModuleBuilder : PLBaseVisitor<Module>() {
     override fun visitModuleDeclaration(ctx: PLParser.ModuleDeclarationContext): Module =
             Module(
                     name = ctx.UpperIdentifier().text,
-                    members = ctx.moduleMemberDeclaration().map { it.accept(ModuleMemberBuilder) }
+                    members = ctx.moduleMembersDeclaration().accept(ModuleMembersBuilder)
             )
 
 }

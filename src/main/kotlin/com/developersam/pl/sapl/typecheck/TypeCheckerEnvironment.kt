@@ -1,11 +1,15 @@
 package com.developersam.pl.sapl.typecheck
 
+import com.developersam.fp.FpMap
+import com.developersam.pl.sapl.ast.TypeExprInDeclaration
 import com.developersam.pl.sapl.ast.TypeIdentifier
-import com.developersam.pl.sapl.environment.Environment
 
 internal data class TypeCheckerEnvironment(
         val currentModuleTracker: CurrentModuleTracker,
-        val typesEnvironment: Environment<TypeIdentifier>
+        val upperLevelTypeDefinitions: FpMap<TypeIdentifier, TypeExprInDeclaration>,
+        val currentLevelTypeDefinitions: FpMap<TypeIdentifier, TypeExprInDeclaration>,
+        val upperLevelTypeEnvironment: FpMap<String, TypeIdentifier>,
+        val currentLevelTypeEnvironment: FpMap<String, TypeIdentifier>
 ) {
 
     fun enterSubModule(subModuleName: String): TypeCheckerEnvironment {

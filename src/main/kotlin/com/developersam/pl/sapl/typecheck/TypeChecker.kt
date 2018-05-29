@@ -1,7 +1,7 @@
 package com.developersam.pl.sapl.typecheck
 
+import com.developersam.fp.FpMap
 import com.developersam.pl.sapl.ast.Module
-import com.developersam.pl.sapl.environment.FunctionalEnvironment
 
 /**
  * [TypeChecker] defines how a type checker should work.
@@ -15,10 +15,12 @@ internal object TypeChecker {
      * unchecked exception.
      */
     fun typeCheck(module: Module) {
-
         val environment = TypeCheckerEnvironment(
                 currentModuleTracker = CurrentModuleTracker(module.name),
-                typesEnvironment = FunctionalEnvironment.getEmpty()
+                upperLevelTypeDefinitions = FpMap.empty(),
+                currentLevelTypeDefinitions = FpMap.empty(),
+                upperLevelTypeEnvironment = FpMap.empty(),
+                currentLevelTypeEnvironment = FpMap.empty()
         )
         TypeCheckerVisitor(environment = environment).visit(module = module)
     }

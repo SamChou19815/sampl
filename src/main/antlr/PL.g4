@@ -2,20 +2,27 @@ grammar PL;
 
 import PLLexerPart;
 
-compilationUnit : importDeclaration? moduleMemberDeclaration* EOF;
+compilationUnit : importDeclaration? moduleMembersDeclaration EOF;
 
 importDeclaration : IMPORT LBRACE UpperIdentifier (COMMA UpperIdentifier)* RBRACE;
 
-moduleDeclaration : MODULE UpperIdentifier LBRACE moduleMemberDeclaration* RBRACE;
+moduleDeclaration : MODULE UpperIdentifier LBRACE moduleMembersDeclaration RBRACE;
 
-moduleMemberDeclaration
-    : moduleDeclaration # NestedModuleDeclaration
-    | PRIVATE? TYPE typeIdentifier ASSIGN typeExprInDeclaration # ModuleTypeDeclaration
-    | PRIVATE? LET LowerIdentifier ASSIGN expression # ModuleConstantDeclaration
-    | PRIVATE? LET LowerIdentifier genericsDeclaration?
-          argumentDeclaration+ typeAnnotation
-      ASSIGN expression # ModuleFunctionDeclaration
+moduleMembersDeclaration:
+    moduleTypeDeclaration* // first type definitions
+    moduleConstantDeclaration* // then constant definitions
+    moduleFunctionDeclaration* // then function definitions
+    moduleDeclaration* // finally nested module definitions
     ;
+
+moduleTypeDeclaration: TYPE typeIdentifier ASSIGN typeExprInDeclaration;
+
+moduleConstantDeclaration: PRIVATE? LET LowerIdentifier ASSIGN expression;
+
+moduleFunctionDeclaration:
+    PRIVATE? LET LowerIdentifier genericsDeclaration?
+        argumentDeclaration+ typeAnnotation
+    ASSIGN expression;
 
 typeExprInAnnotation
     : LPAREN typeExprInAnnotation RPAREN
