@@ -45,9 +45,9 @@ internal class TypeChecker(
 
     private fun typeCheckConstant(env: TypeCheckerEnvironment,
                                   constantMember: ModuleConstantMember): TypeCheckerEnvironment =
-            env.copy(currentLevelTypeEnvironment = env.currentLevelTypeEnvironment.put(
-                    key = constantMember.identifier,
-                    value = constantMember.expr.inferType(environment = env)
-            ))
+            env.updateTypeInformation(
+                    variable = constantMember.identifier,
+                    typeInfo = constantMember.expr.inferType(environment = env)
+            )
 
 }

@@ -2,9 +2,11 @@ package com.developersam.pl.sapl.ast
 
 import com.developersam.pl.sapl.ast.BinaryOperator.*
 import com.developersam.pl.sapl.exceptions.ShadowedNameError
+import com.developersam.pl.sapl.exceptions.TooManyArgumentsError
 import com.developersam.pl.sapl.exceptions.UndefinedIdentifierError
 import com.developersam.pl.sapl.exceptions.UnexpectedTypeError
 import com.developersam.pl.sapl.typecheck.TypeCheckerEnvironment
+import com.developersam.pl.sapl.util.toFunctionTypeExpr
 
 /**
  * [Expression] represents a set of supported expression.
@@ -50,7 +52,38 @@ internal data class FunctionApplicationExpr(
 ) : Expression() {
 
     override fun inferType(environment: TypeCheckerEnvironment): TypeInformation {
-        TODO()
+        val functionType = functionExpr.inferType(environment = environment)
+        val typeExpr = functionType.typeExpr
+        return when (typeExpr) {
+            is SingleIdentifierTypeInAnnotation -> throw UnexpectedTypeError(
+                    expectedType = "<function>", actualType = functionType
+            )
+            is FunctionTypeInAnnotation -> {
+                var expectedArg: TypeExprInAnnotation? = typeExpr.argumentType
+                var returnType = typeExpr.returnType
+                for (expr in arguments) {
+                    val expType = TypeInformation(
+                            typeExpr = expectedArg ?: throw TooManyArgumentsError(),
+                            genericInfo = functionType.genericInfo
+                    )
+                    val exprType = expr.inferType(environment = environment)
+                    if (expType != exprType) {
+                        throw UnexpectedTypeError(expectedType = expType, actualType = exprType)
+                    }
+                    val r = returnType
+                    when (r) {
+                        is SingleIdentifierTypeInAnnotation -> {
+                            expectedArg = null
+                        }
+                        is FunctionTypeInAnnotation -> {
+                            expectedArg = r.argumentType
+                            returnType = r.returnType
+                        }
+                    }
+                }
+                TypeInformation(typeExpr = returnType, genericInfo = functionType.genericInfo)
+            }
+        }
     }
 
 }
@@ -157,16 +190,14 @@ internal data class LetExpr(
         val identifier: String, val e1: Expression, val e2: Expression
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeInformation {
-        if (environment.getTypeInformation(variable = identifier) != null) {
-            throw ShadowedNameError(shadowedName = identifier)
-        }
-        val varType = e1.inferType(environment = environment)
-        val newTypeEnv =
-                environment.currentLevelTypeEnvironment.put(key = identifier, value = varType)
-        val newTypeCheckEnv = environment.copy(currentLevelTypeEnvironment = newTypeEnv)
-        return e2.inferType(environment = newTypeCheckEnv)
-    }
+    override fun inferType(environment: TypeCheckerEnvironment): TypeInformation =
+            if (environment.getTypeInformation(variable = identifier) == null) {
+                e2.inferType(environment = environment.updateTypeInformation(
+                        variable = identifier, typeInfo = e1.inferType(environment = environment)
+                ))
+            } else {
+                throw ShadowedNameError(shadowedName = identifier)
+            }
 
 }
 
@@ -180,6 +211,9 @@ internal data class FunctionExpr(
 ) : Expression() {
 
     override fun inferType(environment: TypeCheckerEnvironment): TypeInformation {
+        val functionDeclaredType = toFunctionTypeExpr(
+                argumentTypes = arguments.map { it.second }, returnType = returnType
+        )
         TODO()
     }
 
@@ -253,13 +287,9 @@ internal data class TryCatchFinallyExpr(
 
     override fun inferType(environment: TypeCheckerEnvironment): TypeInformation {
         val tryType = tryExpr.inferType(environment = environment)
-        val catchType = catchHandler.inferType(
-                environment = environment.copy(
-                        currentLevelTypeEnvironment = environment.currentLevelTypeEnvironment.put(
-                                key = exception, value = stringTypeInfo
-                        )
-                )
-        )
+        val catchType = catchHandler.inferType(environment = environment.updateTypeInformation(
+                variable = exception, typeInfo = stringTypeInfo
+        ))
         if (tryType != catchType) {
             throw UnexpectedTypeError(expectedType = tryType, actualType = catchType)
         }

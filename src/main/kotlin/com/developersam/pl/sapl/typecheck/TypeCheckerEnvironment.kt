@@ -30,6 +30,15 @@ internal data class TypeCheckerEnvironment(
     fun getTypeInformation(variable: String): TypeInformation? =
             currentLevelTypeEnvironment[variable] ?: upperLevelTypeEnvironment[variable]
 
+    /**
+     * [updateTypeInformation] creates a new [TypeCheckerEnvironment] that has the current level
+     * type environment updated with a new pair [variable] to [typeInfo].
+     */
+    fun updateTypeInformation(variable: String, typeInfo: TypeInformation): TypeCheckerEnvironment =
+            copy(currentLevelTypeEnvironment = currentLevelTypeEnvironment.put(
+                    key = variable, value = typeInfo
+            ))
+
     fun enterSubModule(subModuleName: String): TypeCheckerEnvironment {
         TODO()
     }

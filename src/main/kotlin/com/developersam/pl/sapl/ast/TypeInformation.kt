@@ -6,4 +6,21 @@ package com.developersam.pl.sapl.ast
  */
 internal data class TypeInformation(
         val typeExpr: TypeExprInAnnotation, val genericInfo: Set<String> = emptySet()
-)
+) {
+
+    /**
+     * [intersect] will try to find a type that is the intersection of this type and the given
+     * type [another]. If no such type exists, it will return `null`.
+     */
+    infix fun intersect(another: TypeInformation): TypeInformation? {
+        TODO()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return super.equals(other)
+    }
+
+    override fun hashCode(): Int {
+        return super.hashCode()
+    }
+}
