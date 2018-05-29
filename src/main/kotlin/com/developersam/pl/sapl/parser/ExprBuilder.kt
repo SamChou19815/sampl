@@ -1,6 +1,7 @@
 package com.developersam.pl.sapl.parser
 
 import com.developersam.pl.sapl.antlr.PLBaseVisitor
+import com.developersam.pl.sapl.antlr.PLParser
 import com.developersam.pl.sapl.antlr.PLParser.BitExprContext
 import com.developersam.pl.sapl.antlr.PLParser.BooleanExprContext
 import com.developersam.pl.sapl.antlr.PLParser.ComparisonExprContext
@@ -17,7 +18,7 @@ import com.developersam.pl.sapl.antlr.PLParser.NotExprContext
 import com.developersam.pl.sapl.antlr.PLParser.StringConcatExprContext
 import com.developersam.pl.sapl.antlr.PLParser.TermExprContext
 import com.developersam.pl.sapl.antlr.PLParser.ThrowExprContext
-import com.developersam.pl.sapl.antlr.PLParser.TryCatchFinallyExprContext
+import com.developersam.pl.sapl.antlr.PLParser.TryCatchExprContext
 import com.developersam.pl.sapl.ast.BinaryExpr
 import com.developersam.pl.sapl.ast.BinaryOperator
 import com.developersam.pl.sapl.ast.Expression
@@ -28,7 +29,6 @@ import com.developersam.pl.sapl.ast.LetExpr
 import com.developersam.pl.sapl.ast.LiteralBuilder
 import com.developersam.pl.sapl.ast.LiteralExpr
 import com.developersam.pl.sapl.ast.MatchExpr
-import com.developersam.pl.sapl.ast.MemberAccessExpr
 import com.developersam.pl.sapl.ast.NotExpr
 import com.developersam.pl.sapl.ast.ThrowExpr
 import com.developersam.pl.sapl.ast.TryCatchFinallyExpr
@@ -46,15 +46,12 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
     override fun visitLiteralExpr(ctx: LiteralExprContext): Expression =
             LiteralExpr(literal = LiteralBuilder.from(text = ctx.Literal().text))
 
-    override fun visitIdentifierExpr(ctx: IdentifierExprContext): Expression {
-        val last = ctx.LowerIdentifier().text
-        val prefixes: List<TerminalNode> = ctx.UpperIdentifier()
-        return if (prefixes.isEmpty()) {
-            VariableIdentifierExpr(variable = last)
-        } else{
-            MemberAccessExpr(moduleChain = prefixes.map(TerminalNode::getText), member = last)
-        }
-    }
+    override fun visitIdentifierExpr(ctx: IdentifierExprContext): Expression =
+            VariableIdentifierExpr(
+                    variable = ctx.UpperIdentifier().joinToString(
+                            separator = ".", transform = TerminalNode::getText
+                    ) + "." + ctx.LowerIdentifier().text
+            )
 
     override fun visitFunctionApplicationExpr(ctx: FunctionApplicationExprContext): Expression {
         val exprContextList = ctx.expression()
@@ -147,12 +144,11 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
     override fun visitThrowExpr(ctx: ThrowExprContext): Expression =
             ThrowExpr(ctx.expression().accept(this))
 
-    override fun visitTryCatchFinallyExpr(ctx: TryCatchFinallyExprContext): Expression =
+    override fun visitTryCatchExpr(ctx: TryCatchExprContext): Expression =
             TryCatchFinallyExpr(
                     tryExpr = ctx.expression(0).accept(this),
                     exception = ctx.LowerIdentifier().text,
-                    catchHandler = ctx.expression(1).accept(this),
-                    finallyHandler = ctx.expression(2).accept(this)
+                    catchHandler = ctx.expression(1).accept(this)
             )
 
 }

@@ -65,7 +65,7 @@ expression
     | IF expression THEN expression ELSE expression # IfElseExpr
     | MATCH LowerIdentifier WITH patternToExpr+ # MatchExpr
     | THROW expression # ThrowExpr
-    | TRY expression CATCH LowerIdentifier expression (FINALLY expression)? # TryCatchFinallyExpr
+    | TRY expression CATCH LowerIdentifier expression # TryCatchExpr
     ;
 
 pattern

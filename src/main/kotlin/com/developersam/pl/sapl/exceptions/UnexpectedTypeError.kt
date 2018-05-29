@@ -1,6 +1,6 @@
 package com.developersam.pl.sapl.exceptions
 
-import com.developersam.pl.sapl.ast.TypeIdentifier
+import com.developersam.pl.sapl.ast.TypeInformation
 
 /**
  * [UnexpectedTypeError] reports an unexpected type during compile time type checking.
@@ -9,6 +9,6 @@ import com.developersam.pl.sapl.ast.TypeIdentifier
  * @param actualType actual type deduced from the expression.
  */
 internal class UnexpectedTypeError(
-        private val expectedType: TypeIdentifier,
-        private val actualType: TypeIdentifier
+        private val expectedType: TypeInformation,
+        private val actualType: TypeInformation
 ) : CompileTimeError(reason = "Unexpected type: $actualType. Expecting: $expectedType.")

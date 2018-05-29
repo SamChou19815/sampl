@@ -3,19 +3,6 @@ package com.developersam.pl.sapl.typecheck
 import com.developersam.fp.FpMap
 import com.developersam.pl.sapl.ast.Module
 import com.developersam.pl.sapl.ast.ModuleConstantMember
-import com.developersam.pl.sapl.ast.TypeExprInAnnotation
-import com.developersam.pl.sapl.ast.TypeExprInDeclaration
-import com.developersam.pl.sapl.ast.TypeIdentifier
-
-/**
- * [Def] is the collection of definition for type checking.
- */
-private typealias Def = FpMap<TypeIdentifier, TypeExprInDeclaration>
-
-/**
- * [Env] is the environment for type checking
- */
-private typealias Env = FpMap<String, TypeExprInAnnotation>
 
 /**
  * [TypeChecker] defines how a type checker should work.
@@ -29,30 +16,38 @@ internal class TypeChecker(
         parentTypeChecker: TypeChecker? = null
 ) {
 
-    private var currentModuleTracker: CurrentModuleTracker =
-            parentTypeChecker?.currentModuleTracker?.enterSubModule(subModuleName = module.name)
-                    ?: CurrentModuleTracker(module.name)
-    private var parentTypeDefinitions: Def = TODO()
-    private val currentTypeDefinitions: Def
-    private var parentTypeEnvironment: Env = TODO()
-    private var currentTypeEnvironment: Env = FpMap.empty()
+    private val environment: TypeCheckerEnvironment
 
     init {
         val members = module.members
         // conflict checker
         members.noNameShadowingValidation()
-        // process type definitions
-        currentTypeDefinitions = members.typeMembers.fold(initial = FpMap.empty()) { acc, member ->
-            acc.put(key = member.identifier, value = member.declaration)
-        }
+        val environmentInit = TypeCheckerEnvironment(
+                currentModuleTracker = parentTypeChecker
+                        ?.environment?.currentModuleTracker
+                        ?.enterSubModule(subModuleName = module.name)
+                        ?: CurrentModuleTracker(topLevelModuleName = module.name),
+                currentLevelTypeDefinitions = members.typeMembers
+                        .fold(initial = FpMap.empty()) { acc, member ->
+                            acc.put(key = member.identifier, value = member.declaration)
+                        },
+                upperLevelTypeEnvironment = parentTypeChecker?.environment
+                        ?.upperLevelTypeEnvironment
+                        ?: FpMap.empty(),
+                currentLevelTypeEnvironment = FpMap.empty()
+        )
         // process constant definitions
-        val typeEnvAfterTypeCheckingConstants: Env = members.constantMembers.fold(
-                initial = FpMap.empty(), operation = ::typeCheckConstant)
+        val typeEnvAfterTypeCheckingConstants = members.constantMembers
+                .fold(initial = environmentInit, operation = ::typeCheckConstant)
+        // TODO
+        environment = typeEnvAfterTypeCheckingConstants
     }
 
-    private fun typeCheckConstant(env: Env, constantMember: ModuleConstantMember): Env {
-        constantMember.expr.inferType(environment = this)
-        TODO()
-    }
+    private fun typeCheckConstant(env: TypeCheckerEnvironment,
+                                  constantMember: ModuleConstantMember): TypeCheckerEnvironment =
+            env.copy(currentLevelTypeEnvironment = env.currentLevelTypeEnvironment.put(
+                    key = constantMember.identifier,
+                    value = constantMember.expr.inferType(environment = env)
+            ))
 
 }

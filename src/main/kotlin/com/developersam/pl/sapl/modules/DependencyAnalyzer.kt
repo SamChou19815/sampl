@@ -2,7 +2,7 @@ package com.developersam.pl.sapl.modules
 
 import com.developersam.pl.sapl.ast.CompilationUnit
 import com.developersam.pl.sapl.ast.Module
-import com.developersam.pl.sapl.ast.NestedModule
+import com.developersam.pl.sapl.ast.ModuleMembers
 import com.developersam.pl.sapl.exceptions.CompileTimeError
 import com.developersam.pl.sapl.exceptions.CyclicDependencyError
 
@@ -39,9 +39,14 @@ internal object DependencyAnalyzer {
         // Construct a single module
         return Module(
                 name = "Main",
-                members = sequence.map { (name, unit) ->
-                    NestedModule(module = Module(name = name, members = unit.members))
-                }
+                members = ModuleMembers(
+                        typeMembers = emptyList(),
+                        constantMembers = emptyList(),
+                        functionMembers = emptyList(),
+                        nestedModuleMembers = sequence.map { (name, unit) ->
+                            Module(name = name, members = unit.members)
+                        }
+                )
         )
     }
 

@@ -6,8 +6,4 @@ package com.developersam.pl.sapl.ast
 internal data class Module(
         override val name: String,
         val members: ModuleMembers
-) : AstNode, ModuleMember {
-
-    override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(module = this)
-
-}
+) : ModuleMember

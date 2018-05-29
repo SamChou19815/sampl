@@ -5,7 +5,7 @@ import com.developersam.pl.sapl.antlr.PLParser
 import com.developersam.pl.sapl.ast.CompilationUnit
 import com.developersam.pl.sapl.ast.Module
 import com.developersam.pl.sapl.parser.CompilationUnitBuilder
-import com.developersam.pl.sapl.util.FileUtil
+import com.developersam.pl.sapl.util.getAllSourceFiles
 import org.antlr.v4.runtime.ANTLRInputStream
 import org.antlr.v4.runtime.CommonTokenStream
 import java.io.ByteArrayInputStream
@@ -46,7 +46,7 @@ internal object ModuleConstructor {
      * given [directory].
      */
     fun fromDirectory(directory: String): Module {
-        val compilationUnitMap = FileUtil.getAllSourceFiles(directory = directory)
+        val compilationUnitMap = getAllSourceFiles(directory = directory)
                 .parallelStream()
                 .collect(Collectors.toMap(File::nameWithoutExtension) { file ->
                     inputStreamToCompilationUnit(FileInputStream(file))

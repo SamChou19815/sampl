@@ -10,16 +10,12 @@ import org.antlr.v4.runtime.tree.TerminalNode
  */
 internal object TypeIdentifierBuilder : PLBaseVisitor<TypeIdentifier>() {
 
-    override fun visitTypeIdentifier(ctx: PLParser.TypeIdentifierContext): TypeIdentifier {
-        val ids = ctx.UpperIdentifier()
-        val l = ids.size
-        return TypeIdentifier(
-                moduleChain = ids.subList(fromIndex = 0, toIndex = l - 1)
-                        .map(TerminalNode::getText),
-                type = ids[l - 1].text,
-                genericsList = ctx.genericsBracket().typeIdentifier()
-                        .map(this::visitTypeIdentifier)
-        )
-    }
+    override fun visitTypeIdentifier(ctx: PLParser.TypeIdentifierContext): TypeIdentifier =
+            TypeIdentifier(
+                    type = ctx.UpperIdentifier()
+                            .joinToString(separator = ".", transform = TerminalNode::getText),
+                    genericsList = ctx.genericsBracket().typeIdentifier()
+                            .map(this::visitTypeIdentifier)
+            )
 
 }
