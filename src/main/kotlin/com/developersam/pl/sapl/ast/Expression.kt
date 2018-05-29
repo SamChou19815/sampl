@@ -1,6 +1,7 @@
 package com.developersam.pl.sapl.ast
 
 import com.developersam.pl.sapl.exceptions.UnexpectedTypeError
+import com.developersam.pl.sapl.typecheck.TypeChecker
 import com.developersam.pl.sapl.typecheck.TypeCheckerEnvironment
 
 /**
@@ -13,7 +14,7 @@ internal sealed class Expression : AstNode {
      *
      * If the type checking failed, it should throw [UnexpectedTypeError] to indicate what's wrong.
      */
-    abstract fun inferType(environment: TypeCheckerEnvironment): TypeIdentifier
+    abstract fun inferType(environment: TypeChecker): TypeExprInAnnotation
 
     final override fun <T> accept(visitor: AstVisitor<T>): T = visitor.visit(expression = this)
 
@@ -24,7 +25,7 @@ internal sealed class Expression : AstNode {
  */
 internal data class LiteralExpr(val literal: Literal) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeIdentifier =
+    override fun inferType(environment: TypeChecker): TypeExprInAnnotation =
             literal.inferredType
 
 }
@@ -34,7 +35,7 @@ internal data class LiteralExpr(val literal: Literal) : Expression() {
  */
 internal data class VariableIdentifierExpr(val variable: String) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeIdentifier {
+    override fun inferType(environment: TypeChecker): TypeExprInAnnotation {
         TODO()
     }
 
@@ -48,7 +49,7 @@ internal data class MemberAccessExpr(
         val moduleChain: List<String>, val member: String
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeIdentifier {
+    override fun inferType(environment: TypeChecker): TypeExprInAnnotation {
         TODO()
     }
 
@@ -62,7 +63,7 @@ internal data class FunctionApplicationExpr(
         val functionExpr: Expression, val arguments: List<Expression>
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeIdentifier {
+    override fun inferType(environment: TypeChecker): TypeExprInAnnotation {
         TODO()
     }
 
@@ -75,7 +76,7 @@ internal data class BinaryExpr(
         val left: Expression, val op: BinaryOperator, val right: Expression
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeIdentifier {
+    override fun inferType(environment: TypeChecker): TypeExprInAnnotation {
         TODO()
     }
 
@@ -86,7 +87,7 @@ internal data class BinaryExpr(
  */
 internal data class NotExpr(val expr: Expression) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeIdentifier {
+    override fun inferType(environment: TypeChecker): TypeExprInAnnotation {
         TODO()
     }
 
@@ -97,11 +98,10 @@ internal data class NotExpr(val expr: Expression) : Expression() {
  * `let` [identifier] (: [typeAnnotation]) `=` [e1] `;` [e2]
  */
 internal data class LetExpr(
-        val identifier: String, val typeAnnotation: TypeExprInAnnotation?,
-        val e1: Expression, val e2: Expression
+        val identifier: String, val e1: Expression, val e2: Expression
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeIdentifier {
+    override fun inferType(environment: TypeChecker): TypeExprInAnnotation {
         TODO()
     }
 
@@ -116,7 +116,7 @@ internal data class FunctionExpr(
         val returnType: TypeExprInAnnotation, val body: Expression
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeIdentifier {
+    override fun inferType(environment: TypeChecker): TypeExprInAnnotation {
         TODO()
     }
 
@@ -130,7 +130,7 @@ internal data class IfElseExpr(
         val condition: Expression, val e1: Expression, val e2: Expression
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeIdentifier {
+    override fun inferType(environment: TypeChecker): TypeExprInAnnotation {
         TODO()
     }
 
@@ -144,7 +144,7 @@ internal data class MatchExpr(
         val identifier: String, val matchingList: List<Pair<Pattern, Expression>>
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeIdentifier {
+    override fun inferType(environment: TypeChecker): TypeExprInAnnotation {
         TODO()
     }
 
@@ -155,7 +155,7 @@ internal data class MatchExpr(
  */
 internal data class ThrowExpr(val expr: Expression) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeIdentifier {
+    override fun inferType(environment: TypeChecker): TypeExprInAnnotation {
         TODO()
     }
 
@@ -171,7 +171,7 @@ internal data class TryCatchFinallyExpr(
         val catchHandler: Expression, val finallyHandler: Expression? = null
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeIdentifier {
+    override fun inferType(environment: TypeChecker): TypeExprInAnnotation {
         TODO()
     }
 

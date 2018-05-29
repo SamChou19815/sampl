@@ -114,7 +114,6 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
     override fun visitLetExpr(ctx: LetExprContext): Expression =
             LetExpr(
                     identifier = ctx.LowerIdentifier().text,
-                    typeAnnotation = ctx.typeAnnotation().accept(TypeExprInAnnotationBuilder),
                     e1 = ctx.expression(0).accept(this),
                     e2 = ctx.expression(1).accept(this)
             )

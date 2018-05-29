@@ -14,7 +14,7 @@ object PLCompiler {
      */
     private fun compile(module: Module) {
         // Type checking
-        TypeChecker.typeCheck(module = module)
+        TypeChecker(module = module)
         // TODO trans-pile to Java code
 
         // TODO invoke java compiler
@@ -24,13 +24,13 @@ object PLCompiler {
     /**
      * [compileFromSource] tries to compile all the source files in the given [code].
      */
-    fun compileFromSource(code: String) =
+    fun compileFromSource(code: String): Unit =
             compile(module = ModuleConstructor.fromSource(code = code))
 
     /**
      * [compileFromDirectory] tries to compile all the source files in the given [directory].
      */
-    fun compileFromDirectory(directory: String) =
+    fun compileFromDirectory(directory: String): Unit =
             compile(module = ModuleConstructor.fromDirectory(directory = directory))
 
 }

@@ -60,7 +60,7 @@ expression
     | expression BinaryLogicalOperator expression # BooleanExpr
     | expression ComparisonOperator expression # ComparisonExpr
     | NOT expression # NotExpr
-    | LET LowerIdentifier typeAnnotation? ASSIGN expression SEMICOLON expression # LetExpr
+    | LET LowerIdentifier ASSIGN expression SEMICOLON expression # LetExpr
     | FUNCTION argumentDeclaration+ typeAnnotation ARROW expression # FunExpr
     | IF expression THEN expression ELSE expression # IfElseExpr
     | MATCH LowerIdentifier WITH patternToExpr+ # MatchExpr

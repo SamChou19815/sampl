@@ -8,7 +8,7 @@ internal sealed class Literal{
     /**
      * [inferredType] reports the inferred type from the literal.
      */
-    abstract val inferredType: TypeIdentifier
+    abstract val inferredType: TypeExprInAnnotation
 
 }
 
@@ -16,42 +16,48 @@ internal sealed class Literal{
  * [UnitLiteral] is the literal for unit.
  */
 internal object UnitLiteral : Literal() {
-    override val inferredType: TypeIdentifier = PredefinedTypes.unitTypeIdentifier
+    override val inferredType: TypeExprInAnnotation =
+            SingleIdentifierTypeInAnnotation(identifier = PredefinedTypes.unitTypeIdentifier)
 }
 
 /**
  * [IntLiteral] is the literal for int with [value].
  */
 internal data class IntLiteral(val value: Long) : Literal() {
-    override val inferredType: TypeIdentifier = PredefinedTypes.intTypeIdentifier
+    override val inferredType: TypeExprInAnnotation =
+            SingleIdentifierTypeInAnnotation(identifier = PredefinedTypes.intTypeIdentifier)
 }
 
 /**
  * [FloatLiteral] is the literal for float with [value].
  */
 internal data class FloatLiteral(val value: Double) : Literal() {
-    override val inferredType: TypeIdentifier = PredefinedTypes.floatTypeIdentifier
+    override val inferredType: TypeExprInAnnotation =
+            SingleIdentifierTypeInAnnotation(identifier = PredefinedTypes.floatTypeIdentifier)
 }
 
 /**
  * [BoolLiteral] is the literal for bool with [value].
  */
 internal data class BoolLiteral(val value: Boolean) : Literal() {
-    override val inferredType: TypeIdentifier = PredefinedTypes.boolTypeIdentifier
+    override val inferredType: TypeExprInAnnotation =
+            SingleIdentifierTypeInAnnotation(identifier = PredefinedTypes.boolTypeIdentifier)
 }
 
 /**
  * [CharLiteral] is the literal for char with [value].
  */
 internal data class CharLiteral(val value: Char) : Literal() {
-    override val inferredType: TypeIdentifier = PredefinedTypes.charTypeIdentifier
+    override val inferredType: TypeExprInAnnotation =
+            SingleIdentifierTypeInAnnotation(identifier = PredefinedTypes.charTypeIdentifier)
 }
 
 /**
  * [StringLiteral] is the literal for string with [value].
  */
 internal data class StringLiteral(val value: String) : Literal() {
-    override val inferredType: TypeIdentifier = PredefinedTypes.stringTypeIdentifier
+    override val inferredType: TypeExprInAnnotation =
+            SingleIdentifierTypeInAnnotation(identifier = PredefinedTypes.stringTypeIdentifier)
 }
 
 /**
