@@ -6,11 +6,6 @@ import com.developersam.pl.sapl.ast.TypeIdentifier
 import com.developersam.pl.sapl.ast.TypeInformation
 
 /**
- * [TypeEnv] is the environment for type checking
- */
-internal typealias TypeEnv = FpMap<String, TypeInformation>
-
-/**
  * [TypeCheckerEnv] is the environment for type checking. It contains a set of currently determined
  * definitions to help type check the program.
  *
@@ -18,14 +13,16 @@ internal typealias TypeEnv = FpMap<String, TypeInformation>
  */
 internal data class TypeCheckerEnv(
         val typeDefinitions: FpMap<TypeIdentifier, TypeExprInDeclaration>,
-        val upperLevelTypeEnv: TypeEnv, val currentLevelTypeEnv: TypeEnv
+        val upperLevelTypeEnv: FpMap<String, TypeInformation>,
+        val currentLevelTypeEnv: FpMap<String, TypeInformation>
 ) {
 
     /**
      * [updateCurrent] creates a new [TypeCheckerEnv] with current level type environment updated
      * to [newValue].
      */
-    fun updateCurrent(newValue: TypeEnv): TypeCheckerEnv = copy(currentLevelTypeEnv = newValue)
+    fun updateCurrent(newValue: FpMap<String, TypeInformation>): TypeCheckerEnv =
+            copy(currentLevelTypeEnv = newValue)
 
     /**
      * [getTypeInfo] returns the optionally existing type information for the given

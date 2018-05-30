@@ -142,7 +142,10 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
             )
 
     override fun visitThrowExpr(ctx: ThrowExprContext): Expression =
-            ThrowExpr(ctx.expression().accept(this))
+            ThrowExpr(
+                    type = ctx.typeExprInAnnotation().accept(TypeExprInAnnotationBuilder),
+                    expr = ctx.expression().accept(this)
+            )
 
     override fun visitTryCatchExpr(ctx: TryCatchExprContext): Expression =
             TryCatchFinallyExpr(

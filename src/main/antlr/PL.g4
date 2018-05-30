@@ -40,7 +40,7 @@ typeExprInDeclaration
 
 // Some parser type fragment
 typeIdentifier : (UpperIdentifier DOT)* UpperIdentifier genericsBracket?;
-genericsBracket : LBRACKET UpperIdentifier (COMMA typeIdentifier)* RBRACKET;
+genericsBracket : LBRACKET typeIdentifier (COMMA typeIdentifier)* RBRACKET;
 variantConstructorDeclaration : UpperIdentifier (OF typeExprInAnnotation)?;
 typeAnnotation : COLON typeExprInAnnotation;
 annotatedVariable : LowerIdentifier typeAnnotation;
@@ -52,7 +52,7 @@ expression
     : LPAREN expression RPAREN # NestedExpr
     | Literal # LiteralExpr
     | (UpperIdentifier DOT)* LowerIdentifier # IdentifierExpr
-    | expression (LPAREN expression+ RPAREN) # FunctionApplicationExpr
+    | expression genericsBracket LPAREN expression+ RPAREN # FunctionApplicationExpr
     | expression BitOperator expression # BitExpr
     | expression FactorOperator expression # FactorExpr
     | expression TermOperator expression # TermExpr
@@ -64,7 +64,7 @@ expression
     | FUNCTION argumentDeclaration+ typeAnnotation ARROW expression # FunExpr
     | IF expression THEN expression ELSE expression # IfElseExpr
     | MATCH LowerIdentifier WITH patternToExpr+ # MatchExpr
-    | THROW expression # ThrowExpr
+    | THROW LBRACKET typeExprInAnnotation RBRACKET expression # ThrowExpr
     | TRY expression CATCH LowerIdentifier expression # TryCatchExpr
     ;
 

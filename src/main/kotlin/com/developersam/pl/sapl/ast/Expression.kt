@@ -214,7 +214,13 @@ internal data class FunctionExpr(
         val functionDeclaredType = toFunctionTypeExpr(
                 argumentTypes = arguments.map { it.second }, returnType = returnType
         )
-        TODO()
+        val bodyType = body.inferType(environment = environment)
+        if (returnType != bodyType.typeExpr) {
+            throw UnexpectedTypeError(
+                    expectedType = TypeInformation(typeExpr = returnType), actualType = bodyType
+            )
+        }
+        return TypeInformation(typeExpr = functionDeclaredType)
     }
 
 }
@@ -258,20 +264,16 @@ internal data class MatchExpr(
 
 /**
  * [ThrowExpr] represents the throw exception expression, where the thrown exception is [expr].
+ * The throw expression is coerced to have [type].
  */
-internal data class ThrowExpr(val expr: Expression) : Expression() {
+internal data class ThrowExpr(val type: TypeExprInAnnotation, val expr: Expression) : Expression() {
 
     override fun inferType(environment: TypeCheckerEnv): TypeInformation {
         val t = expr.inferType(environment = environment)
         if (t != stringTypeInfo) {
             throw UnexpectedTypeError(expectedType = stringTypeInfo, actualType = t)
         }
-        return TypeInformation(
-                typeExpr = SingleIdentifierTypeInAnnotation(
-                        identifier = TypeIdentifier(type = "_generic1")
-                ),
-                genericInfo = setOf(element = "_generic1")
-        )
+        return TypeInformation(typeExpr = type)
     }
 
 }
