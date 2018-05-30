@@ -1,13 +1,10 @@
 package com.developersam.pl.sapl.typecheck
 
 import com.developersam.fp.FpMap
-import com.developersam.pl.sapl.ast.FunctionTypeInAnnotation
 import com.developersam.pl.sapl.ast.Module
-import com.developersam.pl.sapl.ast.SingleIdentifierTypeInAnnotation
 import com.developersam.pl.sapl.ast.TypeInformation
 import com.developersam.pl.sapl.exceptions.CompileTimeError
 import com.developersam.pl.sapl.exceptions.UnexpectedTypeError
-import com.developersam.pl.sapl.util.toFunctionTypeExpr
 
 /**
  * [TypeChecker] defines a type checker that type checks modules.
@@ -45,30 +42,17 @@ internal object TypeChecker {
         )
         // process constant definitions
         val eWithC = members.constantMembers.fold(init) { env, m ->
-            env.updateTypeInfo(variable = m.identifier, typeInfo = m.expr.inferType(env))
+            env.put(variable = m.identifier, typeInfo = m.expr.inferType(env).asTypeInformation)
         }
         // process function definitions
-        val eWithF = eWithC.updateCurrent(
-                newValue = members.functionMembers.fold(eWithC.currentLevelTypeEnv) { env, m ->
+        val eWithF = eWithC.update(
+                newCurrent = members.functionMembers.fold(eWithC.currentLevelTypeEnv) { env, m ->
                     env.put(key = m.identifier, value = TypeInformation(
-                            typeExpr = toFunctionTypeExpr(
-                                    argumentTypes = m.arguments.map { it.second },
-                                    returnType = m.returnType
-                            ),
-                            genericInfo = m.genericsDeclaration
+                            typeExpr = m.functionType, genericInfo = m.genericsDeclaration
                     ))
                 })
         members.functionMembers.forEach { m ->
-            val expectedType = eWithF.getTypeInfo(variable = m.identifier)
-                    ?.typeExpr
-                    ?.let {
-                        when (it) {
-                            is SingleIdentifierTypeInAnnotation -> error(message = "Impossible")
-                            is FunctionTypeInAnnotation -> TypeInformation(
-                                    typeExpr = it.returnType, genericInfo = m.genericsDeclaration
-                            )
-                        }
-                    }!!
+            val expectedType = m.functionType.returnType
             val bodyType = m.body.inferType(environment = eWithF)
             if (expectedType != bodyType) {
                 throw UnexpectedTypeError(expectedType = expectedType, actualType = bodyType)
@@ -78,10 +62,10 @@ internal object TypeChecker {
         val envWithModules = members.nestedModuleMembers.fold(eWithF, ::typeCheckModule)
         // remove private members
         var envTemp = members.constantMembers.fold(envWithModules) { env, m ->
-            if (m.isPublic) env else env.removeTypeInfo(variable = m.identifier)
+            if (m.isPublic) env else env.remove(variable = m.identifier)
         }
         envTemp = members.functionMembers.fold(envTemp) { env, m ->
-            if (m.isPublic) env else env.removeTypeInfo(variable = m.identifier)
+            if (m.isPublic) env else env.remove(variable = m.identifier)
         }
         // move current level to upper level
         val newUpperLevel = envTemp.currentLevelTypeEnv

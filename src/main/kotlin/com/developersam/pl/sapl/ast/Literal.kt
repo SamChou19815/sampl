@@ -8,7 +8,7 @@ internal sealed class Literal {
     /**
      * [inferredType] reports the inferred type from the literal.
      */
-    abstract val inferredType: TypeInformation
+    abstract val inferredType: TypeExprInAnnotation
 
 }
 
@@ -16,42 +16,42 @@ internal sealed class Literal {
  * [UnitLiteral] is the literal for unit.
  */
 internal object UnitLiteral : Literal() {
-    override val inferredType: TypeInformation = unitTypeInfo
+    override val inferredType: TypeExprInAnnotation = unitTypeExpr
 }
 
 /**
  * [IntLiteral] is the literal for int with [value].
  */
 internal data class IntLiteral(val value: Long) : Literal() {
-    override val inferredType: TypeInformation = intTypeInfo
+    override val inferredType: TypeExprInAnnotation = intTypeExpr
 }
 
 /**
  * [FloatLiteral] is the literal for float with [value].
  */
 internal data class FloatLiteral(val value: Double) : Literal() {
-    override val inferredType: TypeInformation = floatTypeInfo
+    override val inferredType: TypeExprInAnnotation = floatTypeExpr
 }
 
 /**
  * [BoolLiteral] is the literal for bool with [value].
  */
 internal data class BoolLiteral(val value: Boolean) : Literal() {
-    override val inferredType: TypeInformation = boolTypeInfo
+    override val inferredType: TypeExprInAnnotation = boolTypeExpr
 }
 
 /**
  * [CharLiteral] is the literal for char with [value].
  */
 internal data class CharLiteral(val value: Char) : Literal() {
-    override val inferredType: TypeInformation = charTypeInfo
+    override val inferredType: TypeExprInAnnotation = charTypeExpr
 }
 
 /**
  * [StringLiteral] is the literal for string with [value].
  */
 internal data class StringLiteral(val value: String) : Literal() {
-    override val inferredType: TypeInformation = stringTypeInfo
+    override val inferredType: TypeExprInAnnotation = stringTypeExpr
 }
 
 /**

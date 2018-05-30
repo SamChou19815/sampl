@@ -1,6 +1,7 @@
 package com.developersam.pl.sapl.ast
 
 import com.developersam.pl.sapl.ast.BinaryOperator.*
+import com.developersam.pl.sapl.exceptions.GenericInfoWrongNumberOfArgumentsError
 import com.developersam.pl.sapl.exceptions.ShadowedNameError
 import com.developersam.pl.sapl.exceptions.TooManyArgumentsError
 import com.developersam.pl.sapl.exceptions.UndefinedIdentifierError
@@ -18,7 +19,7 @@ internal sealed class Expression {
      *
      * If the type checking failed, it should throw [UnexpectedTypeError] to indicate what's wrong.
      */
-    abstract fun inferType(environment: TypeCheckerEnv): TypeInformation
+    abstract fun inferType(environment: TypeCheckerEnv): TypeExprInAnnotation
 
 }
 
@@ -27,19 +28,32 @@ internal sealed class Expression {
  */
 internal data class LiteralExpr(val literal: Literal) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnv): TypeInformation =
+    override fun inferType(environment: TypeCheckerEnv): TypeExprInAnnotation =
             literal.inferredType
 
 }
 
 /**
  * [VariableIdentifierExpr] represents a [variable] identifier as an expression.
+ * It can only contain [genericInfo] which helps to determine the fixed type for this expression.
  */
-internal data class VariableIdentifierExpr(val variable: String) : Expression() {
+internal data class VariableIdentifierExpr(
+        val variable: String, private val genericInfo: List<TypeExprInAnnotation>
+) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnv): TypeInformation =
-            environment.getTypeInfo(variable = variable)
-                    ?: throw UndefinedIdentifierError(badIdentifier = variable)
+    override fun inferType(environment: TypeCheckerEnv): TypeExprInAnnotation {
+        val typeInfo = environment[variable]
+                ?: throw UndefinedIdentifierError(badIdentifier = variable)
+        val genericSymbolsToSubstitute = typeInfo.genericInfo
+        if (genericSymbolsToSubstitute.size != genericInfo.size) {
+            throw GenericInfoWrongNumberOfArgumentsError(
+                    expectedNumber = genericSymbolsToSubstitute.size,
+                    actualNumber = genericInfo.size
+            )
+        }
+        val substitutionMap = genericSymbolsToSubstitute.zip(genericInfo).toMap()
+        return typeInfo.typeExpr.substituteGenericInfo(map = substitutionMap)
+    }
 
 }
 
@@ -51,21 +65,17 @@ internal data class FunctionApplicationExpr(
         val functionExpr: Expression, val arguments: List<Expression>
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnv): TypeInformation {
+    override fun inferType(environment: TypeCheckerEnv): TypeExprInAnnotation {
         val functionType = functionExpr.inferType(environment = environment)
-        val typeExpr = functionType.typeExpr
-        return when (typeExpr) {
+        return when (functionType) {
             is SingleIdentifierTypeInAnnotation -> throw UnexpectedTypeError(
                     expectedType = "<function>", actualType = functionType
             )
             is FunctionTypeInAnnotation -> {
-                var expectedArg: TypeExprInAnnotation? = typeExpr.argumentType
-                var returnType = typeExpr.returnType
+                var expectedArg: TypeExprInAnnotation? = functionType.argumentType
+                var returnType = functionType.returnType
                 for (expr in arguments) {
-                    val expType = TypeInformation(
-                            typeExpr = expectedArg ?: throw TooManyArgumentsError(),
-                            genericInfo = functionType.genericInfo
-                    )
+                    val expType = expectedArg ?: throw TooManyArgumentsError()
                     val exprType = expr.inferType(environment = environment)
                     if (expType != exprType) {
                         throw UnexpectedTypeError(expectedType = expType, actualType = exprType)
@@ -81,7 +91,7 @@ internal data class FunctionApplicationExpr(
                         }
                     }
                 }
-                TypeInformation(typeExpr = returnType, genericInfo = functionType.genericInfo)
+                returnType
             }
         }
     }
@@ -95,39 +105,39 @@ internal data class BinaryExpr(
         val left: Expression, val op: BinaryOperator, val right: Expression
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnv): TypeInformation =
+    override fun inferType(environment: TypeCheckerEnv): TypeExprInAnnotation =
             when (op) {
                 SHL, SHR, USHR, XOR, LAND, LOR, MUL, DIV, MOD, PLUS, MINUS -> {
                     // int binary operators
                     val leftType = left.inferType(environment = environment)
-                    if (leftType != intTypeInfo) {
+                    if (leftType != intTypeExpr) {
                         throw UnexpectedTypeError(
-                                expectedType = intTypeInfo, actualType = leftType
+                                expectedType = intTypeExpr, actualType = leftType
                         )
                     }
                     val rightType = right.inferType(environment = environment)
-                    if (rightType == intTypeInfo) {
-                        intTypeInfo
+                    if (rightType == intTypeExpr) {
+                        intTypeExpr
                     } else {
                         throw UnexpectedTypeError(
-                                expectedType = intTypeInfo, actualType = rightType
+                                expectedType = intTypeExpr, actualType = rightType
                         )
                     }
                 }
                 F_MUL, F_DIV, F_PLUS, F_MINUS -> {
                     // float binary operators
                     val leftType = left.inferType(environment = environment)
-                    if (leftType != floatTypeInfo) {
+                    if (leftType != floatTypeExpr) {
                         throw UnexpectedTypeError(
-                                expectedType = floatTypeInfo, actualType = leftType
+                                expectedType = floatTypeExpr, actualType = leftType
                         )
                     }
                     val rightType = right.inferType(environment = environment)
-                    if (rightType == floatTypeInfo) {
-                        floatTypeInfo
+                    if (rightType == floatTypeExpr) {
+                        floatTypeExpr
                     } else {
                         throw UnexpectedTypeError(
-                                expectedType = floatTypeInfo, actualType = rightType
+                                expectedType = floatTypeExpr, actualType = rightType
                         )
                     }
                 }
@@ -135,10 +145,10 @@ internal data class BinaryExpr(
                     // comparison type operator
                     val leftType = left.inferType(environment = environment)
                     when (leftType) {
-                        intTypeInfo, floatTypeInfo, charTypeInfo, stringTypeInfo -> {
+                        intTypeExpr, floatTypeExpr, charTypeExpr, stringTypeExpr -> {
                             val rightType = right.inferType(environment = environment)
                             if (leftType == rightType) {
-                                boolTypeInfo
+                                boolTypeExpr
                             } else {
                                 throw UnexpectedTypeError(
                                         expectedType = leftType, actualType = rightType
@@ -146,7 +156,7 @@ internal data class BinaryExpr(
                             }
                         }
                         else -> throw UnexpectedTypeError(
-                                expectedType = intTypeInfo, actualType = leftType
+                                expectedType = intTypeExpr, actualType = leftType
                         )
                     }
                 }
@@ -155,7 +165,7 @@ internal data class BinaryExpr(
                     val leftType = left.inferType(environment = environment)
                     val rightType = right.inferType(environment = environment)
                     if (leftType == rightType) {
-                        boolTypeInfo
+                        boolTypeExpr
                     } else {
                         throw UnexpectedTypeError(
                                 expectedType = leftType, actualType = rightType
@@ -171,12 +181,12 @@ internal data class BinaryExpr(
  */
 internal data class NotExpr(val expr: Expression) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnv): TypeInformation {
+    override fun inferType(environment: TypeCheckerEnv): TypeExprInAnnotation {
         val t = expr.inferType(environment = environment)
-        if (t == boolTypeInfo) {
-            return boolTypeInfo
+        if (t == boolTypeExpr) {
+            return boolTypeExpr
         } else {
-            throw UnexpectedTypeError(expectedType = boolTypeInfo, actualType = t)
+            throw UnexpectedTypeError(expectedType = boolTypeExpr, actualType = t)
         }
     }
 
@@ -190,10 +200,11 @@ internal data class LetExpr(
         val identifier: String, val e1: Expression, val e2: Expression
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnv): TypeInformation =
-            if (environment.getTypeInfo(variable = identifier) == null) {
-                e2.inferType(environment = environment.updateTypeInfo(
-                        variable = identifier, typeInfo = e1.inferType(environment = environment)
+    override fun inferType(environment: TypeCheckerEnv): TypeExprInAnnotation =
+            if (environment[identifier] == null) {
+                e2.inferType(environment = environment.put(
+                        variable = identifier,
+                        typeInfo = e1.inferType(environment = environment).asTypeInformation
                 ))
             } else {
                 throw ShadowedNameError(shadowedName = identifier)
@@ -210,17 +221,15 @@ internal data class FunctionExpr(
         val returnType: TypeExprInAnnotation, val body: Expression
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnv): TypeInformation {
+    override fun inferType(environment: TypeCheckerEnv): TypeExprInAnnotation {
         val functionDeclaredType = toFunctionTypeExpr(
                 argumentTypes = arguments.map { it.second }, returnType = returnType
         )
         val bodyType = body.inferType(environment = environment)
-        if (returnType != bodyType.typeExpr) {
-            throw UnexpectedTypeError(
-                    expectedType = TypeInformation(typeExpr = returnType), actualType = bodyType
-            )
+        if (returnType != bodyType) {
+            throw UnexpectedTypeError(expectedType = returnType, actualType = bodyType)
         }
-        return TypeInformation(typeExpr = functionDeclaredType)
+        return functionDeclaredType
     }
 
 }
@@ -233,10 +242,10 @@ internal data class IfElseExpr(
         val condition: Expression, val e1: Expression, val e2: Expression
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnv): TypeInformation {
+    override fun inferType(environment: TypeCheckerEnv): TypeExprInAnnotation {
         val conditionType = condition.inferType(environment = environment)
-        if (conditionType != boolTypeInfo) {
-            throw UnexpectedTypeError(expectedType = boolTypeInfo, actualType = conditionType)
+        if (conditionType != boolTypeExpr) {
+            throw UnexpectedTypeError(expectedType = boolTypeExpr, actualType = conditionType)
         }
         val t1 = e1.inferType(environment = environment)
         val t2 = e2.inferType(environment = environment)
@@ -256,7 +265,7 @@ internal data class MatchExpr(
         val identifier: String, val matchingList: List<Pair<Pattern, Expression>>
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnv): TypeInformation {
+    override fun inferType(environment: TypeCheckerEnv): TypeExprInAnnotation {
         TODO()
     }
 
@@ -268,12 +277,12 @@ internal data class MatchExpr(
  */
 internal data class ThrowExpr(val type: TypeExprInAnnotation, val expr: Expression) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnv): TypeInformation {
+    override fun inferType(environment: TypeCheckerEnv): TypeExprInAnnotation {
         val t = expr.inferType(environment = environment)
-        if (t != stringTypeInfo) {
-            throw UnexpectedTypeError(expectedType = stringTypeInfo, actualType = t)
+        if (t != stringTypeExpr) {
+            throw UnexpectedTypeError(expectedType = stringTypeExpr, actualType = t)
         }
-        return TypeInformation(typeExpr = type)
+        return type
     }
 
 }
@@ -287,10 +296,10 @@ internal data class TryCatchFinallyExpr(
         val tryExpr: Expression, val exception: String, val catchHandler: Expression
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnv): TypeInformation {
+    override fun inferType(environment: TypeCheckerEnv): TypeExprInAnnotation {
         val tryType = tryExpr.inferType(environment = environment)
-        val catchType = catchHandler.inferType(environment = environment.updateTypeInfo(
-                variable = exception, typeInfo = stringTypeInfo
+        val catchType = catchHandler.inferType(environment = environment.put(
+                variable = exception, typeInfo = stringTypeExpr.asTypeInformation
         ))
         if (tryType != catchType) {
             throw UnexpectedTypeError(expectedType = tryType, actualType = catchType)

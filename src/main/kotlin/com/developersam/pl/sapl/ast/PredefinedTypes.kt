@@ -41,61 +41,30 @@ private val stringTypeIdentifier: TypeIdentifier = TypeIdentifier(type = "String
 /**
  * [unitTypeExpr] is the type expression for the unit type.
  */
-private val unitTypeExpr: TypeExprInAnnotation =
+internal val unitTypeExpr: TypeExprInAnnotation =
         SingleIdentifierTypeInAnnotation(identifier = unitTypeIdentifier)
 /**
  * [intTypeExpr] is the type expression for the integer type.
  */
-private val intTypeExpr: TypeExprInAnnotation =
+internal val intTypeExpr: TypeExprInAnnotation =
         SingleIdentifierTypeInAnnotation(identifier = intTypeIdentifier)
 /**
  * [floatTypeExpr] is the type expression for the float type.
  */
-private val floatTypeExpr: TypeExprInAnnotation =
+internal val floatTypeExpr: TypeExprInAnnotation =
         SingleIdentifierTypeInAnnotation(identifier = floatTypeIdentifier)
 /**
  * [boolTypeExpr] is the type expression for the bool type.
  */
-private val boolTypeExpr: TypeExprInAnnotation =
+internal val boolTypeExpr: TypeExprInAnnotation =
         SingleIdentifierTypeInAnnotation(identifier = boolTypeIdentifier)
 /**
  * [charTypeExpr] is the type expression for the char type.
  */
-private val charTypeExpr: TypeExprInAnnotation =
+internal val charTypeExpr: TypeExprInAnnotation =
         SingleIdentifierTypeInAnnotation(identifier = charTypeIdentifier)
 /**
  * [stringTypeExpr] is the type expression for the string type.
  */
-private val stringTypeExpr: TypeExprInAnnotation =
+internal val stringTypeExpr: TypeExprInAnnotation =
         SingleIdentifierTypeInAnnotation(identifier = stringTypeIdentifier)
-
-/*
- * -------------------------------------------------------------------------------
- * Part 3: Type Information
- * -------------------------------------------------------------------------------
- */
-
-/**
- * [unitTypeInfo] is the type information for the unit type.
- */
-internal val unitTypeInfo: TypeInformation = TypeInformation(typeExpr = unitTypeExpr)
-/**
- * [intTypeInfo] is the type information for the integer type.
- */
-internal val intTypeInfo: TypeInformation = TypeInformation(typeExpr = intTypeExpr)
-/**
- * [floatTypeInfo] is the type information for the float type.
- */
-internal val floatTypeInfo: TypeInformation = TypeInformation(typeExpr = floatTypeExpr)
-/**
- * [boolTypeInfo] is the type information for the bool type.
- */
-internal val boolTypeInfo: TypeInformation = TypeInformation(typeExpr = boolTypeExpr)
-/**
- * [charTypeInfo] is the type information for the char type.
- */
-internal val charTypeInfo: TypeInformation = TypeInformation(typeExpr = charTypeExpr)
-/**
- * [stringTypeInfo] is the type information for the string type.
- */
-internal val stringTypeInfo: TypeInformation = TypeInformation(typeExpr = stringTypeExpr)

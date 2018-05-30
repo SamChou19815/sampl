@@ -1,6 +1,7 @@
 package com.developersam.pl.sapl.ast
 
 import com.developersam.pl.sapl.exceptions.ShadowedNameError
+import com.developersam.pl.sapl.util.toFunctionTypeExpr
 
 /**
  * [ModuleMembers] contains collections of different types of module members,
@@ -21,7 +22,7 @@ internal data class ModuleMembers(
      */
     fun noNameShadowingValidation() {
         val nameSetAccumulator: HashSet<String> = hashSetOf()
-        val validator: (ModuleMember) -> Unit =  { member ->
+        val validator: (ModuleMember) -> Unit = { member ->
             val name = member.name
             if (!nameSetAccumulator.add(name)) {
                 throw ShadowedNameError(shadowedName = name)
@@ -67,5 +68,15 @@ internal data class ModuleFunctionMember(
         val arguments: List<Pair<String, TypeExprInAnnotation>>,
         val returnType: TypeExprInAnnotation, val body: Expression
 ) : ModuleMember {
+
     override val name: String = identifier
+
+    /**
+     * [functionType] reports the functional type of itself.
+     */
+    val functionType: FunctionTypeInAnnotation = toFunctionTypeExpr(
+            argumentTypes = arguments.map { it.second },
+            returnType = returnType
+    )
+
 }

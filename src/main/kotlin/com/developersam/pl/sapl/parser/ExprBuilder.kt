@@ -48,9 +48,13 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
 
     override fun visitIdentifierExpr(ctx: IdentifierExprContext): Expression =
             VariableIdentifierExpr(
-                    variable = ctx.UpperIdentifier().joinToString(
-                            separator = ".", transform = TerminalNode::getText
-                    ) + "." + ctx.LowerIdentifier().text
+                    variable = ctx.UpperIdentifier()
+                            .joinToString(separator = ".", transform = TerminalNode::getText)
+                            + "." + ctx.LowerIdentifier().text,
+                    genericInfo = ctx.genericsBracket()
+                            ?.typeIdentifier()
+                            ?.map { it.accept(TypeExprInAnnotationBuilder) }
+                            ?: emptyList()
             )
 
     override fun visitFunctionApplicationExpr(ctx: FunctionApplicationExprContext): Expression {

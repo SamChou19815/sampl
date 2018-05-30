@@ -8,9 +8,11 @@ import com.developersam.pl.sapl.ast.TypeExprInAnnotation
  * and [returnType] to a single BST form.
  */
 internal fun toFunctionTypeExpr(argumentTypes: List<TypeExprInAnnotation>,
-                                returnType: TypeExprInAnnotation): TypeExprInAnnotation {
-    var t = returnType
-    for (i in argumentTypes.size - 1 downTo 0) {
+                                returnType: TypeExprInAnnotation): FunctionTypeInAnnotation {
+    var t = FunctionTypeInAnnotation(
+            argumentType = argumentTypes[argumentTypes.size - 1], returnType = returnType
+    )
+    for (i in argumentTypes.size - 2 downTo 0) {
         t = FunctionTypeInAnnotation(argumentType = argumentTypes[i], returnType = t)
     }
     return t

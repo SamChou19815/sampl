@@ -51,8 +51,8 @@ genericsDeclaration : LBRACKET UpperIdentifier (COMMA UpperIdentifier)* RBRACKET
 expression
     : LPAREN expression RPAREN # NestedExpr
     | Literal # LiteralExpr
-    | (UpperIdentifier DOT)* LowerIdentifier # IdentifierExpr
-    | expression genericsBracket LPAREN expression+ RPAREN # FunctionApplicationExpr
+    | (UpperIdentifier DOT)* LowerIdentifier genericsBracket # IdentifierExpr
+    | expression LPAREN expression+ RPAREN # FunctionApplicationExpr
     | expression BitOperator expression # BitExpr
     | expression FactorOperator expression # FactorExpr
     | expression TermOperator expression # TermExpr

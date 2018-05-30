@@ -1,5 +1,6 @@
 package com.developersam.pl.sapl.exceptions
 
+import com.developersam.pl.sapl.ast.TypeExprInAnnotation
 import com.developersam.pl.sapl.ast.TypeInformation
 
 /**
@@ -10,13 +11,13 @@ import com.developersam.pl.sapl.ast.TypeInformation
  */
 internal class UnexpectedTypeError(
         private val expectedType: String,
-        private val actualType: TypeInformation
+        private val actualType: TypeExprInAnnotation
 ) : CompileTimeError(reason = "Unexpected type: $actualType. Expecting: $expectedType.") {
 
     /**
-     * Construct the same error but with [expectedType] as an [TypeInformation].
+     * Construct the same error but with [expectedType] as an [TypeExprInAnnotation].
      */
-    constructor(expectedType: TypeInformation, actualType: TypeInformation) : this(
+    constructor(expectedType: TypeExprInAnnotation, actualType: TypeExprInAnnotation) : this(
             expectedType = expectedType.toString(), actualType = actualType
     )
 
