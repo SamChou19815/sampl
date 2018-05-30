@@ -5,7 +5,7 @@ package com.developersam.pl.sapl.ast
  * set [genericInfo] to tell whether any arguments in the type are generic.
  */
 internal data class TypeInformation(
-        val typeExpr: TypeExprInAnnotation, val genericInfo: Set<String> = emptySet()
+        val typeExpr: TypeExprInAnnotation, val genericInfo: List<String> = emptyList()
 ) {
 
     /**

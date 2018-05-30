@@ -63,7 +63,7 @@ internal data class ModuleConstantMember(
  */
 internal data class ModuleFunctionMember(
         val isPublic: Boolean, val identifier: String,
-        val genericsDeclaration: Set<String>,
+        val genericsDeclaration: List<String>,
         val arguments: List<Pair<String, TypeExprInAnnotation>>,
         val returnType: TypeExprInAnnotation, val body: Expression
 ) : ModuleMember {

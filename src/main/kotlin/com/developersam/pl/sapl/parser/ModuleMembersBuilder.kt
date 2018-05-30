@@ -31,7 +31,7 @@ internal object ModuleMembersBuilder : PLBaseVisitor<M>() {
                     isPublic = c.PRIVATE() == null,
                     identifier = c.LowerIdentifier().text,
                     genericsDeclaration = c.genericsDeclaration()
-                            ?.accept(GenericsDeclarationBuilder) ?: emptySet(),
+                            ?.UpperIdentifier()?.map { it.text } ?: emptyList(),
                     arguments = c.argumentDeclaration()
                             .map { it.accept(ArgumentDeclarationBuilder) },
                     returnType = c.typeAnnotation().typeExprInAnnotation()
