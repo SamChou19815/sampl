@@ -5,7 +5,7 @@ import com.developersam.pl.sapl.exceptions.ShadowedNameError
 import com.developersam.pl.sapl.exceptions.TooManyArgumentsError
 import com.developersam.pl.sapl.exceptions.UndefinedIdentifierError
 import com.developersam.pl.sapl.exceptions.UnexpectedTypeError
-import com.developersam.pl.sapl.typecheck.TypeCheckerEnvironment
+import com.developersam.pl.sapl.typecheck.TypeCheckerEnv
 import com.developersam.pl.sapl.util.toFunctionTypeExpr
 
 /**
@@ -18,7 +18,7 @@ internal sealed class Expression {
      *
      * If the type checking failed, it should throw [UnexpectedTypeError] to indicate what's wrong.
      */
-    abstract fun inferType(environment: TypeCheckerEnvironment): TypeInformation
+    abstract fun inferType(environment: TypeCheckerEnv): TypeInformation
 
 }
 
@@ -27,7 +27,7 @@ internal sealed class Expression {
  */
 internal data class LiteralExpr(val literal: Literal) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeInformation =
+    override fun inferType(environment: TypeCheckerEnv): TypeInformation =
             literal.inferredType
 
 }
@@ -37,8 +37,8 @@ internal data class LiteralExpr(val literal: Literal) : Expression() {
  */
 internal data class VariableIdentifierExpr(val variable: String) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeInformation =
-            environment.getTypeInformation(variable = variable)
+    override fun inferType(environment: TypeCheckerEnv): TypeInformation =
+            environment.getTypeInfo(variable = variable)
                     ?: throw UndefinedIdentifierError(badIdentifier = variable)
 
 }
@@ -51,7 +51,7 @@ internal data class FunctionApplicationExpr(
         val functionExpr: Expression, val arguments: List<Expression>
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeInformation {
+    override fun inferType(environment: TypeCheckerEnv): TypeInformation {
         val functionType = functionExpr.inferType(environment = environment)
         val typeExpr = functionType.typeExpr
         return when (typeExpr) {
@@ -95,7 +95,7 @@ internal data class BinaryExpr(
         val left: Expression, val op: BinaryOperator, val right: Expression
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeInformation =
+    override fun inferType(environment: TypeCheckerEnv): TypeInformation =
             when (op) {
                 SHL, SHR, USHR, XOR, LAND, LOR, MUL, DIV, MOD, PLUS, MINUS -> {
                     // int binary operators
@@ -171,7 +171,7 @@ internal data class BinaryExpr(
  */
 internal data class NotExpr(val expr: Expression) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeInformation {
+    override fun inferType(environment: TypeCheckerEnv): TypeInformation {
         val t = expr.inferType(environment = environment)
         if (t == boolTypeInfo) {
             return boolTypeInfo
@@ -190,9 +190,9 @@ internal data class LetExpr(
         val identifier: String, val e1: Expression, val e2: Expression
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeInformation =
-            if (environment.getTypeInformation(variable = identifier) == null) {
-                e2.inferType(environment = environment.updateTypeInformation(
+    override fun inferType(environment: TypeCheckerEnv): TypeInformation =
+            if (environment.getTypeInfo(variable = identifier) == null) {
+                e2.inferType(environment = environment.updateTypeInfo(
                         variable = identifier, typeInfo = e1.inferType(environment = environment)
                 ))
             } else {
@@ -210,7 +210,7 @@ internal data class FunctionExpr(
         val returnType: TypeExprInAnnotation, val body: Expression
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeInformation {
+    override fun inferType(environment: TypeCheckerEnv): TypeInformation {
         val functionDeclaredType = toFunctionTypeExpr(
                 argumentTypes = arguments.map { it.second }, returnType = returnType
         )
@@ -227,7 +227,7 @@ internal data class IfElseExpr(
         val condition: Expression, val e1: Expression, val e2: Expression
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeInformation {
+    override fun inferType(environment: TypeCheckerEnv): TypeInformation {
         val conditionType = condition.inferType(environment = environment)
         if (conditionType != boolTypeInfo) {
             throw UnexpectedTypeError(expectedType = boolTypeInfo, actualType = conditionType)
@@ -250,7 +250,7 @@ internal data class MatchExpr(
         val identifier: String, val matchingList: List<Pair<Pattern, Expression>>
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeInformation {
+    override fun inferType(environment: TypeCheckerEnv): TypeInformation {
         TODO()
     }
 
@@ -261,7 +261,7 @@ internal data class MatchExpr(
  */
 internal data class ThrowExpr(val expr: Expression) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeInformation {
+    override fun inferType(environment: TypeCheckerEnv): TypeInformation {
         val t = expr.inferType(environment = environment)
         if (t != stringTypeInfo) {
             throw UnexpectedTypeError(expectedType = stringTypeInfo, actualType = t)
@@ -285,9 +285,9 @@ internal data class TryCatchFinallyExpr(
         val tryExpr: Expression, val exception: String, val catchHandler: Expression
 ) : Expression() {
 
-    override fun inferType(environment: TypeCheckerEnvironment): TypeInformation {
+    override fun inferType(environment: TypeCheckerEnv): TypeInformation {
         val tryType = tryExpr.inferType(environment = environment)
-        val catchType = catchHandler.inferType(environment = environment.updateTypeInformation(
+        val catchType = catchHandler.inferType(environment = environment.updateTypeInfo(
                 variable = exception, typeInfo = stringTypeInfo
         ))
         if (tryType != catchType) {

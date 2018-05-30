@@ -14,7 +14,7 @@ object PLCompiler {
      */
     private fun compile(module: Module) {
         // Type checking
-        TypeChecker(module = module)
+        TypeChecker.typeCheck(module = module)
         // TODO trans-pile to Java code
 
         // TODO invoke java compiler
