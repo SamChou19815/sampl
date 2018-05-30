@@ -12,9 +12,9 @@ import com.developersam.pl.sapl.ast.TypeInformation
  * @param
  */
 internal data class TypeCheckerEnv(
-        val typeDefinitions: FpMap<TypeIdentifier, TypeExprInDeclaration>,
-        val upperLevelTypeEnv: FpMap<String, TypeInformation>,
-        val currentLevelTypeEnv: FpMap<String, TypeInformation>
+        val typeDefinitions: FpMap<TypeIdentifier, TypeExprInDeclaration> = FpMap.empty(),
+        val upperLevelTypeEnv: FpMap<String, TypeInformation> = FpMap.empty(),
+        val currentLevelTypeEnv: FpMap<String, TypeInformation> = FpMap.empty()
 ) {
 
     /**
@@ -44,5 +44,12 @@ internal data class TypeCheckerEnv(
      */
     fun remove(variable: String): TypeCheckerEnv =
             update(newCurrent = currentLevelTypeEnv.remove(variable))
+
+    companion object {
+        /**
+         * [empty] is the empty [TypeCheckerEnv].
+         */
+        val empty: TypeCheckerEnv = TypeCheckerEnv()
+    }
 
 }

@@ -63,14 +63,13 @@ expression
     | LET LowerIdentifier ASSIGN expression SEMICOLON expression # LetExpr
     | FUNCTION argumentDeclaration+ typeAnnotation ARROW expression # FunExpr
     | IF expression THEN expression ELSE expression # IfElseExpr
-    | MATCH LowerIdentifier WITH patternToExpr+ # MatchExpr
+    | MATCH expression WITH patternToExpr+ # MatchExpr
     | THROW LBRACKET typeExprInAnnotation RBRACKET expression # ThrowExpr
     | TRY expression CATCH LowerIdentifier expression # TryCatchExpr
     ;
 
 pattern
-    : UNIT # UnitPattern
-    | UpperIdentifier LowerIdentifier # VariantPattern
+    : UpperIdentifier LowerIdentifier # VariantPattern
     | LowerIdentifier # VariablePattern
     | WILDCARD # WildcardPattern
     ;

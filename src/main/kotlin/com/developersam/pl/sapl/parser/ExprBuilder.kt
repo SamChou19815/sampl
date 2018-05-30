@@ -137,7 +137,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
 
     override fun visitMatchExpr(ctx: MatchExprContext): Expression =
             MatchExpr(
-                    identifier = ctx.LowerIdentifier().text,
+                    exprToMatch = ctx.expression().accept(this),
                     matchingList = ctx.patternToExpr().map { c ->
                         val pattern = c.pattern().accept(PatternBuilder)
                         val expr = c.expression().accept(this)

@@ -6,11 +6,6 @@ package com.developersam.pl.sapl.ast
 internal sealed class Pattern
 
 /**
- * [UnitPattern] represents the unit pattern.
- */
-internal object UnitPattern : Pattern()
-
-/**
  * [VariantPattern] represents the variant pattern with [variantIdentifier] and potentially an
  * [associatedVariable].
  */

@@ -2,10 +2,14 @@ package com.developersam.pl.sapl.ast
 
 import com.developersam.pl.sapl.ast.BinaryOperator.*
 import com.developersam.pl.sapl.exceptions.GenericInfoWrongNumberOfArgumentsError
+import com.developersam.pl.sapl.exceptions.NonExhaustivePatternMatchingError
 import com.developersam.pl.sapl.exceptions.ShadowedNameError
 import com.developersam.pl.sapl.exceptions.TooManyArgumentsError
 import com.developersam.pl.sapl.exceptions.UndefinedIdentifierError
 import com.developersam.pl.sapl.exceptions.UnexpectedTypeError
+import com.developersam.pl.sapl.exceptions.UnmatchableTypeError
+import com.developersam.pl.sapl.exceptions.UnusedPatternError
+import com.developersam.pl.sapl.exceptions.WrongPatternError
 import com.developersam.pl.sapl.typecheck.TypeCheckerEnv
 import com.developersam.pl.sapl.util.toFunctionTypeExpr
 
@@ -259,14 +263,69 @@ internal data class IfElseExpr(
 
 /**
  * [MatchExpr] represents the pattern matching expression, with a list of [matchingList] to match
- * against [identifier].
+ * against [exprToMatch].
  */
 internal data class MatchExpr(
-        val identifier: String, val matchingList: List<Pair<Pattern, Expression>>
+        val exprToMatch: Expression, val matchingList: List<Pair<Pattern, Expression>>
 ) : Expression() {
 
     override fun inferType(environment: TypeCheckerEnv): TypeExprInAnnotation {
-        TODO()
+        val typeToMatch = exprToMatch.inferType(environment = environment)
+        val typeIdentifier = (typeToMatch as? SingleIdentifierTypeInAnnotation)?.identifier
+                ?: throw UnmatchableTypeError(typeExpr = typeToMatch)
+        val typeDefinitionOpt = environment.typeDefinitions[typeIdentifier]
+                as? VariantTypeInDeclaration
+        val variantTypeDeclarations = typeDefinitionOpt ?.map?.toMutableMap()
+                ?: throw UnmatchableTypeError(typeExpr = typeToMatch)
+        var type: TypeExprInAnnotation? = null
+        for ((pattern, expr) in matchingList) {
+            if (variantTypeDeclarations.isEmpty()) {
+                throw UnusedPatternError(pattern = pattern)
+            }
+            val newEnv: TypeCheckerEnv = when (pattern) {
+                is VariantPattern -> {
+                    val patternId = pattern.variantIdentifier
+                    if (patternId !in variantTypeDeclarations) {
+                        throw WrongPatternError(patternId = patternId)
+                    }
+                    variantTypeDeclarations.remove(key = patternId)
+                    val associatedVarType = variantTypeDeclarations[patternId]
+                    if (pattern.associatedVariable == null && associatedVarType == null) {
+                        environment
+                    } else if (pattern.associatedVariable != null && associatedVarType != null) {
+                        environment.put(
+                                variable = pattern.associatedVariable,
+                                typeInfo = associatedVarType.asTypeInformation
+                        )
+                    } else {
+                        throw WrongPatternError(patternId = patternId)
+                    }
+                }
+                is VariablePattern -> {
+                    variantTypeDeclarations.clear()
+                    environment.put(
+                            variable = pattern.identifier, typeInfo = typeToMatch.asTypeInformation
+                    )
+                }
+                WildCardPattern -> {
+                    variantTypeDeclarations.clear()
+                    environment
+                }
+            }
+            val exprType = expr.inferType(environment = newEnv)
+            val knownType = type
+            if (knownType == null) {
+                type = exprType
+            } else {
+                if (knownType != exprType) {
+                    throw UnexpectedTypeError(expectedType = knownType, actualType = exprType)
+                }
+            }
+        }
+        if (variantTypeDeclarations.isNotEmpty()) {
+            throw NonExhaustivePatternMatchingError()
+        }
+        return type ?: throw NonExhaustivePatternMatchingError()
     }
 
 }

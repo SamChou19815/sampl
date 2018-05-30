@@ -17,11 +17,7 @@ internal object TypeChecker {
      * If it does not type check, it will throw an [CompileTimeError]
      */
     fun typeCheck(module: Module) {
-        typeCheckModule(module = module, e = TypeCheckerEnv(
-                typeDefinitions = FpMap.empty(),
-                currentLevelTypeEnv = FpMap.empty(),
-                upperLevelTypeEnv = FpMap.empty()
-        ))
+        typeCheckModule(module = module, e = TypeCheckerEnv.empty)
     }
 
     /**
@@ -30,28 +26,32 @@ internal object TypeChecker {
      */
     private fun typeCheckModule(e: TypeCheckerEnv, module: Module): TypeCheckerEnv {
         // conflict checker
+        module.noNameShadowingValidation()
+        // members
         val members = module.members
-        members.noNameShadowingValidation()
+        val typeMembers = members.typeMembers
+        val constantMembers = members.constantMembers
+        val functionMembers = members.functionMembers
+        val nestedModuleMembers = members.nestedModuleMembers
         // processed type declarations
         val init = TypeCheckerEnv(
-                typeDefinitions = members.typeMembers.fold(e.typeDefinitions) { acc, m ->
+                typeDefinitions = typeMembers.fold(e.typeDefinitions) { acc, m ->
                     acc.put(key = m.identifier, value = m.declaration)
                 },
-                upperLevelTypeEnv = e.upperLevelTypeEnv,
-                currentLevelTypeEnv = FpMap.empty()
+                upperLevelTypeEnv = e.upperLevelTypeEnv
         )
         // process constant definitions
-        val eWithC = members.constantMembers.fold(init) { env, m ->
+        val eWithC = constantMembers.fold(init) { env, m ->
             env.put(variable = m.identifier, typeInfo = m.expr.inferType(env).asTypeInformation)
         }
         // process function definitions
         val eWithF = eWithC.update(
-                newCurrent = members.functionMembers.fold(eWithC.currentLevelTypeEnv) { env, m ->
+                newCurrent = functionMembers.fold(eWithC.currentLevelTypeEnv) { env, m ->
                     env.put(key = m.identifier, value = TypeInformation(
                             typeExpr = m.functionType, genericInfo = m.genericsDeclaration
                     ))
                 })
-        members.functionMembers.forEach { m ->
+        functionMembers.forEach { m ->
             val expectedType = m.functionType.returnType
             val bodyType = m.body.inferType(environment = eWithF)
             if (expectedType != bodyType) {
@@ -59,12 +59,12 @@ internal object TypeChecker {
             }
         }
         // process nested modules
-        val envWithModules = members.nestedModuleMembers.fold(eWithF, ::typeCheckModule)
+        val envWithModules = nestedModuleMembers.fold(eWithF, ::typeCheckModule)
         // remove private members
-        var envTemp = members.constantMembers.fold(envWithModules) { env, m ->
+        var envTemp = constantMembers.fold(envWithModules) { env, m ->
             if (m.isPublic) env else env.remove(variable = m.identifier)
         }
-        envTemp = members.functionMembers.fold(envTemp) { env, m ->
+        envTemp = functionMembers.fold(envTemp) { env, m ->
             if (m.isPublic) env else env.remove(variable = m.identifier)
         }
         // move current level to upper level

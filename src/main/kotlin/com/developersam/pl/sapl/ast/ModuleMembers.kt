@@ -12,29 +12,7 @@ internal data class ModuleMembers(
         val constantMembers: List<ModuleConstantMember>,
         val functionMembers: List<ModuleFunctionMember>,
         val nestedModuleMembers: List<Module>
-) {
-
-    /**
-     * [noNameShadowingValidation] validates that the members collection has no name shadowing.
-     *
-     * @return [Unit]
-     * @throws ShadowedNameError if there is a detected shadowed name.
-     */
-    fun noNameShadowingValidation() {
-        val nameSetAccumulator: HashSet<String> = hashSetOf()
-        val validator: (ModuleMember) -> Unit = { member ->
-            val name = member.name
-            if (!nameSetAccumulator.add(name)) {
-                throw ShadowedNameError(shadowedName = name)
-            }
-        }
-        typeMembers.forEach(validator)
-        constantMembers.forEach(validator)
-        functionMembers.forEach(validator)
-        nestedModuleMembers.forEach(validator)
-    }
-
-}
+)
 
 /**
  * [ModuleTypeMember] represents a type declaration of the form:
