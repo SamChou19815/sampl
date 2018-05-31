@@ -1,6 +1,5 @@
 package com.developersam.pl.sapl.ast.decorated
 
-import com.developersam.pl.sapl.ast.FunctionTypeInAnnotation
 import com.developersam.pl.sapl.ast.TypeExprInAnnotation
 
 /**
@@ -14,7 +13,7 @@ internal data class DecoratedModuleFunctionMember(
         val genericsDeclaration: List<String>,
         val arguments: List<Pair<String, TypeExprInAnnotation>>,
         val returnType: TypeExprInAnnotation, val body: DecoratedExpression,
-        override val type: FunctionTypeInAnnotation
+        override val type: TypeExprInAnnotation.Function
 ) : DecoratedModuleMember {
 
     override val name: String = identifier

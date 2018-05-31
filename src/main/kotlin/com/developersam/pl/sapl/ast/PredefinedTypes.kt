@@ -41,29 +41,29 @@ private val stringTypeIdentifier: TypeIdentifier = TypeIdentifier(type = "String
  * [unitTypeExpr] is the type expression for the unit type.
  */
 internal val unitTypeExpr: TypeExprInAnnotation =
-        SingleIdentifierTypeInAnnotation(identifier = unitTypeIdentifier)
+        TypeExprInAnnotation.SingleIdentifier(identifier = unitTypeIdentifier)
 /**
  * [intTypeExpr] is the type expression for the integer type.
  */
 internal val intTypeExpr: TypeExprInAnnotation =
-        SingleIdentifierTypeInAnnotation(identifier = intTypeIdentifier)
+        TypeExprInAnnotation.SingleIdentifier(identifier = intTypeIdentifier)
 /**
  * [floatTypeExpr] is the type expression for the float type.
  */
 internal val floatTypeExpr: TypeExprInAnnotation =
-        SingleIdentifierTypeInAnnotation(identifier = floatTypeIdentifier)
+        TypeExprInAnnotation.SingleIdentifier(identifier = floatTypeIdentifier)
 /**
  * [boolTypeExpr] is the type expression for the bool type.
  */
 internal val boolTypeExpr: TypeExprInAnnotation =
-        SingleIdentifierTypeInAnnotation(identifier = boolTypeIdentifier)
+        TypeExprInAnnotation.SingleIdentifier(identifier = boolTypeIdentifier)
 /**
  * [charTypeExpr] is the type expression for the char type.
  */
 internal val charTypeExpr: TypeExprInAnnotation =
-        SingleIdentifierTypeInAnnotation(identifier = charTypeIdentifier)
+        TypeExprInAnnotation.SingleIdentifier(identifier = charTypeIdentifier)
 /**
  * [stringTypeExpr] is the type expression for the string type.
  */
 internal val stringTypeExpr: TypeExprInAnnotation =
-        SingleIdentifierTypeInAnnotation(identifier = stringTypeIdentifier)
+        TypeExprInAnnotation.SingleIdentifier(identifier = stringTypeIdentifier)

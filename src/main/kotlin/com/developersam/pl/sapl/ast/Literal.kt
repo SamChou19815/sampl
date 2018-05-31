@@ -2,93 +2,69 @@ package com.developersam.pl.sapl.ast
 
 /**
  * [Literal] represents a set of supported literal.
+ *
+ * @param inferredType the inferred type from the literal.
  */
-internal sealed class Literal {
+internal sealed class Literal(val inferredType: TypeExprInAnnotation) {
 
     /**
-     * [inferredType] reports the inferred type from the literal.
+     * [Unit] is the literal for unit.
      */
-    abstract val inferredType: TypeExprInAnnotation
+    private object Unit : Literal(inferredType = unitTypeExpr)
 
-}
-
-/**
- * [UnitLiteral] is the literal for unit.
- */
-internal object UnitLiteral : Literal() {
-    override val inferredType: TypeExprInAnnotation =
-            unitTypeExpr
-}
-
-/**
- * [IntLiteral] is the literal for int with [value].
- */
-internal data class IntLiteral(val value: Long) : Literal() {
-    override val inferredType: TypeExprInAnnotation =
-            intTypeExpr
-}
-
-/**
- * [FloatLiteral] is the literal for float with [value].
- */
-internal data class FloatLiteral(val value: Double) : Literal() {
-    override val inferredType: TypeExprInAnnotation =
-            floatTypeExpr
-}
-
-/**
- * [BoolLiteral] is the literal for bool with [value].
- */
-internal data class BoolLiteral(val value: Boolean) : Literal() {
-    override val inferredType: TypeExprInAnnotation =
-            boolTypeExpr
-}
-
-/**
- * [CharLiteral] is the literal for char with [value].
- */
-internal data class CharLiteral(val value: Char) : Literal() {
-    override val inferredType: TypeExprInAnnotation =
-            charTypeExpr
-}
-
-/**
- * [StringLiteral] is the literal for string with [value].
- */
-internal data class StringLiteral(val value: String) : Literal() {
-    override val inferredType: TypeExprInAnnotation =
-            stringTypeExpr
-}
-
-/**
- * [LiteralBuilder] builds literals.
- */
-internal object LiteralBuilder {
     /**
-     * [from] creates a literal from a [text].
+     * [Int] is the literal for int with [value].
      */
-    fun from(text: String): Literal {
-        if (text == "()") {
-            return UnitLiteral
-        }
-        val longOpt = text.toLongOrNull()
-        if (longOpt != null) {
-            return IntLiteral(value = longOpt)
-        }
-        val doubleOpt = text.toDoubleOrNull()
-        if (doubleOpt != null) {
-            return FloatLiteral(value = doubleOpt)
-        }
-        return when (text) {
-            "true" -> BoolLiteral(value = true)
-            "false" -> BoolLiteral(value = false)
-            else -> {
-                if (text.length == 3 && text[0] == '\'' && text[2] == '\'') {
-                    CharLiteral(value = text[1])
-                } else {
-                    StringLiteral(value = text.substring(range = 1 until (text.length - 1)))
+    private data class Int(val value: Long) : Literal(inferredType = intTypeExpr)
+
+    /**
+     * [Float] is the literal for float with [value].
+     */
+    private data class Float(val value: Double) : Literal(inferredType = floatTypeExpr)
+
+    /**
+     * [Bool] is the literal for bool with [value].
+     */
+    private data class Bool(val value: Boolean) : Literal(inferredType = boolTypeExpr)
+
+    /**
+     * [Char] is the literal for char with [value].
+     */
+    private data class Char(val value: kotlin.Char) : Literal(inferredType = charTypeExpr)
+
+    /**
+     * [String] is the literal for string with [value].
+     */
+    private data class String(val value: kotlin.String) : Literal(inferredType = stringTypeExpr)
+
+    companion object {
+        /**
+         * [from] creates a literal from a [text].
+         */
+        fun from(text: kotlin.String): Literal {
+            if (text == "()") {
+                return Literal.Unit
+            }
+            val longOpt = text.toLongOrNull()
+            if (longOpt != null) {
+                return Literal.Int(value = longOpt)
+            }
+            val doubleOpt = text.toDoubleOrNull()
+            if (doubleOpt != null) {
+                return Literal.Float(value = doubleOpt)
+            }
+            return when (text) {
+                "true" -> Literal.Bool(value = true)
+                "false" -> Literal.Bool(value = false)
+                else -> {
+                    if (text.length == 3 && text[0] == '\'' && text[2] == '\'') {
+                        Literal.Char(value = text[1])
+                    } else {
+                        Literal.String(value = text.substring(range = 1 until (text.length - 1)))
+                    }
                 }
             }
         }
     }
+
 }

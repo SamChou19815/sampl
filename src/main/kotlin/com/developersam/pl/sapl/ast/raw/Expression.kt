@@ -2,11 +2,9 @@ package com.developersam.pl.sapl.ast.raw
 
 import com.developersam.pl.sapl.ast.BinaryOperator
 import com.developersam.pl.sapl.ast.BinaryOperator.*
-import com.developersam.pl.sapl.ast.FunctionTypeInAnnotation
 import com.developersam.pl.sapl.ast.Literal
-import com.developersam.pl.sapl.ast.SingleIdentifierTypeInAnnotation
 import com.developersam.pl.sapl.ast.TypeExprInAnnotation
-import com.developersam.pl.sapl.ast.VariantTypeInDeclaration
+import com.developersam.pl.sapl.ast.TypeExprInDeclaration
 import com.developersam.pl.sapl.ast.boolTypeExpr
 import com.developersam.pl.sapl.ast.charTypeExpr
 import com.developersam.pl.sapl.ast.decorated.DecoratedBinaryExpr
@@ -80,7 +78,7 @@ internal data class VariableIdentifierExpr(
             )
         }
         val substitutionMap = genericSymbolsToSubstitute.zip(genericInfo).toMap()
-        val type = typeInfo.typeExpr.substituteGenericInfo(map = substitutionMap)
+        val type = typeInfo.typeExpr.substituteGenerics(map = substitutionMap)
         return DecoratedVariableIdentifierExpr(
                 variable = variable, genericInfo = genericInfo, type = type
         )
@@ -97,44 +95,39 @@ internal data class FunctionApplicationExpr(
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
-        // TODO fix generic function problem
         val decoratedFunctionExpr = functionExpr.typeCheck(environment = environment)
-        val functionType = decoratedFunctionExpr.type
-        when (functionType) {
-            is SingleIdentifierTypeInAnnotation -> throw UnexpectedTypeError(
-                    expectedType = "<function>", actualType = functionType
-            )
-            is FunctionTypeInAnnotation -> {
-                var expectedArg: TypeExprInAnnotation? = functionType.argumentType
-                var returnType = functionType.returnType
-                val decoratedArgumentExpr = arrayListOf<DecoratedExpression>()
-                for (expr in arguments) {
-                    val expType = expectedArg ?: throw TooManyArgumentsError()
-                    val decoratedExpr = expr.typeCheck(environment = environment)
-                    decoratedArgumentExpr.add(element = decoratedExpr)
-                    val exprType = decoratedExpr.type
-                    if (expType != exprType) {
-                        throw UnexpectedTypeError(expectedType = expType, actualType = exprType)
-                    }
-                    val r = returnType
-                    when (r) {
-                        is SingleIdentifierTypeInAnnotation -> {
-                            expectedArg = null
-                        }
-                        is FunctionTypeInAnnotation -> {
-                            expectedArg = r.argumentType
-                            returnType = r.returnType
-                        }
-                    }
-                }
-                return DecoratedFunctionApplicationExpr(
-                        functionExpr = decoratedFunctionExpr, arguments = decoratedArgumentExpr,
-                        type = returnType
+        val functionTypeOpt = decoratedFunctionExpr.type
+        val functionType = functionTypeOpt as? TypeExprInAnnotation.Function
+                ?: throw UnexpectedTypeError(
+                        expectedType = "<function>", actualType = functionTypeOpt
                 )
+        var expectedArg: TypeExprInAnnotation? = functionType.argumentType
+        var returnType = functionType.returnType
+        val decoratedArgumentExpr = arrayListOf<DecoratedExpression>()
+        for (expr in arguments) {
+            val expType = expectedArg ?: throw TooManyArgumentsError()
+            val decoratedExpr = expr.typeCheck(environment = environment)
+            decoratedArgumentExpr.add(element = decoratedExpr)
+            val exprType = decoratedExpr.type
+            if (expType != exprType) {
+                throw UnexpectedTypeError(expectedType = expType, actualType = exprType)
+            }
+            val r = returnType
+            when (r) {
+                is TypeExprInAnnotation.SingleIdentifier -> {
+                    expectedArg = null
+                }
+                is TypeExprInAnnotation.Function -> {
+                    expectedArg = r.argumentType
+                    returnType = r.returnType
+                }
             }
         }
+        return DecoratedFunctionApplicationExpr(
+                functionExpr = decoratedFunctionExpr, arguments = decoratedArgumentExpr,
+                type = returnType
+        )
     }
-
 }
 
 /**
@@ -333,10 +326,10 @@ internal data class MatchExpr(
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val decoratedExprToMatch = exprToMatch.typeCheck(environment = environment)
         val typeToMatch = decoratedExprToMatch.type
-        val typeIdentifier = (typeToMatch as? SingleIdentifierTypeInAnnotation)?.identifier
+        val typeIdentifier = (typeToMatch as? TypeExprInAnnotation.SingleIdentifier)?.identifier
                 ?: throw UnmatchableTypeError(typeExpr = typeToMatch)
         val typeDefinitionOpt = environment.typeDefinitions[typeIdentifier]
-                as? VariantTypeInDeclaration
+                as? TypeExprInDeclaration.Variant
         val variantTypeDeclarations = typeDefinitionOpt?.map?.toMutableMap()
                 ?: throw UnmatchableTypeError(typeExpr = typeToMatch)
         var type: TypeExprInAnnotation? = null

@@ -28,4 +28,8 @@ internal data class TypeIdentifier(
         return 0
     }
 
+    fun substituteGenerics(map: Map<String, TypeExprInAnnotation>): TypeIdentifier {
+        TODO("not implemented")
+    }
+
 }

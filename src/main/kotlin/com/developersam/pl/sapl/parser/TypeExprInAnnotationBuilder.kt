@@ -1,8 +1,6 @@
 package com.developersam.pl.sapl.parser
 
 import com.developersam.pl.sapl.antlr.PLBaseVisitor
-import com.developersam.pl.sapl.ast.FunctionTypeInAnnotation
-import com.developersam.pl.sapl.ast.SingleIdentifierTypeInAnnotation
 import com.developersam.pl.sapl.antlr.PLParser.FunctionTypeInAnnotationContext as Func;
 import com.developersam.pl.sapl.antlr.PLParser.NestedTypeInAnnotationContext as Nested
 import com.developersam.pl.sapl.antlr.PLParser.SingleIdentifierTypeInAnnotationContext as Single
@@ -17,12 +15,10 @@ internal object TypeExprInAnnotationBuilder : PLBaseVisitor<T>() {
             ctx.typeExprInAnnotation().accept(this)
 
     override fun visitSingleIdentifierTypeInAnnotation(ctx: Single): T =
-            SingleIdentifierTypeInAnnotation(
-                    identifier = ctx.typeIdentifier().accept(TypeIdentifierBuilder)
-            )
+            T.SingleIdentifier(identifier = ctx.typeIdentifier().accept(TypeIdentifierBuilder))
 
     override fun visitFunctionTypeInAnnotation(ctx: Func): T =
-            FunctionTypeInAnnotation(
+            T.Function(
                     argumentType = ctx.typeExprInAnnotation(0).accept(this),
                     returnType = ctx.typeExprInAnnotation(1).accept(this)
             )

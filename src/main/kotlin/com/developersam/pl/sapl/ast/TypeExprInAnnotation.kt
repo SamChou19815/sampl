@@ -1,11 +1,6 @@
 package com.developersam.pl.sapl.ast
 
 /**
- * [M] is short for the substitution table.
- */
-private typealias M = Map<String, TypeExprInAnnotation>
-
-/**
  * [TypeExprInAnnotation] represents a set of supported type expression in type annotation.
  */
 internal sealed class TypeExprInAnnotation {
@@ -17,39 +12,39 @@ internal sealed class TypeExprInAnnotation {
         get() = TypeInformation(typeExpr = this)
 
     /**
-     * [substituteGenericInfo] uses the given [map] to substitute generic symbols in the type
+     * [substituteGenerics] uses the given [map] to substitute generic symbols in the type
      * expression with concrete value types.
      */
-    abstract fun substituteGenericInfo(map: M): TypeExprInAnnotation
+    abstract fun substituteGenerics(map: Map<String, TypeExprInAnnotation>): TypeExprInAnnotation
 
-}
+    /**
+     * [SingleIdentifier] represents a single type [identifier] in the type
+     * annotation.
+     */
+    internal data class SingleIdentifier(
+            val identifier: TypeIdentifier
+    ) : TypeExprInAnnotation() {
 
-/**
- * [SingleIdentifierTypeInAnnotation] represents a single type [identifier] in the type annotation.
- */
-internal data class SingleIdentifierTypeInAnnotation(
-        val identifier: TypeIdentifier
-) : TypeExprInAnnotation() {
+        override fun substituteGenerics(map: Map<String, TypeExprInAnnotation>): SingleIdentifier =
+                SingleIdentifier(identifier.substituteGenerics(map = map))
 
-    override fun substituteGenericInfo(map: M): SingleIdentifierTypeInAnnotation {
-        TODO("not implemented")
     }
 
-}
+    /**
+     * [Function] represents the function type in the type annotation of the form
+     * [argumentType] `->` [returnType].
+     */
+    internal data class Function(
+            val argumentType: TypeExprInAnnotation,
+            val returnType: TypeExprInAnnotation
+    ) : TypeExprInAnnotation() {
 
-/**
- * [FunctionTypeInAnnotation] represents the function type in the type annotation of the form
- * [argumentType] `->` [returnType].
- */
-internal data class FunctionTypeInAnnotation(
-        val argumentType: TypeExprInAnnotation,
-        val returnType: TypeExprInAnnotation
-) : TypeExprInAnnotation() {
+        override fun substituteGenerics(map: Map<String, TypeExprInAnnotation>): Function =
+                Function(
+                        argumentType = argumentType.substituteGenerics(map = map),
+                        returnType = returnType.substituteGenerics(map = map)
+                )
 
-    override fun substituteGenericInfo(map: M): FunctionTypeInAnnotation =
-            FunctionTypeInAnnotation(
-                    argumentType = argumentType.substituteGenericInfo(map = map),
-                    returnType = returnType.substituteGenericInfo(map = map)
-            )
+    }
 
 }

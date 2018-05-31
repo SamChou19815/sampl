@@ -20,12 +20,12 @@ import com.developersam.pl.sapl.antlr.PLParser.ThrowExprContext
 import com.developersam.pl.sapl.antlr.PLParser.TryCatchExprContext
 import com.developersam.pl.sapl.ast.raw.BinaryExpr
 import com.developersam.pl.sapl.ast.BinaryOperator
+import com.developersam.pl.sapl.ast.Literal
 import com.developersam.pl.sapl.ast.raw.Expression
 import com.developersam.pl.sapl.ast.raw.FunctionApplicationExpr
 import com.developersam.pl.sapl.ast.raw.FunctionExpr
 import com.developersam.pl.sapl.ast.raw.IfElseExpr
 import com.developersam.pl.sapl.ast.raw.LetExpr
-import com.developersam.pl.sapl.ast.LiteralBuilder
 import com.developersam.pl.sapl.ast.raw.LiteralExpr
 import com.developersam.pl.sapl.ast.raw.MatchExpr
 import com.developersam.pl.sapl.ast.raw.NotExpr
@@ -43,7 +43,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
             ctx.expression().accept(this)
 
     override fun visitLiteralExpr(ctx: LiteralExprContext): Expression =
-            LiteralExpr(literal = LiteralBuilder.from(text = ctx.Literal().text))
+            LiteralExpr(literal = Literal.from(text = ctx.Literal().text))
 
     override fun visitIdentifierExpr(ctx: IdentifierExprContext): Expression =
             VariableIdentifierExpr(

@@ -1,6 +1,5 @@
 package com.developersam.pl.sapl.ast.raw
 
-import com.developersam.pl.sapl.ast.FunctionTypeInAnnotation
 import com.developersam.pl.sapl.ast.TypeExprInAnnotation
 import com.developersam.pl.sapl.util.toFunctionTypeExpr
 
@@ -21,7 +20,7 @@ internal data class ModuleFunctionMember(
     /**
      * [functionType] reports the functional type of itself.
      */
-    val functionType: FunctionTypeInAnnotation = toFunctionTypeExpr(
+    val functionType: TypeExprInAnnotation.Function = toFunctionTypeExpr(
             argumentTypes = arguments.map { it.second },
             returnType = returnType
     )
