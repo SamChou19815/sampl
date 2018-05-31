@@ -12,12 +12,9 @@ object PLCompiler {
      * [compile] tries to compile the given [module] node.
      */
     private fun compile(module: Module) {
-        // Type checking
-        module.typeCheck()
-        // TODO trans-pile to Java code
-
-        // TODO invoke java compiler
-
+        val decoratedModule = module.typeCheck()
+        // TODO trans-pile to kotlin code
+        // TODO invoke kotlin compiler
     }
 
     /**

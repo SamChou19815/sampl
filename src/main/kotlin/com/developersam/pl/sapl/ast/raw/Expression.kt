@@ -3,6 +3,7 @@ package com.developersam.pl.sapl.ast.raw
 import com.developersam.pl.sapl.ast.BinaryOperator
 import com.developersam.pl.sapl.ast.BinaryOperator.*
 import com.developersam.pl.sapl.ast.FunctionTypeInAnnotation
+import com.developersam.pl.sapl.ast.Literal
 import com.developersam.pl.sapl.ast.SingleIdentifierTypeInAnnotation
 import com.developersam.pl.sapl.ast.TypeExprInAnnotation
 import com.developersam.pl.sapl.ast.VariantTypeInDeclaration
@@ -32,8 +33,7 @@ import com.developersam.pl.sapl.exceptions.UndefinedIdentifierError
 import com.developersam.pl.sapl.exceptions.UnexpectedTypeError
 import com.developersam.pl.sapl.exceptions.UnmatchableTypeError
 import com.developersam.pl.sapl.exceptions.UnusedPatternError
-import com.developersam.pl.sapl.exceptions.WrongPatternError
-import com.developersam.pl.sapl.typecheck.TypeCheckerEnvironment
+import com.developersam.pl.sapl.environment.TypeCheckingEnv
 import com.developersam.pl.sapl.util.toFunctionTypeExpr
 
 /**
@@ -47,7 +47,7 @@ internal sealed class Expression {
      *
      * If the type checking failed, it should throw [UnexpectedTypeError] to indicate what's wrong.
      */
-    abstract fun typeCheck(environment: TypeCheckerEnvironment): DecoratedExpression
+    abstract fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression
 
 }
 
@@ -56,7 +56,7 @@ internal sealed class Expression {
  */
 internal data class LiteralExpr(val literal: Literal) : Expression() {
 
-    override fun typeCheck(environment: TypeCheckerEnvironment): DecoratedExpression =
+    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression =
             DecoratedLiteralExpr(literal = literal, type = literal.inferredType)
 
 }
@@ -69,7 +69,7 @@ internal data class VariableIdentifierExpr(
         val variable: String, private val genericInfo: List<TypeExprInAnnotation>
 ) : Expression() {
 
-    override fun typeCheck(environment: TypeCheckerEnvironment): DecoratedExpression {
+    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val typeInfo = environment[variable]
                 ?: throw UndefinedIdentifierError(badIdentifier = variable)
         val genericSymbolsToSubstitute = typeInfo.genericInfo
@@ -96,7 +96,8 @@ internal data class FunctionApplicationExpr(
         val functionExpr: Expression, val arguments: List<Expression>
 ) : Expression() {
 
-    override fun typeCheck(environment: TypeCheckerEnvironment): DecoratedExpression {
+    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
+        // TODO fix generic function problem
         val decoratedFunctionExpr = functionExpr.typeCheck(environment = environment)
         val functionType = decoratedFunctionExpr.type
         when (functionType) {
@@ -143,7 +144,7 @@ internal data class BinaryExpr(
         val left: Expression, val op: BinaryOperator, val right: Expression
 ) : Expression() {
 
-    override fun typeCheck(environment: TypeCheckerEnvironment): DecoratedExpression =
+    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression =
             when (op) {
                 SHL, SHR, USHR, XOR, LAND, LOR, MUL, DIV, MOD, PLUS, MINUS -> {
                     // int binary operators
@@ -231,7 +232,7 @@ internal data class BinaryExpr(
  */
 internal data class NotExpr(val expr: Expression) : Expression() {
 
-    override fun typeCheck(environment: TypeCheckerEnvironment): DecoratedExpression {
+    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val e = expr.typeCheck(environment = environment)
         val t = e.type
         if (t == boolTypeExpr) {
@@ -251,7 +252,7 @@ internal data class LetExpr(
         val identifier: String, val e1: Expression, val e2: Expression
 ) : Expression() {
 
-    override fun typeCheck(environment: TypeCheckerEnvironment): DecoratedExpression =
+    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression =
             if (environment[identifier] == null) {
                 val decoratedE1 = e1.typeCheck(environment = environment)
                 val e1TypeInfo = decoratedE1.type.asTypeInformation
@@ -276,7 +277,7 @@ internal data class FunctionExpr(
         val returnType: TypeExprInAnnotation, val body: Expression
 ) : Expression() {
 
-    override fun typeCheck(environment: TypeCheckerEnvironment): DecoratedExpression {
+    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val functionDeclaredType = toFunctionTypeExpr(
                 argumentTypes = arguments.map { it.second }, returnType = returnType
         )
@@ -301,7 +302,7 @@ internal data class IfElseExpr(
         val condition: Expression, val e1: Expression, val e2: Expression
 ) : Expression() {
 
-    override fun typeCheck(environment: TypeCheckerEnvironment): DecoratedExpression {
+    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val conditionExpr = condition.typeCheck(environment = environment)
         val conditionType = conditionExpr.type
         if (conditionType != boolTypeExpr) {
@@ -329,7 +330,7 @@ internal data class MatchExpr(
         val exprToMatch: Expression, val matchingList: List<Pair<Pattern, Expression>>
 ) : Expression() {
 
-    override fun typeCheck(environment: TypeCheckerEnvironment): DecoratedExpression {
+    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val decoratedExprToMatch = exprToMatch.typeCheck(environment = environment)
         val typeToMatch = decoratedExprToMatch.type
         val typeIdentifier = (typeToMatch as? SingleIdentifierTypeInAnnotation)?.identifier
@@ -344,47 +345,10 @@ internal data class MatchExpr(
             if (variantTypeDeclarations.isEmpty()) {
                 throw UnusedPatternError(pattern = pattern)
             }
-            val (decoratedPattern, newEnv) = when (pattern) {
-                is VariantPattern -> {
-                    val patternId = pattern.variantIdentifier
-                    if (patternId !in variantTypeDeclarations) {
-                        throw WrongPatternError(patternId = patternId)
-                    }
-                    variantTypeDeclarations.remove(key = patternId)
-                    val associatedVarType = variantTypeDeclarations[patternId]
-                    if (pattern.associatedVariable == null && associatedVarType == null) {
-                        val p = DecoratedPattern.Variant(variantIdentifier = patternId)
-                        p to environment
-                    } else if (pattern.associatedVariable != null && associatedVarType != null) {
-                        val p = DecoratedPattern.Variant(
-                                variantIdentifier = patternId,
-                                associatedVariable = pattern.associatedVariable,
-                                associatedVariableType = associatedVarType
-                        )
-                        val newE = environment.put(
-                                variable = pattern.associatedVariable,
-                                typeInfo = associatedVarType.asTypeInformation
-                        )
-                        p to newE
-                    } else {
-                        throw WrongPatternError(patternId = patternId)
-                    }
-                }
-                is VariablePattern -> {
-                    variantTypeDeclarations.clear()
-                    val p = DecoratedPattern.Variable(
-                            identifier = pattern.identifier, type = typeToMatch
-                    )
-                    val newE = environment.put(
-                            variable = pattern.identifier, typeInfo = typeToMatch.asTypeInformation
-                    )
-                    p to newE
-                }
-                WildCardPattern -> {
-                    variantTypeDeclarations.clear()
-                    DecoratedPattern.WildCard to environment
-                }
-            }
+            val (decoratedPattern, newEnv) = pattern.typeCheck(
+                    typeToMatch = typeToMatch, environment = environment,
+                    variantTypeDefs = variantTypeDeclarations
+            )
             val decoratedExpr = expr.typeCheck(environment = newEnv)
             decoratedMatchingList.add(decoratedPattern to decoratedExpr)
             val exprType = decoratedExpr.type
@@ -414,7 +378,7 @@ internal data class MatchExpr(
  */
 internal data class ThrowExpr(val type: TypeExprInAnnotation, val expr: Expression) : Expression() {
 
-    override fun typeCheck(environment: TypeCheckerEnvironment): DecoratedExpression {
+    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val e = expr.typeCheck(environment = environment)
         val t = e.type
         if (t != stringTypeExpr) {
@@ -434,7 +398,7 @@ internal data class TryCatchExpr(
         val tryExpr: Expression, val exception: String, val catchHandler: Expression
 ) : Expression() {
 
-    override fun typeCheck(environment: TypeCheckerEnvironment): DecoratedExpression {
+    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val decoratedTryExpr = tryExpr.typeCheck(environment = environment)
         val tryType = decoratedTryExpr.type
         val decoratedCatchExpr = catchHandler.typeCheck(environment = environment.put(

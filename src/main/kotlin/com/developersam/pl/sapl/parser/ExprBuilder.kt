@@ -25,7 +25,7 @@ import com.developersam.pl.sapl.ast.raw.FunctionApplicationExpr
 import com.developersam.pl.sapl.ast.raw.FunctionExpr
 import com.developersam.pl.sapl.ast.raw.IfElseExpr
 import com.developersam.pl.sapl.ast.raw.LetExpr
-import com.developersam.pl.sapl.ast.raw.LiteralBuilder
+import com.developersam.pl.sapl.ast.LiteralBuilder
 import com.developersam.pl.sapl.ast.raw.LiteralExpr
 import com.developersam.pl.sapl.ast.raw.MatchExpr
 import com.developersam.pl.sapl.ast.raw.NotExpr

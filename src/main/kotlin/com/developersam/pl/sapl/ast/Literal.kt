@@ -1,12 +1,4 @@
-package com.developersam.pl.sapl.ast.raw
-
-import com.developersam.pl.sapl.ast.TypeExprInAnnotation
-import com.developersam.pl.sapl.ast.boolTypeExpr
-import com.developersam.pl.sapl.ast.charTypeExpr
-import com.developersam.pl.sapl.ast.floatTypeExpr
-import com.developersam.pl.sapl.ast.intTypeExpr
-import com.developersam.pl.sapl.ast.stringTypeExpr
-import com.developersam.pl.sapl.ast.unitTypeExpr
+package com.developersam.pl.sapl.ast
 
 /**
  * [Literal] represents a set of supported literal.

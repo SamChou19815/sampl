@@ -35,4 +35,5 @@ internal data class TypeInformation(
     override fun hashCode(): Int {
         return super.hashCode()
     }
+
 }

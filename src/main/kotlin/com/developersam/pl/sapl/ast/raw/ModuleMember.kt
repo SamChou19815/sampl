@@ -1,7 +1,7 @@
 package com.developersam.pl.sapl.ast.raw
 
 /**
- * [ModuleMember] represents a set of supported module members.
+ * [ModuleMember] defines the operation that all module member must support.
  */
 internal interface ModuleMember {
 

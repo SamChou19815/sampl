@@ -2,12 +2,7 @@ package com.developersam.pl.sapl.ast.decorated
 
 import com.developersam.pl.sapl.ast.BinaryOperator
 import com.developersam.pl.sapl.ast.TypeExprInAnnotation
-import com.developersam.pl.sapl.ast.raw.Expression
-import com.developersam.pl.sapl.ast.raw.Literal
-import com.developersam.pl.sapl.ast.raw.MatchExpr
-import com.developersam.pl.sapl.ast.raw.Pattern
-import com.developersam.pl.sapl.ast.raw.ThrowExpr
-import com.developersam.pl.sapl.ast.raw.TryCatchExpr
+import com.developersam.pl.sapl.ast.Literal
 
 /**
  * [DecoratedExpression] is an expression with a correct decorated type.
