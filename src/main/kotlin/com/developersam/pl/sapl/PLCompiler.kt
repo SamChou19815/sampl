@@ -1,8 +1,7 @@
 package com.developersam.pl.sapl
 
-import com.developersam.pl.sapl.ast.Module
+import com.developersam.pl.sapl.ast.raw.Module
 import com.developersam.pl.sapl.modules.ModuleConstructor
-import com.developersam.pl.sapl.typecheck.TypeChecker
 
 /**
  * [PLCompiler] is responsible for the compilation of all the given source files.
@@ -14,7 +13,7 @@ object PLCompiler {
      */
     private fun compile(module: Module) {
         // Type checking
-        TypeChecker.typeCheck(module = module)
+        module.typeCheck()
         // TODO trans-pile to Java code
 
         // TODO invoke java compiler

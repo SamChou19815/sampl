@@ -6,22 +6,25 @@ import com.developersam.pl.sapl.ast.TypeIdentifier
 import com.developersam.pl.sapl.ast.TypeInformation
 
 /**
- * [TypeCheckerEnv] is the environment for type checking. It contains a set of currently determined
- * definitions to help type check the program.
+ * [TypeCheckerEnvironment] is the environment for type checking. It contains a set of currently
+ * determined definitions to help type check the program.
  *
- * @param
+ * @param typeDefinitions the set that maps type identifiers to actual types.
+ * @param upperLevelTypeEnv the upper level type environment. Variables not defined in this module
+ * should be here.
+ * @param currentLevelTypeEnv the current level type environment.
  */
-internal data class TypeCheckerEnv(
+internal data class TypeCheckerEnvironment(
         val typeDefinitions: FpMap<TypeIdentifier, TypeExprInDeclaration> = FpMap.empty(),
         val upperLevelTypeEnv: FpMap<String, TypeInformation> = FpMap.empty(),
         val currentLevelTypeEnv: FpMap<String, TypeInformation> = FpMap.empty()
 ) {
 
     /**
-     * [update] creates a new [TypeCheckerEnv] with current level type environment updated
+     * [update] creates a new [TypeCheckerEnvironment] with current level type environment updated
      * to [newCurrent].
      */
-    fun update(newCurrent: FpMap<String, TypeInformation>): TypeCheckerEnv =
+    fun update(newCurrent: FpMap<String, TypeInformation>): TypeCheckerEnvironment =
             copy(currentLevelTypeEnv = newCurrent)
 
     /**
@@ -32,24 +35,24 @@ internal data class TypeCheckerEnv(
             currentLevelTypeEnv[variable] ?: upperLevelTypeEnv[variable]
 
     /**
-     * [put] creates a new [TypeCheckerEnv] that has the current level
+     * [put] creates a new [TypeCheckerEnvironment] that has the current level
      * type environment updated with a new pair [variable] to [typeInfo].
      */
-    fun put(variable: String, typeInfo: TypeInformation): TypeCheckerEnv =
+    fun put(variable: String, typeInfo: TypeInformation): TypeCheckerEnvironment =
             update(newCurrent = currentLevelTypeEnv.put(variable, typeInfo))
 
     /**
-     * [remove] creates a new [TypeCheckerEnv] that has the current level
+     * [remove] creates a new [TypeCheckerEnvironment] that has the current level
      * type environment updated with [variable]'s type information removed.
      */
-    fun remove(variable: String): TypeCheckerEnv =
+    fun remove(variable: String): TypeCheckerEnvironment =
             update(newCurrent = currentLevelTypeEnv.remove(variable))
 
     companion object {
         /**
-         * [empty] is the empty [TypeCheckerEnv].
+         * [empty] is the empty [TypeCheckerEnvironment].
          */
-        val empty: TypeCheckerEnv = TypeCheckerEnv()
+        val empty: TypeCheckerEnvironment = TypeCheckerEnvironment()
     }
 
 }

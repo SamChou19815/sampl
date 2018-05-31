@@ -1,7 +1,6 @@
 package com.developersam.pl.sapl.parser
 
 import com.developersam.pl.sapl.antlr.PLBaseVisitor
-import com.developersam.pl.sapl.antlr.PLParser
 import com.developersam.pl.sapl.antlr.PLParser.BitExprContext
 import com.developersam.pl.sapl.antlr.PLParser.BooleanExprContext
 import com.developersam.pl.sapl.antlr.PLParser.ComparisonExprContext
@@ -19,20 +18,20 @@ import com.developersam.pl.sapl.antlr.PLParser.StringConcatExprContext
 import com.developersam.pl.sapl.antlr.PLParser.TermExprContext
 import com.developersam.pl.sapl.antlr.PLParser.ThrowExprContext
 import com.developersam.pl.sapl.antlr.PLParser.TryCatchExprContext
-import com.developersam.pl.sapl.ast.BinaryExpr
+import com.developersam.pl.sapl.ast.raw.BinaryExpr
 import com.developersam.pl.sapl.ast.BinaryOperator
-import com.developersam.pl.sapl.ast.Expression
-import com.developersam.pl.sapl.ast.FunctionApplicationExpr
-import com.developersam.pl.sapl.ast.FunctionExpr
-import com.developersam.pl.sapl.ast.IfElseExpr
-import com.developersam.pl.sapl.ast.LetExpr
-import com.developersam.pl.sapl.ast.LiteralBuilder
-import com.developersam.pl.sapl.ast.LiteralExpr
-import com.developersam.pl.sapl.ast.MatchExpr
-import com.developersam.pl.sapl.ast.NotExpr
-import com.developersam.pl.sapl.ast.ThrowExpr
-import com.developersam.pl.sapl.ast.TryCatchFinallyExpr
-import com.developersam.pl.sapl.ast.VariableIdentifierExpr
+import com.developersam.pl.sapl.ast.raw.Expression
+import com.developersam.pl.sapl.ast.raw.FunctionApplicationExpr
+import com.developersam.pl.sapl.ast.raw.FunctionExpr
+import com.developersam.pl.sapl.ast.raw.IfElseExpr
+import com.developersam.pl.sapl.ast.raw.LetExpr
+import com.developersam.pl.sapl.ast.raw.LiteralBuilder
+import com.developersam.pl.sapl.ast.raw.LiteralExpr
+import com.developersam.pl.sapl.ast.raw.MatchExpr
+import com.developersam.pl.sapl.ast.raw.NotExpr
+import com.developersam.pl.sapl.ast.raw.ThrowExpr
+import com.developersam.pl.sapl.ast.raw.TryCatchExpr
+import com.developersam.pl.sapl.ast.raw.VariableIdentifierExpr
 import org.antlr.v4.runtime.tree.TerminalNode
 
 /**
@@ -152,7 +151,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
             )
 
     override fun visitTryCatchExpr(ctx: TryCatchExprContext): Expression =
-            TryCatchFinallyExpr(
+            TryCatchExpr(
                     tryExpr = ctx.expression(0).accept(this),
                     exception = ctx.LowerIdentifier().text,
                     catchHandler = ctx.expression(1).accept(this)

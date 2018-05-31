@@ -1,4 +1,4 @@
-package com.developersam.pl.sapl.ast
+package com.developersam.pl.sapl.ast.raw
 
 /**
  * [ModuleMember] represents a set of supported module members.

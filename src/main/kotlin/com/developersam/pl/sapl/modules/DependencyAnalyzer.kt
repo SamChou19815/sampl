@@ -1,8 +1,8 @@
 package com.developersam.pl.sapl.modules
 
 import com.developersam.pl.sapl.ast.CompilationUnit
-import com.developersam.pl.sapl.ast.Module
-import com.developersam.pl.sapl.ast.ModuleMembers
+import com.developersam.pl.sapl.ast.raw.Module
+import com.developersam.pl.sapl.ast.raw.ModuleMembers
 import com.developersam.pl.sapl.exceptions.CompileTimeError
 import com.developersam.pl.sapl.exceptions.CyclicDependencyError
 

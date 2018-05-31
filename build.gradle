@@ -12,8 +12,8 @@ buildscript {
 group 'com.developersam.pl'
 version '0.0.1'
 
-apply plugin: 'kotlin'
 apply plugin: 'antlr'
+apply plugin: 'kotlin'
 
 repositories {
     mavenCentral()

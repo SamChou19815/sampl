@@ -1,6 +1,5 @@
 package com.developersam.pl.sapl.ast
 
-
 /*
  * -------------------------------------------------------------------------------
  * Part 1: Type Identifiers

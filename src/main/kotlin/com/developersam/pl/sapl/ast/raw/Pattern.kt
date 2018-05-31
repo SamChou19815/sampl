@@ -1,4 +1,4 @@
-package com.developersam.pl.sapl.ast
+package com.developersam.pl.sapl.ast.raw
 
 /**
  * [Pattern] is a collection of supported pattern for matching.
