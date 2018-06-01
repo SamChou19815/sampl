@@ -1,7 +1,6 @@
 package com.developersam.pl.sapl.exceptions
 
-import com.developersam.pl.sapl.ast.TypeExprInAnnotation
-import com.developersam.pl.sapl.ast.TypeInformation
+import com.developersam.pl.sapl.ast.TypeExpr
 
 /**
  * [UnexpectedTypeError] reports an unexpected type during compile time type checking.
@@ -9,15 +8,14 @@ import com.developersam.pl.sapl.ast.TypeInformation
  * @param expectedType the expected type according to the context.
  * @param actualType actual type deduced from the expression.
  */
-internal class UnexpectedTypeError(
-        private val expectedType: String,
-        private val actualType: TypeExprInAnnotation
+class UnexpectedTypeError(
+        private val expectedType: String, private val actualType: TypeExpr
 ) : CompileTimeError(reason = "Unexpected type: $actualType. Expecting: $expectedType.") {
 
     /**
-     * Construct the same error but with [expectedType] as an [TypeExprInAnnotation].
+     * Construct the same error but with [expectedType] as an [TypeExpr].
      */
-    constructor(expectedType: TypeExprInAnnotation, actualType: TypeExprInAnnotation) : this(
+    constructor(expectedType: TypeExpr, actualType: TypeExpr) : this(
             expectedType = expectedType.toString(), actualType = actualType
     )
 

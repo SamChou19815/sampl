@@ -1,8 +1,8 @@
 package com.developersam.pl.sapl.environment
 
 import com.developersam.fp.FpMap
-import com.developersam.pl.sapl.ast.TypeExprInDeclaration
-import com.developersam.pl.sapl.ast.TypeIdentifier
+import com.developersam.pl.sapl.ast.TypeDeclaration
+import com.developersam.pl.sapl.ast.TypeExpr
 import com.developersam.pl.sapl.ast.TypeInformation
 
 /**
@@ -14,8 +14,8 @@ import com.developersam.pl.sapl.ast.TypeInformation
  * should be here.
  * @param currentLevelTypeEnv the current level type environment.
  */
-internal data class TypeCheckingEnv(
-        val typeDefinitions: FpMap<TypeIdentifier, TypeExprInDeclaration> = FpMap.empty(),
+data class TypeCheckingEnv(
+        val typeDefinitions: FpMap<TypeExpr.Identifier, TypeDeclaration> = FpMap.empty(),
         val upperLevelTypeEnv: FpMap<String, TypeInformation> = FpMap.empty(),
         val currentLevelTypeEnv: FpMap<String, TypeInformation> = FpMap.empty()
 ) {

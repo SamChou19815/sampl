@@ -1,24 +1,24 @@
 package com.developersam.pl.sapl.parser
 
 import com.developersam.pl.sapl.antlr.PLBaseVisitor
+import com.developersam.pl.sapl.ast.TypeExpr
 import com.developersam.pl.sapl.antlr.PLParser.FunctionTypeInAnnotationContext as Func;
 import com.developersam.pl.sapl.antlr.PLParser.NestedTypeInAnnotationContext as Nested
 import com.developersam.pl.sapl.antlr.PLParser.SingleIdentifierTypeInAnnotationContext as Single
-import com.developersam.pl.sapl.ast.TypeExprInAnnotation as T
 
 /**
  * [TypeExprInAnnotationBuilder] builds type annotation AST from parse tree.
  */
-internal object TypeExprInAnnotationBuilder : PLBaseVisitor<T>() {
+internal object TypeExprInAnnotationBuilder : PLBaseVisitor<TypeExpr>() {
 
-    override fun visitNestedTypeInAnnotation(ctx: Nested): T =
+    override fun visitNestedTypeInAnnotation(ctx: Nested): TypeExpr =
             ctx.typeExprInAnnotation().accept(this)
 
-    override fun visitSingleIdentifierTypeInAnnotation(ctx: Single): T =
-            T.SingleIdentifier(identifier = ctx.typeIdentifier().accept(TypeIdentifierBuilder))
+    override fun visitSingleIdentifierTypeInAnnotation(ctx: Single): TypeExpr =
+            TypeIdentifierExprBuilder.visitSingleIdentifierTypeInAnnotation(ctx = ctx)
 
-    override fun visitFunctionTypeInAnnotation(ctx: Func): T =
-            T.Function(
+    override fun visitFunctionTypeInAnnotation(ctx: Func): TypeExpr =
+            TypeExpr.Function(
                     argumentType = ctx.typeExprInAnnotation(0).accept(this),
                     returnType = ctx.typeExprInAnnotation(1).accept(this)
             )

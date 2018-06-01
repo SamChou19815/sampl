@@ -3,7 +3,7 @@ package com.developersam.pl.sapl.ast.raw
 /**
  * [ModuleMember] defines the operation that all module member must support.
  */
-internal interface ModuleMember {
+interface ModuleMember {
 
     /**
      * [name] is the name of the identifier of the module member.

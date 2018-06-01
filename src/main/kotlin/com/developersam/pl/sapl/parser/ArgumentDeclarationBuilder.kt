@@ -2,7 +2,7 @@ package com.developersam.pl.sapl.parser
 
 import com.developersam.pl.sapl.antlr.PLBaseVisitor
 import com.developersam.pl.sapl.antlr.PLParser.ArgumentDeclarationContext
-import com.developersam.pl.sapl.ast.TypeExprInAnnotation as TA
+import com.developersam.pl.sapl.ast.TypeExpr as TA
 
 /**
  * [ArgumentDeclarationBuilder] builds argument declaration into AST.

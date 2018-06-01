@@ -4,7 +4,7 @@ import com.developersam.pl.sapl.antlr.PLBaseVisitor
 import com.developersam.pl.sapl.antlr.PLParser.StructTypeInDeclarationContext
 import com.developersam.pl.sapl.antlr.PLParser.VariantTypeInDeclarationContext
 import java.util.stream.Collectors
-import com.developersam.pl.sapl.ast.TypeExprInDeclaration as T
+import com.developersam.pl.sapl.ast.TypeDeclaration as T
 import com.developersam.pl.sapl.parser.TypeExprInAnnotationBuilder as B
 
 /**

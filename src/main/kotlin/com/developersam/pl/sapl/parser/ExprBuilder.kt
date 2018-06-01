@@ -51,7 +51,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
                             .joinToString(separator = ".", transform = TerminalNode::getText)
                             + "." + ctx.LowerIdentifier().text,
                     genericInfo = ctx.genericsBracket()
-                            ?.typeIdentifier()
+                            ?.typeExprInAnnotation()
                             ?.map { it.accept(TypeExprInAnnotationBuilder) }
                             ?: emptyList()
             )

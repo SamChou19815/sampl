@@ -8,7 +8,7 @@ import java.io.File
  *
  * @param directory it must be a valid directory.
  */
-fun getAllSourceFiles(directory: String): List<File> {
+internal fun getAllSourceFiles(directory: String): List<File> {
     val fileList = File(directory).listFiles()
     val files = arrayListOf<File>()
     for (file in fileList) {

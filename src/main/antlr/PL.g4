@@ -40,7 +40,7 @@ typeExprInDeclaration
 
 // Some parser type fragment
 typeIdentifier : (UpperIdentifier DOT)* UpperIdentifier genericsBracket?;
-genericsBracket : LBRACKET typeIdentifier (COMMA typeIdentifier)* RBRACKET;
+genericsBracket : LBRACKET typeExprInAnnotation (COMMA typeExprInAnnotation)* RBRACKET;
 variantConstructorDeclaration : UpperIdentifier (OF typeExprInAnnotation)?;
 typeAnnotation : COLON typeExprInAnnotation;
 annotatedVariable : LowerIdentifier typeAnnotation;

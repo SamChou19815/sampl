@@ -16,10 +16,7 @@ import com.developersam.pl.sapl.environment.TypeCheckingEnv
 /**
  * [Module] node has a [name] and a set of ordered [members].
  */
-internal data class Module(
-        override val name: String,
-        val members: ModuleMembers
-) : ModuleMember {
+data class Module(override val name: String, val members: ModuleMembers) : ModuleMember {
 
     /**
      * [noNameShadowingValidation] validates that the members collection has no name shadowing by

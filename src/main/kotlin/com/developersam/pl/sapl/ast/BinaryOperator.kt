@@ -7,7 +7,8 @@ import com.developersam.pl.sapl.util.toTable
  *
  * @param symbol the text symbol defined in the lexer.
  */
-internal enum class BinaryOperator(val symbol: String) {
+enum class BinaryOperator(val symbol: String) {
+
     /**
      * Shift left.
      */
@@ -68,6 +69,10 @@ internal enum class BinaryOperator(val symbol: String) {
      * Float subtraction.
      */
     F_MINUS(symbol = "-."),
+    /**
+     * String concatenation.
+     */
+    STR_CONCAT(symbol = "^"),
     /**
      * Referential equality.
      */

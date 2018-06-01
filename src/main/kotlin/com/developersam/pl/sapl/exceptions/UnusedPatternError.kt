@@ -5,6 +5,5 @@ import com.developersam.pl.sapl.ast.raw.Pattern
 /**
  * [UnusedPatternError] reports an unused [pattern].
  */
-internal class UnusedPatternError(val pattern: Pattern) : CompileTimeError(
-        reason = "The pattern $pattern is unused."
-)
+class UnusedPatternError(val pattern: Pattern)
+    : CompileTimeError(reason = "The pattern $pattern is unused.")

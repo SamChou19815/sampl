@@ -1,6 +1,6 @@
 package com.developersam.pl.sapl.ast.decorated
 
-import com.developersam.pl.sapl.ast.TypeExprInAnnotation
+import com.developersam.pl.sapl.ast.TypeExpr
 
 /**
  * [DecoratedModuleFunctionMember] represents a function declaration of the form:
@@ -8,12 +8,12 @@ import com.developersam.pl.sapl.ast.TypeExprInAnnotation
  * [arguments] `:` [returnType] `=` [body].
  * It has an additional [type] field.
  */
-internal data class DecoratedModuleFunctionMember(
+data class DecoratedModuleFunctionMember(
         val isPublic: Boolean, val identifier: String,
         val genericsDeclaration: List<String>,
-        val arguments: List<Pair<String, TypeExprInAnnotation>>,
-        val returnType: TypeExprInAnnotation, val body: DecoratedExpression,
-        override val type: TypeExprInAnnotation.Function
+        val arguments: List<Pair<String, TypeExpr>>,
+        val returnType: TypeExpr, val body: DecoratedExpression,
+        override val type: TypeExpr.Function
 ) : DecoratedModuleMember {
 
     override val name: String = identifier

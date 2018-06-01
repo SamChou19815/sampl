@@ -1,6 +1,6 @@
 package com.developersam.pl.sapl.ast.raw
 
-import com.developersam.pl.sapl.ast.TypeExprInAnnotation as T
+import com.developersam.pl.sapl.ast.TypeExpr as T
 import com.developersam.pl.sapl.ast.decorated.DecoratedPattern
 import com.developersam.pl.sapl.exceptions.WrongPatternError
 import com.developersam.pl.sapl.environment.TypeCheckingEnv as E
@@ -8,7 +8,7 @@ import com.developersam.pl.sapl.environment.TypeCheckingEnv as E
 /**
  * [Pattern] is a collection of supported pattern for matching.
  */
-internal sealed class Pattern {
+sealed class Pattern {
 
     /**
      * [typeCheck] tries to type check itself with [environment] and [typeToMatch] and produces a
@@ -22,9 +22,7 @@ internal sealed class Pattern {
      * [Variant] represents the variant pattern with [variantIdentifier] and potentially an
      * [associatedVariable].
      */
-    internal data class Variant(
-            val variantIdentifier: String, val associatedVariable: String?
-    ) : Pattern() {
+    data class Variant(val variantIdentifier: String, val associatedVariable: String?) : Pattern() {
 
         override fun typeCheck(typeToMatch: T, environment: E,
                                variantTypeDefs: MutableMap<String, T?>): Pair<DecoratedPattern, E> {
@@ -57,7 +55,7 @@ internal sealed class Pattern {
     /**
      * [Variable] represents a variable that matches everything.
      */
-    internal data class Variable(val identifier: String) : Pattern() {
+    data class Variable(val identifier: String) : Pattern() {
 
         override fun typeCheck(typeToMatch: T, environment: E,
                                variantTypeDefs: MutableMap<String, T?>): Pair<DecoratedPattern, E> {
@@ -76,7 +74,7 @@ internal sealed class Pattern {
     /**
      * [WildCard] represents a wildcard but does not bound to anything.
      */
-    internal object WildCard : Pattern() {
+    object WildCard : Pattern() {
         override fun typeCheck(typeToMatch: T, environment: E,
                                variantTypeDefs: MutableMap<String, T?>): Pair<DecoratedPattern, E> {
             variantTypeDefs.clear()

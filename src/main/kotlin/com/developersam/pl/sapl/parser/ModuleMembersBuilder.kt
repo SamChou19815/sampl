@@ -15,7 +15,7 @@ internal object ModuleMembersBuilder : PLBaseVisitor<M>() {
     override fun visitModuleMembersDeclaration(ctx: ModuleMembersDeclarationContext): M {
         val typeMembers = ctx.moduleTypeDeclaration().map { c ->
             ModuleTypeMember(
-                    identifier = c.typeIdentifier().accept(TypeIdentifierBuilder),
+                    identifier = c.typeIdentifier().accept(TypeIdentifierExprBuilder),
                     declaration = c.typeExprInDeclaration().accept(TypeExprInDeclarationBuilder)
             )
         }

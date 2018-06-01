@@ -3,8 +3,8 @@ package com.developersam.pl.sapl.ast.raw
 import com.developersam.pl.sapl.ast.BinaryOperator
 import com.developersam.pl.sapl.ast.BinaryOperator.*
 import com.developersam.pl.sapl.ast.Literal
-import com.developersam.pl.sapl.ast.TypeExprInAnnotation
-import com.developersam.pl.sapl.ast.TypeExprInDeclaration
+import com.developersam.pl.sapl.ast.TypeExpr
+import com.developersam.pl.sapl.ast.TypeDeclaration
 import com.developersam.pl.sapl.ast.boolTypeExpr
 import com.developersam.pl.sapl.ast.charTypeExpr
 import com.developersam.pl.sapl.ast.decorated.DecoratedBinaryExpr
@@ -37,7 +37,7 @@ import com.developersam.pl.sapl.util.toFunctionTypeExpr
 /**
  * [Expression] represents a set of supported expression.
  */
-internal sealed class Expression {
+sealed class Expression {
 
     /**
      * [typeCheck] returns the decorated expression with the inferred type  under the given
@@ -52,7 +52,7 @@ internal sealed class Expression {
 /**
  * [LiteralExpr] represents a [literal] as an expression.
  */
-internal data class LiteralExpr(val literal: Literal) : Expression() {
+data class LiteralExpr(val literal: Literal) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression =
             DecoratedLiteralExpr(literal = literal, type = literal.inferredType)
@@ -63,8 +63,8 @@ internal data class LiteralExpr(val literal: Literal) : Expression() {
  * [VariableIdentifierExpr] represents a [variable] identifier as an expression.
  * It can only contain [genericInfo] which helps to determine the fixed type for this expression.
  */
-internal data class VariableIdentifierExpr(
-        val variable: String, private val genericInfo: List<TypeExprInAnnotation>
+data class VariableIdentifierExpr(
+        val variable: String, private val genericInfo: List<TypeExpr>
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
@@ -90,18 +90,18 @@ internal data class VariableIdentifierExpr(
  * [FunctionApplicationExpr] is the function application expression, with [functionExpr] as the
  * function and [arguments] as arguments of the function.
  */
-internal data class FunctionApplicationExpr(
+data class FunctionApplicationExpr(
         val functionExpr: Expression, val arguments: List<Expression>
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val decoratedFunctionExpr = functionExpr.typeCheck(environment = environment)
         val functionTypeOpt = decoratedFunctionExpr.type
-        val functionType = functionTypeOpt as? TypeExprInAnnotation.Function
+        val functionType = functionTypeOpt as? TypeExpr.Function
                 ?: throw UnexpectedTypeError(
                         expectedType = "<function>", actualType = functionTypeOpt
                 )
-        var expectedArg: TypeExprInAnnotation? = functionType.argumentType
+        var expectedArg: TypeExpr? = functionType.argumentType
         var returnType = functionType.returnType
         val decoratedArgumentExpr = arrayListOf<DecoratedExpression>()
         for (expr in arguments) {
@@ -114,10 +114,10 @@ internal data class FunctionApplicationExpr(
             }
             val r = returnType
             when (r) {
-                is TypeExprInAnnotation.SingleIdentifier -> {
+                is TypeExpr.Identifier -> {
                     expectedArg = null
                 }
-                is TypeExprInAnnotation.Function -> {
+                is TypeExpr.Function -> {
                     expectedArg = r.argumentType
                     returnType = r.returnType
                 }
@@ -133,97 +133,87 @@ internal data class FunctionApplicationExpr(
 /**
  * [BinaryExpr] represents a binary expression with operator [op] between [left] and [right].
  */
-internal data class BinaryExpr(
+data class BinaryExpr(
         val left: Expression, val op: BinaryOperator, val right: Expression
 ) : Expression() {
 
-    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression =
-            when (op) {
-                SHL, SHR, USHR, XOR, LAND, LOR, MUL, DIV, MOD, PLUS, MINUS -> {
-                    // int binary operators
-                    val leftExpr = left.typeCheck(environment = environment)
-                    val leftType = leftExpr.type
-                    if (leftType != intTypeExpr) {
-                        throw UnexpectedTypeError(
-                                expectedType = intTypeExpr, actualType = leftType
-                        )
-                    }
-                    val rightExpr = right.typeCheck(environment = environment)
-                    val rightType = rightExpr.type
-                    if (rightType == intTypeExpr) {
-                        DecoratedBinaryExpr(left = leftExpr, op = op,
-                                right = rightExpr, type = intTypeExpr)
-                    } else {
-                        throw UnexpectedTypeError(
-                                expectedType = intTypeExpr, actualType = rightType
-                        )
-                    }
+    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
+        val leftExpr = left.typeCheck(environment = environment)
+        val leftType = leftExpr.type
+        val rightExpr = right.typeCheck(environment = environment)
+        val rightType = rightExpr.type
+        val type = when (op) {
+            SHL, SHR, USHR, XOR, LAND, LOR, MUL, DIV, MOD, PLUS, MINUS -> {
+                // int binary operators
+                if (leftType != intTypeExpr) {
+                    throw UnexpectedTypeError(
+                            expectedType = intTypeExpr, actualType = leftType
+                    )
                 }
-                F_MUL, F_DIV, F_PLUS, F_MINUS -> {
-                    // float binary operators
-                    val leftExpr = left.typeCheck(environment = environment)
-                    val leftType = leftExpr.type
-                    if (leftType != floatTypeExpr) {
-                        throw UnexpectedTypeError(
-                                expectedType = floatTypeExpr, actualType = leftType
-                        )
-                    }
-                    val rightExpr = right.typeCheck(environment = environment)
-                    val rightType = rightExpr.type
-                    if (rightType == floatTypeExpr) {
-                        DecoratedBinaryExpr(left = leftExpr, op = op,
-                                right = rightExpr, type = floatTypeExpr)
-                    } else {
-                        throw UnexpectedTypeError(
-                                expectedType = floatTypeExpr, actualType = rightType
-                        )
-                    }
-                }
-                LT, LE, GT, GE -> {
-                    // comparison type operator
-                    val leftExpr = left.typeCheck(environment = environment)
-                    val leftType = leftExpr.type
-                    when (leftType) {
-                        intTypeExpr, floatTypeExpr, charTypeExpr, stringTypeExpr -> {
-                            val rightExpr = right.typeCheck(environment = environment)
-                            val rightType = rightExpr.type
-                            if (leftType == rightType) {
-                                DecoratedBinaryExpr(left = leftExpr, op = op,
-                                        right = rightExpr, type = boolTypeExpr)
-                            } else {
-                                throw UnexpectedTypeError(
-                                        expectedType = leftType, actualType = rightType
-                                )
-                            }
-                        }
-                        else -> throw UnexpectedTypeError(
-                                expectedType = intTypeExpr, actualType = leftType
-                        )
-                    }
-                }
-                REF_EQ, STRUCT_EQ, REF_NE, STRUCT_NE -> {
-                    // equality operator
-                    val leftExpr = left.typeCheck(environment = environment)
-                    val leftType = leftExpr.type
-                    val rightExpr = right.typeCheck(environment = environment)
-                    val rightType = rightExpr.type
-                    if (leftType == rightType) {
-                        DecoratedBinaryExpr(left = leftExpr, op = op,
-                                right = rightExpr, type = boolTypeExpr)
-                    } else {
-                        throw UnexpectedTypeError(
-                                expectedType = leftType, actualType = rightType
-                        )
-                    }
+                if (rightType == intTypeExpr) intTypeExpr else {
+                    throw UnexpectedTypeError(
+                            expectedType = intTypeExpr, actualType = rightType
+                    )
                 }
             }
+            F_MUL, F_DIV, F_PLUS, F_MINUS -> {
+                // float binary operators
+                if (leftType != floatTypeExpr) {
+                    throw UnexpectedTypeError(
+                            expectedType = floatTypeExpr, actualType = leftType
+                    )
+                }
+                if (rightType == floatTypeExpr) floatTypeExpr else {
+                    throw UnexpectedTypeError(
+                            expectedType = floatTypeExpr, actualType = rightType
+                    )
+                }
+            }
+            STR_CONCAT -> {
+                if (leftType != stringTypeExpr) {
+                    throw UnexpectedTypeError(
+                            expectedType = stringTypeExpr, actualType = leftType
+                    )
+                }
+                if (leftType == rightType) stringTypeExpr else {
+                    throw UnexpectedTypeError(
+                            expectedType = leftType, actualType = rightType
+                    )
+                }
+            }
+            LT, LE, GT, GE -> {
+                // comparison type operator
+                when (leftType) {
+                    intTypeExpr, floatTypeExpr, charTypeExpr, stringTypeExpr -> {
+                        if (leftType == rightType) boolTypeExpr else {
+                            throw UnexpectedTypeError(
+                                    expectedType = leftType, actualType = rightType
+                            )
+                        }
+                    }
+                    else -> throw UnexpectedTypeError(
+                            expectedType = intTypeExpr, actualType = leftType
+                    )
+                }
+            }
+            REF_EQ, STRUCT_EQ, REF_NE, STRUCT_NE -> {
+                // equality operator
+                if (leftType == rightType) boolTypeExpr else {
+                    throw UnexpectedTypeError(
+                            expectedType = leftType, actualType = rightType
+                    )
+                }
+            }
+        }
+        return DecoratedBinaryExpr(left = leftExpr, op = op, right = rightExpr, type = type)
+    }
 
 }
 
 /**
  * [NotExpr] represents the logical inversion of expression [expr].
  */
-internal data class NotExpr(val expr: Expression) : Expression() {
+data class NotExpr(val expr: Expression) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val e = expr.typeCheck(environment = environment)
@@ -241,7 +231,7 @@ internal data class NotExpr(val expr: Expression) : Expression() {
  * [LetExpr] represents the let expression of the form
  * `let` [identifier] `=` [e1] `;` [e2]
  */
-internal data class LetExpr(
+data class LetExpr(
         val identifier: String, val e1: Expression, val e2: Expression
 ) : Expression() {
 
@@ -265,9 +255,9 @@ internal data class LetExpr(
  * [FunctionExpr] is the function expression with some [arguments], a [returnType] and finally the
  * function [body].
  */
-internal data class FunctionExpr(
-        val arguments: List<Pair<String, TypeExprInAnnotation>>,
-        val returnType: TypeExprInAnnotation, val body: Expression
+data class FunctionExpr(
+        val arguments: List<Pair<String, TypeExpr>>,
+        val returnType: TypeExpr, val body: Expression
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
@@ -291,7 +281,7 @@ internal data class FunctionExpr(
  * [IfElseExpr] represents the if else expression, guarded by [condition] and having two
  * branches [e1] and [e2].
  */
-internal data class IfElseExpr(
+data class IfElseExpr(
         val condition: Expression, val e1: Expression, val e2: Expression
 ) : Expression() {
 
@@ -319,20 +309,20 @@ internal data class IfElseExpr(
  * [MatchExpr] represents the pattern matching expression, with a list of [matchingList] to match
  * against [exprToMatch].
  */
-internal data class MatchExpr(
+data class MatchExpr(
         val exprToMatch: Expression, val matchingList: List<Pair<Pattern, Expression>>
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val decoratedExprToMatch = exprToMatch.typeCheck(environment = environment)
         val typeToMatch = decoratedExprToMatch.type
-        val typeIdentifier = (typeToMatch as? TypeExprInAnnotation.SingleIdentifier)?.identifier
+        val typeIdentifier = (typeToMatch as? TypeExpr.Identifier)
                 ?: throw UnmatchableTypeError(typeExpr = typeToMatch)
         val typeDefinitionOpt = environment.typeDefinitions[typeIdentifier]
-                as? TypeExprInDeclaration.Variant
+                as? TypeDeclaration.Variant
         val variantTypeDeclarations = typeDefinitionOpt?.map?.toMutableMap()
                 ?: throw UnmatchableTypeError(typeExpr = typeToMatch)
-        var type: TypeExprInAnnotation? = null
+        var type: TypeExpr? = null
         val decoratedMatchingList = arrayListOf<Pair<DecoratedPattern, DecoratedExpression>>()
         for ((pattern, expr) in matchingList) {
             if (variantTypeDeclarations.isEmpty()) {
@@ -369,7 +359,7 @@ internal data class MatchExpr(
  * [ThrowExpr] represents the throw exception expression, where the thrown exception is [expr].
  * The throw expression is coerced to have [type].
  */
-internal data class ThrowExpr(val type: TypeExprInAnnotation, val expr: Expression) : Expression() {
+data class ThrowExpr(val type: TypeExpr, val expr: Expression) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val e = expr.typeCheck(environment = environment)
@@ -387,7 +377,7 @@ internal data class ThrowExpr(val type: TypeExprInAnnotation, val expr: Expressi
  * [tryExpr] is evaluated, and guard by catch branch with [exception] in scope and [catchHandler]
  * to deal with it.
  */
-internal data class TryCatchExpr(
+data class TryCatchExpr(
         val tryExpr: Expression, val exception: String, val catchHandler: Expression
 ) : Expression() {
 

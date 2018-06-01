@@ -5,37 +5,37 @@ package com.developersam.pl.sapl.ast
  *
  * @param inferredType the inferred type from the literal.
  */
-internal sealed class Literal(val inferredType: TypeExprInAnnotation) {
+sealed class Literal(val inferredType: TypeExpr) {
 
     /**
      * [Unit] is the literal for unit.
      */
-    private object Unit : Literal(inferredType = unitTypeExpr)
+    object Unit : Literal(inferredType = unitTypeExpr)
 
     /**
      * [Int] is the literal for int with [value].
      */
-    private data class Int(val value: Long) : Literal(inferredType = intTypeExpr)
+    data class Int(val value: Long) : Literal(inferredType = intTypeExpr)
 
     /**
      * [Float] is the literal for float with [value].
      */
-    private data class Float(val value: Double) : Literal(inferredType = floatTypeExpr)
+    data class Float(val value: Double) : Literal(inferredType = floatTypeExpr)
 
     /**
      * [Bool] is the literal for bool with [value].
      */
-    private data class Bool(val value: Boolean) : Literal(inferredType = boolTypeExpr)
+    data class Bool(val value: Boolean) : Literal(inferredType = boolTypeExpr)
 
     /**
      * [Char] is the literal for char with [value].
      */
-    private data class Char(val value: kotlin.Char) : Literal(inferredType = charTypeExpr)
+    data class Char(val value: kotlin.Char) : Literal(inferredType = charTypeExpr)
 
     /**
      * [String] is the literal for string with [value].
      */
-    private data class String(val value: kotlin.String) : Literal(inferredType = stringTypeExpr)
+    data class String(val value: kotlin.String) : Literal(inferredType = stringTypeExpr)
 
     companion object {
         /**
