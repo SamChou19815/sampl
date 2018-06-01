@@ -287,6 +287,7 @@ data class FunctionExpr(
         val functionDeclaredType = toFunctionTypeExpr(
                 argumentTypes = arguments.map { it.second }, returnType = returnType
         )
+        functionDeclaredType.checkTypeValidity(environment = environment)
         val bodyExpr = body.typeCheck(environment = environment)
         val bodyType = bodyExpr.type
         if (returnType != bodyType) {

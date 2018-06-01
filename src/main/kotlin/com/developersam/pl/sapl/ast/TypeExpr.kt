@@ -1,5 +1,7 @@
 package com.developersam.pl.sapl.ast
 
+import com.developersam.pl.sapl.environment.TypeCheckingEnv
+import com.developersam.pl.sapl.exceptions.UndefinedTypeIdentifierError
 import kotlin.math.min
 
 /**
@@ -47,6 +49,12 @@ sealed class TypeExpr : Comparable<TypeExpr> {
     abstract fun substituteGenerics(map: Map<String, TypeExpr>): TypeExpr
 
     /**
+     * [checkTypeValidity] tries to check the type is well-formed under the current given
+     * [environment]. If not, it should throw [UndefinedTypeIdentifierError]
+     */
+    abstract fun checkTypeValidity(environment: TypeCheckingEnv)
+
+    /**
      * [Identifier] represents a single [type] with optional [genericsList].
      */
     data class Identifier(
@@ -56,6 +64,15 @@ sealed class TypeExpr : Comparable<TypeExpr> {
         override fun substituteGenerics(map: Map<String, TypeExpr>): TypeExpr =
                 map[type].takeIf { genericsList.isEmpty() }
                         ?: Identifier(type, genericsList.map { it.substituteGenerics(map) })
+
+        override fun checkTypeValidity(environment: TypeCheckingEnv) {
+            val declaredGenerics = environment.declaredTypes[type]
+                    ?: throw UndefinedTypeIdentifierError(badIdentifier = type)
+            if (declaredGenerics.size != genericsList.size) {
+                throw UndefinedTypeIdentifierError(badIdentifier = type)
+            }
+            genericsList.forEach { it.checkTypeValidity(environment = environment) }
+        }
 
     }
 
@@ -72,6 +89,11 @@ sealed class TypeExpr : Comparable<TypeExpr> {
                         argumentType = argumentType.substituteGenerics(map = map),
                         returnType = returnType.substituteGenerics(map = map)
                 )
+
+        override fun checkTypeValidity(environment: TypeCheckingEnv) {
+            argumentType.checkTypeValidity(environment = environment)
+            returnType.checkTypeValidity(environment = environment)
+        }
 
     }
 

@@ -35,7 +35,12 @@ data class ModuleFunctionMember(
      * Requires: [environment] must already put all the function members inside to allow mutually
      * recursive functions.
      */
-    fun typeCheck(environment: TypeCheckingEnv) : DecoratedModuleFunctionMember {
+    fun typeCheck(environment: TypeCheckingEnv): DecoratedModuleFunctionMember {
+        functionType.checkTypeValidity(environment = environment.copy(
+                declaredTypes = genericsDeclaration.fold(environment.declaredTypes) { acc, s ->
+                    acc.put(key = s, value = emptyList())
+                }
+        ))
         val expectedType = functionType.returnType
         val bodyExpr = body.typeCheck(environment = environment)
         val bodyType = bodyExpr.type

@@ -22,6 +22,17 @@ data class ModuleTypeMember(
      * recursive types.
      */
     fun typeCheck(environment: TypeCheckingEnv) {
+        val newDeclaredTypes = identifier.genericsInfo
+                .fold(initial = environment.declaredTypes) { acc, s ->
+                    acc.put(key = s, value = emptyList())
+                }
+        val newEnv = environment.copy(declaredTypes = newDeclaredTypes)
+        when (declaration) {
+            is TypeDeclaration.Variant -> declaration.map.values
+                    .forEach { it?.checkTypeValidity(environment = newEnv) }
+            is TypeDeclaration.Struct -> declaration.map.values
+                    .forEach { it.checkTypeValidity(environment = newEnv) }
+        }
 
     }
 
