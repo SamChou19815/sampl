@@ -4,6 +4,7 @@ import com.developersam.fp.FpMap
 import com.developersam.pl.sapl.ast.TypeDeclaration
 import com.developersam.pl.sapl.ast.TypeExpr
 import com.developersam.pl.sapl.ast.TypeInfo
+import com.developersam.pl.sapl.ast.raw.Module
 
 /**
  * [TypeCheckingEnv] is the environment for type checking. It contains a set of currently
@@ -47,6 +48,26 @@ data class TypeCheckingEnv(
      */
     fun remove(variable: String): TypeCheckingEnv =
             update(newCurrent = currentLevelTypeEnv.remove(variable))
+
+    /**
+     * [exitModule] produces a new [TypeCheckingEnv] with all the public information preserved and
+     * make the access of current module elements prefixed with module name,
+     */
+    fun exitModule(module: Module): TypeCheckingEnv {
+        val members = module.members
+        // remove private members
+        var envTemp = members.constantMembers.fold(initial = this) { env, m ->
+            if (m.isPublic) env else env.remove(variable = m.identifier)
+        }
+        envTemp = members.functionMembers.fold(initial = envTemp) { env, m ->
+            if (m.isPublic) env else env.remove(variable = m.identifier)
+        }
+        // move current level to upper level
+        val newUpperLevel = envTemp.currentLevelTypeEnv
+                .mapByKey { k -> "${module.name}.$k" }
+                .reduce(envTemp.upperLevelTypeEnv) { k, v, acc -> acc.put(key = k, value = v) }
+        return envTemp.copy(upperLevelTypeEnv = newUpperLevel, currentLevelTypeEnv = FpMap.empty())
+    }
 
     companion object {
         /**
