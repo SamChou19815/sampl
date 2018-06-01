@@ -8,18 +8,21 @@ importDeclaration : IMPORT LBRACE UpperIdentifier (COMMA UpperIdentifier)* RBRAC
 
 moduleDeclaration : MODULE UpperIdentifier LBRACE moduleMembersDeclaration RBRACE;
 
-moduleMembersDeclaration:
+moduleMembersDeclaration :
     moduleTypeDeclaration* // first type definitions
     moduleConstantDeclaration* // then constant definitions
     moduleFunctionDeclaration* // then function definitions
     moduleDeclaration* // finally nested module definitions
     ;
 
-moduleTypeDeclaration: PRIVATE? TYPE typeIdentifier ASSIGN typeExprInDeclaration;
+moduleTypeDeclaration :
+    PRIVATE? TYPE
+        UpperIdentifier genericsDeclaration?
+    ASSIGN typeExprInDeclaration;
 
 moduleConstantDeclaration: PRIVATE? LET LowerIdentifier ASSIGN expression;
 
-moduleFunctionDeclaration:
+moduleFunctionDeclaration :
     PRIVATE? LET LowerIdentifier genericsDeclaration?
         argumentDeclaration+ typeAnnotation
     ASSIGN expression;
@@ -27,7 +30,7 @@ moduleFunctionDeclaration:
 typeExprInAnnotation
     : LPAREN typeExprInAnnotation RPAREN
       # NestedTypeInAnnotation
-    | typeIdentifier
+    | (UpperIdentifier DOT)* UpperIdentifier genericsBracket?
       # SingleIdentifierTypeInAnnotation
     | <assoc=right> typeExprInAnnotation ARROW typeExprInAnnotation
       # FunctionTypeInAnnotation
@@ -39,7 +42,6 @@ typeExprInDeclaration
     ;
 
 // Some parser type fragment
-typeIdentifier : (UpperIdentifier DOT)* UpperIdentifier genericsBracket?;
 genericsBracket : LBRACKET typeExprInAnnotation (COMMA typeExprInAnnotation)* RBRACKET;
 variantConstructorDeclaration : UpperIdentifier (OF typeExprInAnnotation)?;
 typeAnnotation : COLON typeExprInAnnotation;

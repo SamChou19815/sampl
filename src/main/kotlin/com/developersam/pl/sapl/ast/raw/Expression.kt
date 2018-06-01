@@ -1,10 +1,33 @@
 package com.developersam.pl.sapl.ast.raw
 
 import com.developersam.pl.sapl.ast.BinaryOperator
-import com.developersam.pl.sapl.ast.BinaryOperator.*
+import com.developersam.pl.sapl.ast.BinaryOperator.DIV
+import com.developersam.pl.sapl.ast.BinaryOperator.F_DIV
+import com.developersam.pl.sapl.ast.BinaryOperator.F_MINUS
+import com.developersam.pl.sapl.ast.BinaryOperator.F_MUL
+import com.developersam.pl.sapl.ast.BinaryOperator.F_PLUS
+import com.developersam.pl.sapl.ast.BinaryOperator.GE
+import com.developersam.pl.sapl.ast.BinaryOperator.GT
+import com.developersam.pl.sapl.ast.BinaryOperator.LAND
+import com.developersam.pl.sapl.ast.BinaryOperator.LE
+import com.developersam.pl.sapl.ast.BinaryOperator.LOR
+import com.developersam.pl.sapl.ast.BinaryOperator.LT
+import com.developersam.pl.sapl.ast.BinaryOperator.MINUS
+import com.developersam.pl.sapl.ast.BinaryOperator.MOD
+import com.developersam.pl.sapl.ast.BinaryOperator.MUL
+import com.developersam.pl.sapl.ast.BinaryOperator.PLUS
+import com.developersam.pl.sapl.ast.BinaryOperator.REF_EQ
+import com.developersam.pl.sapl.ast.BinaryOperator.REF_NE
+import com.developersam.pl.sapl.ast.BinaryOperator.SHL
+import com.developersam.pl.sapl.ast.BinaryOperator.SHR
+import com.developersam.pl.sapl.ast.BinaryOperator.STRUCT_EQ
+import com.developersam.pl.sapl.ast.BinaryOperator.STRUCT_NE
+import com.developersam.pl.sapl.ast.BinaryOperator.STR_CONCAT
+import com.developersam.pl.sapl.ast.BinaryOperator.USHR
+import com.developersam.pl.sapl.ast.BinaryOperator.XOR
 import com.developersam.pl.sapl.ast.Literal
-import com.developersam.pl.sapl.ast.TypeExpr
 import com.developersam.pl.sapl.ast.TypeDeclaration
+import com.developersam.pl.sapl.ast.TypeExpr
 import com.developersam.pl.sapl.ast.boolTypeExpr
 import com.developersam.pl.sapl.ast.charTypeExpr
 import com.developersam.pl.sapl.ast.decorated.DecoratedBinaryExpr
@@ -23,6 +46,7 @@ import com.developersam.pl.sapl.ast.decorated.DecoratedVariableIdentifierExpr
 import com.developersam.pl.sapl.ast.floatTypeExpr
 import com.developersam.pl.sapl.ast.intTypeExpr
 import com.developersam.pl.sapl.ast.stringTypeExpr
+import com.developersam.pl.sapl.environment.TypeCheckingEnv
 import com.developersam.pl.sapl.exceptions.GenericInfoWrongNumberOfArgumentsError
 import com.developersam.pl.sapl.exceptions.NonExhaustivePatternMatchingError
 import com.developersam.pl.sapl.exceptions.ShadowedNameError
@@ -31,7 +55,6 @@ import com.developersam.pl.sapl.exceptions.UndefinedIdentifierError
 import com.developersam.pl.sapl.exceptions.UnexpectedTypeError
 import com.developersam.pl.sapl.exceptions.UnmatchableTypeError
 import com.developersam.pl.sapl.exceptions.UnusedPatternError
-import com.developersam.pl.sapl.environment.TypeCheckingEnv
 import com.developersam.pl.sapl.util.toFunctionTypeExpr
 
 /**
@@ -318,9 +341,11 @@ data class MatchExpr(
         val typeToMatch = decoratedExprToMatch.type
         val typeIdentifier = (typeToMatch as? TypeExpr.Identifier)
                 ?: throw UnmatchableTypeError(typeExpr = typeToMatch)
-        val typeDefinitionOpt = environment.typeDefinitions[typeIdentifier]
-                as? TypeDeclaration.Variant
-        val variantTypeDeclarations = typeDefinitionOpt?.map?.toMutableMap()
+        // TODO make use of genericsInfo
+        val (genericsInfo, typeDefinition) = environment.typeDefinitions[typeIdentifier.type]
+                ?: throw UnmatchableTypeError(typeExpr = typeToMatch)
+        val variantTypeDeclarations = (typeDefinition as? TypeDeclaration.Variant)
+                ?.map?.toMutableMap()
                 ?: throw UnmatchableTypeError(typeExpr = typeToMatch)
         var type: TypeExpr? = null
         val decoratedMatchingList = arrayListOf<Pair<DecoratedPattern, DecoratedExpression>>()

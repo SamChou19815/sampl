@@ -2,9 +2,11 @@ package com.developersam.pl.sapl.parser
 
 import com.developersam.pl.sapl.antlr.PLBaseVisitor
 import com.developersam.pl.sapl.antlr.PLParser.ModuleMembersDeclarationContext
+import com.developersam.pl.sapl.ast.TypeIdentifier
 import com.developersam.pl.sapl.ast.raw.ModuleConstantMember
 import com.developersam.pl.sapl.ast.raw.ModuleFunctionMember
 import com.developersam.pl.sapl.ast.raw.ModuleTypeMember
+import org.antlr.v4.runtime.tree.TerminalNode
 import com.developersam.pl.sapl.ast.raw.ModuleMembers as M
 
 /**
@@ -16,7 +18,13 @@ internal object ModuleMembersBuilder : PLBaseVisitor<M>() {
         val typeMembers = ctx.moduleTypeDeclaration().map { c ->
             ModuleTypeMember(
                     isPublic = c.PRIVATE() == null,
-                    identifier = c.typeIdentifier().accept(TypeIdentifierExprBuilder),
+                    identifier = TypeIdentifier(
+                            name = c.UpperIdentifier().text,
+                            genericsInfo = c.genericsDeclaration()
+                                    ?.UpperIdentifier()
+                                    ?.map(TerminalNode::getText)
+                                    ?: emptyList()
+                    ),
                     declaration = c.typeExprInDeclaration().accept(TypeExprInDeclarationBuilder)
             )
         }

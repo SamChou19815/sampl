@@ -1,7 +1,7 @@
 package com.developersam.pl.sapl.ast.raw
 
 import com.developersam.pl.sapl.ast.TypeDeclaration
-import com.developersam.pl.sapl.ast.TypeExpr
+import com.developersam.pl.sapl.ast.TypeIdentifier
 import com.developersam.pl.sapl.environment.TypeCheckingEnv
 
 /**
@@ -10,10 +10,10 @@ import com.developersam.pl.sapl.environment.TypeCheckingEnv
  */
 data class ModuleTypeMember(
         override val isPublic: Boolean,
-        val identifier: TypeExpr.Identifier, val declaration: TypeDeclaration
+        val identifier: TypeIdentifier, val declaration: TypeDeclaration
 ) : ModuleMember {
 
-    override val name: String = identifier.type
+    override val name: String = identifier.name
 
     /**
      * [typeCheck] uses the given [environment] to type check this function member.
