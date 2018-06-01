@@ -9,7 +9,7 @@ import com.developersam.pl.sapl.ast.TypeExpr
  * It has an additional [type] field.
  */
 data class DecoratedModuleFunctionMember(
-        val isPublic: Boolean, val identifier: String,
+        override val isPublic: Boolean, val identifier: String,
         val genericsDeclaration: List<String>,
         val arguments: List<Pair<String, TypeExpr>>,
         val returnType: TypeExpr, val body: DecoratedExpression,

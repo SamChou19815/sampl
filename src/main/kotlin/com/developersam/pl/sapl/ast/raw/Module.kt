@@ -15,6 +15,8 @@ import com.developersam.pl.sapl.environment.TypeCheckingEnv
  */
 data class Module(override val name: String, val members: ModuleMembers) : ModuleMember {
 
+    override val isPublic: Boolean = true
+
     /**
      * [noNameShadowingValidation] validates that the members collection has no name shadowing by
      * checking whether there is a name conflict with a name in [set].
@@ -54,24 +56,17 @@ data class Module(override val name: String, val members: ModuleMembers) : Modul
      * It returns a decorated module and a new environment after type check.
      */
     private fun typeCheck(e: TypeCheckingEnv): Pair<DecoratedModule, TypeCheckingEnv> {
-        // conflict checker
-        noNameShadowingValidation(set = hashSetOf())
-        // members
+        // Part 0: Members Declaration (for easier access only)
         val typeMembers = members.typeMembers
         val constantMembers = members.constantMembers
         val functionMembers = members.functionMembers
         val nestedModuleMembers = members.nestedModuleMembers
-        // processed type declarations
-        val init = TypeCheckingEnv(
-                typeDefinitions = typeMembers.fold(e.typeDefinitions) { acc, m ->
-                    acc.put(key = m.identifier, value = m.declaration)
-                },
-                upperLevelTypeEnv = e.upperLevelTypeEnv
-        )
-        typeMembers.forEach { it.typeCheck(environment = init) }
-        // process constant definitions
+        // Part 1: Process Type Declarations
+        val eInit = e.enterModule(module = this)
+        typeMembers.forEach { it.typeCheck(environment = eInit) }
+        // Part 2: Process Constant Definitions
         val decoratedConstants = arrayListOf<DecoratedModuleConstantMember>()
-        val eWithC = constantMembers.fold(initial = init) { env, m ->
+        val eWithConstants = constantMembers.fold(initial = eInit) { env, m ->
             val decoratedExpr = m.expr.typeCheck(environment = env)
             val decoratedConstant = DecoratedModuleConstantMember(
                     isPublic = m.isPublic, identifier = m.identifier, expr = decoratedExpr,
@@ -80,27 +75,27 @@ data class Module(override val name: String, val members: ModuleMembers) : Modul
             decoratedConstants.add(element = decoratedConstant)
             env.put(variable = m.identifier, typeInfo = decoratedExpr.type.asTypeInformation)
         }
-        // process function definitions
-        val eWithF = eWithC.update(
-                newCurrent = functionMembers.fold(initial = eWithC.currentLevelTypeEnv) { env, m ->
+        // Part 3: Process Function Definitions
+        val eWithFunctions = eWithConstants.update(
+                newTypeEnv = functionMembers.fold(initial = eWithConstants.typeEnv) { env, m ->
                     val functionTypeInfo = TypeInfo(m.functionType, m.genericsDeclaration)
                     env.put(key = m.identifier, value = functionTypeInfo)
                 })
-        val decoratedFunctions = functionMembers.map { it.typeCheck(environment = eWithF) }
-        // process nested modules
+        val decoratedFunctions = functionMembers.map { it.typeCheck(environment = eWithFunctions) }
+        // Part 4: Process Nested Modules
         val decoratedModules = arrayListOf<DecoratedModule>()
-        val envWithModules = nestedModuleMembers.fold(initial = eWithF) { env, m ->
+        val eWithModules = nestedModuleMembers.fold(initial = eWithFunctions) { env, m ->
             val (decoratedModule, newEnv) = m.typeCheck(env)
             decoratedModules.add(element = decoratedModule)
             newEnv
         }
-        // exit module
-        val finalEnv = envWithModules.exitModule(module = this)
+        // Part 5: Exit Current Module and Return
         val decoratedModule = DecoratedModule(name = name, members = DecoratedModuleMembers(
                 typeMembers = typeMembers, constantMembers = decoratedConstants,
                 functionMembers = decoratedFunctions, nestedModuleMembers = decoratedModules
         ))
-        return decoratedModule to finalEnv
+        val eFinal = eWithModules.exitModule(module = this)
+        return decoratedModule to eFinal
     }
 
     /**
@@ -109,6 +104,9 @@ data class Module(override val name: String, val members: ModuleMembers) : Modul
      *
      * @return the decorated module after type check.
      */
-    fun typeCheck(): DecoratedModule = typeCheck(e = TypeCheckingEnv.empty).first
+    fun typeCheck(): DecoratedModule {
+        noNameShadowingValidation(set = hashSetOf())
+        return typeCheck(e = TypeCheckingEnv.initial).first
+    }
 
 }

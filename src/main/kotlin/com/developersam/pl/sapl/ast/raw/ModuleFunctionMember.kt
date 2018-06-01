@@ -12,7 +12,7 @@ import com.developersam.pl.sapl.util.toFunctionTypeExpr
  * [arguments] `:` [returnType] `=` [body].
  */
 data class ModuleFunctionMember(
-        val isPublic: Boolean, val identifier: String,
+        override val isPublic: Boolean, val identifier: String,
         val genericsDeclaration: List<String>,
         val arguments: List<Pair<String, TypeExpr>>,
         val returnType: TypeExpr, val body: Expression

@@ -6,9 +6,10 @@ import com.developersam.pl.sapl.environment.TypeCheckingEnv
 
 /**
  * [ModuleTypeMember] represents a type declaration of the form:
- * `type` [identifier] `=` [declaration].
+ * `public/private`([isPublic]) `type` [identifier] `=` [declaration].
  */
 data class ModuleTypeMember(
+        override val isPublic: Boolean,
         val identifier: TypeExpr.Identifier, val declaration: TypeDeclaration
 ) : ModuleMember {
 

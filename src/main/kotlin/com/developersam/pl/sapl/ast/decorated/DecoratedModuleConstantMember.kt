@@ -8,7 +8,7 @@ import com.developersam.pl.sapl.ast.TypeExpr
  * It has an additional [type] field.
  */
 data class DecoratedModuleConstantMember(
-        val isPublic: Boolean, val identifier: String, val expr: DecoratedExpression,
+        override val isPublic: Boolean, val identifier: String, val expr: DecoratedExpression,
         override val type: TypeExpr
 ) : DecoratedModuleMember {
     override val name: String = identifier

@@ -15,7 +15,7 @@ moduleMembersDeclaration:
     moduleDeclaration* // finally nested module definitions
     ;
 
-moduleTypeDeclaration: TYPE typeIdentifier ASSIGN typeExprInDeclaration;
+moduleTypeDeclaration: PRIVATE? TYPE typeIdentifier ASSIGN typeExprInDeclaration;
 
 moduleConstantDeclaration: PRIVATE? LET LowerIdentifier ASSIGN expression;
 
