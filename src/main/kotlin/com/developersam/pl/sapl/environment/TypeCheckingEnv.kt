@@ -3,7 +3,7 @@ package com.developersam.pl.sapl.environment
 import com.developersam.fp.FpMap
 import com.developersam.pl.sapl.ast.TypeDeclaration
 import com.developersam.pl.sapl.ast.TypeExpr
-import com.developersam.pl.sapl.ast.TypeInformation
+import com.developersam.pl.sapl.ast.TypeInfo
 
 /**
  * [TypeCheckingEnv] is the environment for type checking. It contains a set of currently
@@ -16,29 +16,29 @@ import com.developersam.pl.sapl.ast.TypeInformation
  */
 data class TypeCheckingEnv(
         val typeDefinitions: FpMap<TypeExpr.Identifier, TypeDeclaration> = FpMap.empty(),
-        val upperLevelTypeEnv: FpMap<String, TypeInformation> = FpMap.empty(),
-        val currentLevelTypeEnv: FpMap<String, TypeInformation> = FpMap.empty()
+        val upperLevelTypeEnv: FpMap<String, TypeInfo> = FpMap.empty(),
+        val currentLevelTypeEnv: FpMap<String, TypeInfo> = FpMap.empty()
 ) {
 
     /**
      * [update] creates a new [TypeCheckingEnv] with current level type environment updated
      * to [newCurrent].
      */
-    fun update(newCurrent: FpMap<String, TypeInformation>): TypeCheckingEnv =
+    fun update(newCurrent: FpMap<String, TypeInfo>): TypeCheckingEnv =
             copy(currentLevelTypeEnv = newCurrent)
 
     /**
      * [get] returns the optionally existing type information for the given
      * [variable], with potentially fully-qualified name.
      */
-    operator fun get(variable: String): TypeInformation? =
+    operator fun get(variable: String): TypeInfo? =
             currentLevelTypeEnv[variable] ?: upperLevelTypeEnv[variable]
 
     /**
      * [put] creates a new [TypeCheckingEnv] that has the current level
      * type environment updated with a new pair [variable] to [typeInfo].
      */
-    fun put(variable: String, typeInfo: TypeInformation): TypeCheckingEnv =
+    fun put(variable: String, typeInfo: TypeInfo): TypeCheckingEnv =
             update(newCurrent = currentLevelTypeEnv.put(variable, typeInfo))
 
     /**

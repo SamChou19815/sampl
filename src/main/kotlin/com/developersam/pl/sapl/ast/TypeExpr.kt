@@ -8,10 +8,10 @@ import kotlin.math.min
 sealed class TypeExpr : Comparable<TypeExpr> {
 
     /**
-     * [asTypeInformation] converts itself to [TypeInformation] without generics declaration.
+     * [asTypeInformation] converts itself to [TypeInfo] without generics declaration.
      */
-    val asTypeInformation: TypeInformation
-        get() = TypeInformation(typeExpr = this)
+    val asTypeInformation: TypeInfo
+        get() = TypeInfo(typeExpr = this)
 
     override fun compareTo(other: TypeExpr): Int {
         if (this is Identifier && other is Identifier) {

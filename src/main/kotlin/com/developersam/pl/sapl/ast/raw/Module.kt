@@ -2,7 +2,7 @@ package com.developersam.pl.sapl.ast.raw
 
 import com.developersam.fp.FpMap
 import com.developersam.pl.sapl.TOP_LEVEL_MODULE_NAME
-import com.developersam.pl.sapl.ast.TypeInformation
+import com.developersam.pl.sapl.ast.TypeInfo
 import com.developersam.pl.sapl.ast.decorated.DecoratedModule
 import com.developersam.pl.sapl.ast.decorated.DecoratedModuleConstantMember
 import com.developersam.pl.sapl.ast.decorated.DecoratedModuleFunctionMember
@@ -86,7 +86,7 @@ data class Module(override val name: String, val members: ModuleMembers) : Modul
         val decoratedFunctions = arrayListOf<DecoratedModuleFunctionMember>()
         val eWithF = eWithC.update(
                 newCurrent = functionMembers.fold(eWithC.currentLevelTypeEnv) { env, m ->
-                    env.put(key = m.identifier, value = TypeInformation(
+                    env.put(key = m.identifier, value = TypeInfo(
                             typeExpr = m.functionType, genericInfo = m.genericsDeclaration
                     ))
                 })
