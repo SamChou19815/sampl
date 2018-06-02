@@ -1,3 +1,5 @@
+@file:JvmName(name = "Pervasives")
+
 package com.developersam.pl.sapl.util
 
 import java.util.Arrays

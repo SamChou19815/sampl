@@ -63,6 +63,7 @@ import com.developersam.pl.sapl.exceptions.UnexpectedTypeError
 import com.developersam.pl.sapl.exceptions.UnmatchableTypeError
 import com.developersam.pl.sapl.exceptions.UnusedPatternError
 import com.developersam.pl.sapl.exceptions.VariantNotFoundError
+import com.developersam.pl.sapl.util.inferActualGenericTypeInfo
 import com.developersam.pl.sapl.util.toFunctionTypeExpr
 
 /**
@@ -179,7 +180,15 @@ sealed class ConstructorExpr : Expression() {
                     ?: throw VariantNotFoundError(typeName = typeName, variantName = variantName)
             val decoratedData = data.typeCheck(environment = e)
             val decoratedDataType = decoratedData.type
-            TODO(reason = "Reconcile between generic type and actual type.")
+            val inferredGenericInfo = inferActualGenericTypeInfo(
+                    genericDeclarations = genericDeclarations,
+                    genericTypeExpr = declaredVariantType, actualTypeExpr = decoratedDataType
+            )
+            val type = TypeExpr.Identifier(type = typeName, genericsList = inferredGenericInfo)
+            return DecoratedConstructorExpr.OneArgVariant(
+                    typeName = typeName, variantName = variantName, data = decoratedData,
+                    type = type
+            )
         }
 
     }

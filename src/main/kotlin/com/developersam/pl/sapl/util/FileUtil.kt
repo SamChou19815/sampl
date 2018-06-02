@@ -1,3 +1,5 @@
+@file:JvmName(name = "FileUtil")
+
 package com.developersam.pl.sapl.util
 
 import com.developersam.pl.sapl.EXTENSION
