@@ -3,6 +3,7 @@ package com.developersam.pl.sapl.ast.decorated
 import com.developersam.pl.sapl.ast.BinaryOperator
 import com.developersam.pl.sapl.ast.Literal
 import com.developersam.pl.sapl.ast.TypeExpr
+import com.developersam.pl.sapl.environment.TypeCheckingEnv
 
 /**
  * [DecoratedExpression] is an expression with a correct decorated type.
@@ -76,6 +77,14 @@ sealed class DecoratedConstructorExpr : DecoratedExpression() {
     ) : DecoratedConstructorExpr()
 
 }
+
+/**
+ * [DecoratedStructMemberAccessExpr] with correct [type] represents accessing [memberName]
+ * of [structExpr].
+ */
+data class DecoratedStructMemberAccessExpr(
+        val structExpr: DecoratedExpression, val memberName: String, override val type: TypeExpr
+) : DecoratedExpression()
 
 /**
  * [DecoratedNotExpr] with correct [type] represents the logical inversion of expression [expr].

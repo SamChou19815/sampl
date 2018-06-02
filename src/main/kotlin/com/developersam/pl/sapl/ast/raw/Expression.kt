@@ -43,6 +43,7 @@ import com.developersam.pl.sapl.ast.decorated.DecoratedLiteralExpr
 import com.developersam.pl.sapl.ast.decorated.DecoratedMatchExpr
 import com.developersam.pl.sapl.ast.decorated.DecoratedNotExpr
 import com.developersam.pl.sapl.ast.decorated.DecoratedPattern
+import com.developersam.pl.sapl.ast.decorated.DecoratedStructMemberAccessExpr
 import com.developersam.pl.sapl.ast.decorated.DecoratedThrowExpr
 import com.developersam.pl.sapl.ast.decorated.DecoratedTryCatchExpr
 import com.developersam.pl.sapl.ast.decorated.DecoratedVariableIdentifierExpr
@@ -268,6 +269,34 @@ sealed class ConstructorExpr : Expression() {
             )
         }
 
+    }
+
+}
+
+/**
+ * [StructMemberAccessExpr] represents accessing [memberName] of [structExpr].
+ */
+data class StructMemberAccessExpr(
+        val structExpr: Expression, val memberName: String
+) : Expression() {
+
+    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
+        val decoratedStructExpr = structExpr.typeCheck(environment = environment)
+        val structType = decoratedStructExpr.type as? TypeExpr.Identifier
+                ?: throw UnexpectedTypeError(expectedType = "<struct>",
+                        actualType = decoratedStructExpr.type)
+        val structTypeName = structType.type
+        val (genericDeclarations, typeDeclarations) = environment.typeDefinitions[structTypeName]
+                ?: throw UndefinedTypeIdentifierError(badIdentifier = structTypeName)
+        val structDeclarationMap = (typeDeclarations as? TypeDeclaration.Struct)?.map
+                ?: throw StructNotFoundError(structName = structTypeName)
+        val memberTypeDeclaration = structDeclarationMap[memberName]
+                ?: throw StructMissingMemberError(structTypeName, memberName)
+        val replacementMap = genericDeclarations.zip(structType.genericsList).toMap()
+        val actualMemberType = memberTypeDeclaration.substituteGenerics(map = replacementMap)
+        return DecoratedStructMemberAccessExpr(
+                structExpr = decoratedStructExpr, memberName = memberName, type = actualMemberType
+        )
     }
 
 }

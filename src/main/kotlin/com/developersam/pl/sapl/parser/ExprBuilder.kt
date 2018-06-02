@@ -1,7 +1,6 @@
 package com.developersam.pl.sapl.parser
 
 import com.developersam.pl.sapl.antlr.PLBaseVisitor
-import com.developersam.pl.sapl.antlr.PLParser
 import com.developersam.pl.sapl.antlr.PLParser.BitExprContext
 import com.developersam.pl.sapl.antlr.PLParser.ComparisonExprContext
 import com.developersam.pl.sapl.antlr.PLParser.ConjunctionExprContext
@@ -17,6 +16,7 @@ import com.developersam.pl.sapl.antlr.PLParser.LiteralExprContext
 import com.developersam.pl.sapl.antlr.PLParser.MatchExprContext
 import com.developersam.pl.sapl.antlr.PLParser.NestedExprContext
 import com.developersam.pl.sapl.antlr.PLParser.NotExprContext
+import com.developersam.pl.sapl.antlr.PLParser.StructMemberAccessExprContext
 import com.developersam.pl.sapl.antlr.PLParser.TermExprContext
 import com.developersam.pl.sapl.antlr.PLParser.ThrowExprContext
 import com.developersam.pl.sapl.antlr.PLParser.TryCatchExprContext
@@ -31,6 +31,7 @@ import com.developersam.pl.sapl.ast.raw.LetExpr
 import com.developersam.pl.sapl.ast.raw.LiteralExpr
 import com.developersam.pl.sapl.ast.raw.MatchExpr
 import com.developersam.pl.sapl.ast.raw.NotExpr
+import com.developersam.pl.sapl.ast.raw.StructMemberAccessExpr
 import com.developersam.pl.sapl.ast.raw.ThrowExpr
 import com.developersam.pl.sapl.ast.raw.TryCatchExpr
 import com.developersam.pl.sapl.ast.raw.VariableIdentifierExpr
@@ -60,6 +61,12 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
 
     override fun visitConstructorExpr(ctx: ConstructorExprContext): Expression =
             ctx.accept(ConstructorExprBuilder)
+
+    override fun visitStructMemberAccessExpr(ctx: StructMemberAccessExprContext): Expression =
+            StructMemberAccessExpr(
+                    structExpr = ctx.expression().accept(this),
+                    memberName = ctx.LowerIdentifier().text
+            )
 
     override fun visitNotExpr(ctx: NotExprContext): Expression =
             NotExpr(expr = ctx.expression().accept(this))

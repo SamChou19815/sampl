@@ -53,8 +53,9 @@ genericsDeclaration : LT UpperIdentifier (COMMA UpperIdentifier)* GT;
 expression
     : LPAREN expression RPAREN # NestedExpr
     | Literal # LiteralExpr
-    | (UpperIdentifier DOT)* LowerIdentifier genericsSpecialization # IdentifierExpr
+    | (UpperIdentifier DOT)* LowerIdentifier genericsSpecialization? # IdentifierExpr
     | constructor # ConstructorExpr
+    | expression DOT LowerIdentifier # StructMemberAccessExpr
     | NOT expression # NotExpr
     | expression BitOperator expression # BitExpr
     | expression FactorOperator expression # FactorExpr
