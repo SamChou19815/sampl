@@ -57,10 +57,10 @@ expression
     | constructor # ConstructorExpr
     | expression DOT LowerIdentifier # StructMemberAccessExpr
     | NOT expression # NotExpr
-    | expression BitOperator expression # BitExpr
-    | expression FactorOperator expression # FactorExpr
-    | expression TermOperator expression # TermExpr
-    | expression ComparisonOperator expression # ComparisonExpr
+    | expression bitOperator expression # BitExpr
+    | expression factorOperator expression # FactorExpr
+    | expression termOperator expression # TermExpr
+    | expression comparisonOperator expression # ComparisonExpr
     | expression AND expression # ConjunctionExpr
     | expression OR expression # DisjunctionExpr
     | THROW LBRACKET typeExprInAnnotation RBRACKET expression # ThrowExpr
@@ -91,3 +91,14 @@ pattern
     | LowerIdentifier # VariablePattern
     | WILDCARD # WildcardPattern
     ;
+
+// Operator collections
+
+bitOperator : SHL | SHR | USHR | XOR | LAND | LOR;
+
+factorOperator : MUL | DIV | MOD | F_MUL | F_DIV;
+
+termOperator : PLUS | MINUS | F_PLUS | F_MINUS | STR_CONCAT;
+
+comparisonOperator : REF_EQ | STRUCT_EQ | LT | LE | GT | GE | REF_NE | STRUCT_NE;
+

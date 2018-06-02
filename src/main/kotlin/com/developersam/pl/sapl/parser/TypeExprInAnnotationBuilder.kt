@@ -19,8 +19,8 @@ internal object TypeExprInAnnotationBuilder : PLBaseVisitor<TypeExpr>() {
         val type = ctx.UpperIdentifier().joinToString(
                 separator = ".", transform = TerminalNode::getText
         )
-        val genericsList = ctx.genericsSpecialization()
-                .typeExprInAnnotation().map { it.accept(this) }
+        val genericsList = ctx.genericsSpecialization()?.typeExprInAnnotation()
+                ?.map { it.accept(this) } ?: emptyList()
         return TypeExpr.Identifier(type = type, genericsList = genericsList)
     }
 

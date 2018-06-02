@@ -12,10 +12,11 @@ internal object CompilationUnitBuilder : PLBaseVisitor<CompilationUnit>() {
 
     override fun visitCompilationUnit(ctx: PLParser.CompilationUnitContext): CompilationUnit =
             CompilationUnit(
-                    imports = ctx.importDeclaration().UpperIdentifier()
-                            .stream()
-                            .map { it.text }
-                            .collect(Collectors.toSet()),
+                    imports = ctx.importDeclaration()?.UpperIdentifier()
+                            ?.stream()
+                            ?.map { it.text }
+                            ?.collect(Collectors.toSet())
+                            ?: emptySet(),
                     members = ctx.moduleMembersDeclaration().accept(ModuleMembersBuilder)
             )
 

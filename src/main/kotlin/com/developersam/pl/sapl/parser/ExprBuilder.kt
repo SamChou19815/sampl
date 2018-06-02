@@ -36,6 +36,7 @@ import com.developersam.pl.sapl.ast.raw.ThrowExpr
 import com.developersam.pl.sapl.ast.raw.TryCatchExpr
 import com.developersam.pl.sapl.ast.raw.VariableIdentifierExpr
 import org.antlr.v4.runtime.tree.TerminalNode
+import java.awt.SystemColor.text
 
 /**
  * [ExprBuilder] builds expression AST from parse tree.
@@ -74,28 +75,28 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
     override fun visitBitExpr(ctx: BitExprContext): Expression =
             BinaryExpr(
                     left = ctx.expression(0).accept(this),
-                    op = BinaryOperator.fromRaw(text = ctx.BitOperator().text),
+                    op = BinaryOperator.fromRaw(text = ctx.bitOperator().text),
                     right = ctx.expression(1).accept(this)
             )
 
     override fun visitFactorExpr(ctx: FactorExprContext): Expression =
             BinaryExpr(
                     left = ctx.expression(0).accept(this),
-                    op = BinaryOperator.fromRaw(text = ctx.FactorOperator().text),
+                    op = BinaryOperator.fromRaw(text = ctx.factorOperator().text),
                     right = ctx.expression(1).accept(this)
             )
 
     override fun visitTermExpr(ctx: TermExprContext): Expression =
             BinaryExpr(
                     left = ctx.expression(0).accept(this),
-                    op = BinaryOperator.fromRaw(text = ctx.TermOperator().text),
+                    op = BinaryOperator.fromRaw(text = ctx.termOperator().text),
                     right = ctx.expression(1).accept(this)
             )
 
     override fun visitComparisonExpr(ctx: ComparisonExprContext): Expression =
             BinaryExpr(
                     left = ctx.expression(0).accept(this),
-                    op = BinaryOperator.fromRaw(text = ctx.ComparisonOperator().text),
+                    op = BinaryOperator.fromRaw(text = ctx.comparisonOperator().text),
                     right = ctx.expression(1).accept(this)
             )
 

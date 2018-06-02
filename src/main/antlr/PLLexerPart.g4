@@ -65,9 +65,10 @@ ARROW : '->';
  * ----------------------------------------------------------------------------
  */
 
+ASSIGN : '=';
+
 NOT : '!';
 
-BitOperator : SHL | SHR | USHR | XOR | LAND | LOR;
 SHL : 'shl';
 SHR : 'shr';
 USHR : 'ushr';
@@ -75,21 +76,17 @@ XOR : 'xor';
 LAND : '&';
 LOR : '|';
 
-FactorOperator : MUL | DIV | MOD | F_MUL | F_DIV;
 MUL : '*';
 DIV : '/';
 MOD : '%';
 F_MUL : '.';
 F_DIV : '/.';
 
-TermOperator : PLUS | MINUS | F_PLUS | F_MINUS | STR_CONCAT;
 PLUS : '+';
 MINUS : '-';
 F_PLUS : '+.';
 F_MINUS : '-.';
 STR_CONCAT : '^';
-
-ComparisonOperator : REF_EQ | STRUCT_EQ | LT | LE | GT | GE | REF_NE | STRUCT_NE;
 
 REF_EQ : '===';
 STRUCT_EQ : '==';
@@ -99,8 +96,6 @@ GT : '>';
 GE : '>=';
 REF_NE : '!==';
 STRUCT_NE : '!=';
-
-ASSIGN : '=';
 
 AND : '&&';
 OR : '||';
