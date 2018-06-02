@@ -182,7 +182,7 @@ sealed class ConstructorExpr : Expression() {
             val decoratedDataType = decoratedData.type
             val inferredGenericInfo = inferActualGenericTypeInfo(
                     genericDeclarations = genericDeclarations,
-                    genericTypeExpr = declaredVariantType, actualTypeExpr = decoratedDataType
+                    genericType = declaredVariantType, actualType = decoratedDataType
             )
             val type = TypeExpr.Identifier(type = typeName, genericsList = inferredGenericInfo)
             return DecoratedConstructorExpr.OneArgVariant(
@@ -205,15 +205,25 @@ sealed class ConstructorExpr : Expression() {
                     ?: throw UndefinedTypeIdentifierError(badIdentifier = typeName)
             val structDeclarationMap = (typeDeclarations as? TypeDeclaration.Struct)?.map
                     ?: throw StructNotFoundError(structName = typeName)
-            for ((declaredMemberName, declaredMemberType) in structDeclarationMap) {
-                val expr = declarations[declaredMemberName] ?: throw StructMissingMemberError(
-                        structName = typeName, missingMember = declaredMemberName
+            val decoratedDeclarations = hashMapOf<String, DecoratedExpression>()
+            val inferredGenericInfo = structDeclarationMap.map { (declaredName, declaredType) ->
+                val expr = declarations[declaredName] ?: throw StructMissingMemberError(
+                        structName = typeName, missingMember = declaredName
                 )
                 val decoratedExpr = expr.typeCheck(environment = e)
+                decoratedDeclarations[declaredName] = decoratedExpr
                 val exprType = decoratedExpr.type
-
+                declaredType to exprType
+            }.let { pairs ->
+                inferActualGenericTypeInfo(
+                        genericDeclarations = genericDeclarations,
+                        genericTypeActualTypePairs = pairs
+                )
             }
-            TODO(reason = "Reconcile between generic type and actual type.")
+            val type = TypeExpr.Identifier(type = typeName, genericsList = inferredGenericInfo)
+            return DecoratedConstructorExpr.Struct(
+                    typeName = typeName, declarations = decoratedDeclarations, type = type
+            )
         }
 
     }
@@ -230,20 +240,32 @@ sealed class ConstructorExpr : Expression() {
             val expectedFinalType = decoratedOld.type as? TypeExpr.Identifier
                     ?: throw UnexpectedTypeError(expectedType = "<struct>",
                             actualType = decoratedOld.type)
+            val expectedActualGenericInfo = expectedFinalType.genericsList
             val structName = expectedFinalType.type
             val (genericDeclarations, typeDeclarations) = e.typeDefinitions[structName]
                     ?: throw UndefinedTypeIdentifierError(badIdentifier = structName)
-            val structDeclarationMap = (typeDeclarations as? TypeDeclaration.Struct)?.map
+            val structDeclarationMap = (typeDeclarations as? TypeDeclaration.Struct)
+                    ?.map
                     ?: throw StructNotFoundError(structName = structName)
-            for ((newMemberName, newMemberExpr) in newDeclarations) {
-                val declaredMemberType = structDeclarationMap[newMemberName]
-                        ?: throw NoSuchMemberInStructError(
-                                structName = structName, memberName = newMemberName)
-                val decoratedExpr = newMemberExpr.typeCheck(environment = e)
-                val exprType = decoratedExpr.type
-
+            val replacementMap = genericDeclarations.zip(expectedActualGenericInfo).toMap()
+            val actualTypeMap = structDeclarationMap.mapValues { (_, typeWithGenerics) ->
+                typeWithGenerics.substituteGenerics(map = replacementMap)
             }
-            TODO(reason = "Reconcile between generic type and actual type.")
+            val decoratedNewDeclarations = newDeclarations.mapValues { (newName, newExpr) ->
+                val expectedType = actualTypeMap[newName]
+                        ?: throw NoSuchMemberInStructError(
+                                structName = structName, memberName = newName)
+                val decoratedExpr = newExpr.typeCheck(environment = e)
+                val exprType = decoratedExpr.type
+                if (expectedType != exprType) {
+                    throw UnexpectedTypeError(expectedType = expectedType, actualType = exprType)
+                }
+                decoratedExpr
+            }
+            return DecoratedConstructorExpr.StructWithCopy(
+                    old = decoratedOld, newDeclarations = decoratedNewDeclarations,
+                    type = expectedFinalType
+            )
         }
 
     }

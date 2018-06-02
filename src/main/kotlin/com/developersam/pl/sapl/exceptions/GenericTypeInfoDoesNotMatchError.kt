@@ -14,13 +14,13 @@ import java.util.Arrays
  */
 class GenericTypeInfoDoesNotMatchError(
         val genericDeclarations: List<String>,
-        val genericTypeExpr: TypeExpr, val actualTypeExpr: TypeExpr,
+        val genericTypeExpr: TypeExpr? = null, val actualTypeExpr: TypeExpr? = null,
         val knownGenericInfo: Array<TypeExpr?>
 ) : CompileTimeError(
         reason = """
     Generic information does not match in declaring site and use site.
-    Declared Site: <$genericDeclarations> $genericTypeExpr.
-    Use Site: $actualTypeExpr.
+    Declared Site: <$genericDeclarations> ${genericTypeExpr?.toString() ?: "[Unknown]"}.
+    Use Site: ${actualTypeExpr?.toString() ?: "[Unknown]"}.
     Already Known/Inferred Info: ${Arrays.toString(knownGenericInfo)}.
     """.trimIndent()
 ) {
