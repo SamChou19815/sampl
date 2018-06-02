@@ -1,9 +1,11 @@
 package com.developersam.pl.sapl.parser
 
 import com.developersam.pl.sapl.antlr.PLBaseVisitor
+import com.developersam.pl.sapl.antlr.PLParser
 import com.developersam.pl.sapl.antlr.PLParser.BitExprContext
 import com.developersam.pl.sapl.antlr.PLParser.ComparisonExprContext
 import com.developersam.pl.sapl.antlr.PLParser.ConjunctionExprContext
+import com.developersam.pl.sapl.antlr.PLParser.ConstructorExprContext
 import com.developersam.pl.sapl.antlr.PLParser.DisjunctionExprContext
 import com.developersam.pl.sapl.antlr.PLParser.FactorExprContext
 import com.developersam.pl.sapl.antlr.PLParser.FunExprContext
@@ -55,6 +57,9 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
                             ?.map { it.accept(TypeExprInAnnotationBuilder) }
                             ?: emptyList()
             )
+
+    override fun visitConstructorExpr(ctx: ConstructorExprContext): Expression =
+            ctx.accept(ConstructorExprBuilder)
 
     override fun visitNotExpr(ctx: NotExprContext): Expression =
             NotExpr(expr = ctx.expression().accept(this))

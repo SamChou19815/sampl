@@ -33,6 +33,7 @@ import com.developersam.pl.sapl.ast.TypeExpr
 import com.developersam.pl.sapl.ast.boolTypeExpr
 import com.developersam.pl.sapl.ast.charTypeExpr
 import com.developersam.pl.sapl.ast.decorated.DecoratedBinaryExpr
+import com.developersam.pl.sapl.ast.decorated.DecoratedConstructorExpr
 import com.developersam.pl.sapl.ast.decorated.DecoratedExpression
 import com.developersam.pl.sapl.ast.decorated.DecoratedFunctionApplicationExpr
 import com.developersam.pl.sapl.ast.decorated.DecoratedFunctionExpr
@@ -50,13 +51,18 @@ import com.developersam.pl.sapl.ast.intTypeExpr
 import com.developersam.pl.sapl.ast.stringTypeExpr
 import com.developersam.pl.sapl.environment.TypeCheckingEnv
 import com.developersam.pl.sapl.exceptions.GenericInfoWrongNumberOfArgumentsError
+import com.developersam.pl.sapl.exceptions.NoSuchMemberInStructError
 import com.developersam.pl.sapl.exceptions.NonExhaustivePatternMatchingError
 import com.developersam.pl.sapl.exceptions.ShadowedNameError
+import com.developersam.pl.sapl.exceptions.StructMissingMemberError
+import com.developersam.pl.sapl.exceptions.StructNotFoundError
 import com.developersam.pl.sapl.exceptions.TooManyArgumentsError
 import com.developersam.pl.sapl.exceptions.UndefinedIdentifierError
+import com.developersam.pl.sapl.exceptions.UndefinedTypeIdentifierError
 import com.developersam.pl.sapl.exceptions.UnexpectedTypeError
 import com.developersam.pl.sapl.exceptions.UnmatchableTypeError
 import com.developersam.pl.sapl.exceptions.UnusedPatternError
+import com.developersam.pl.sapl.exceptions.VariantNotFoundError
 import com.developersam.pl.sapl.util.toFunctionTypeExpr
 
 /**
@@ -107,6 +113,130 @@ data class VariableIdentifierExpr(
         return DecoratedVariableIdentifierExpr(
                 variable = variable, genericInfo = genericInfo, type = type
         )
+    }
+
+}
+
+/**
+ * [ConstructorExpr] represents a set of constructor expression defined in type declarations.
+ */
+sealed class ConstructorExpr : Expression() {
+
+    /**
+     * [constructorTypeCheck] with environment [e] is a more constrained type check that is only
+     * allowed to produce [DecoratedConstructorExpr].
+     */
+    protected abstract fun constructorTypeCheck(e: TypeCheckingEnv): DecoratedConstructorExpr
+
+    final override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression =
+            constructorTypeCheck(e = environment)
+
+    /**
+     * [NoArgVariant] represents a singleton value in variant with [typeName], [variantName] and
+     * some potential [genericInfo] to assist type inference.
+     */
+    data class NoArgVariant(
+            val typeName: String, val variantName: String,
+            val genericInfo: List<TypeExpr>
+    ) : ConstructorExpr() {
+
+        override fun constructorTypeCheck(e: TypeCheckingEnv): DecoratedConstructorExpr {
+            val (genericDeclarations, typeDeclarations) = e.typeDefinitions[typeName]
+                    ?: throw UndefinedTypeIdentifierError(badIdentifier = typeName)
+            val variantDeclarationMap = (typeDeclarations as? TypeDeclaration.Variant)?.map
+                    ?: throw VariantNotFoundError(typeName = typeName, variantName = variantName)
+            if (variantDeclarationMap[variantName] != null) {
+                throw VariantNotFoundError(typeName = typeName, variantName = variantName)
+            }
+            if (genericDeclarations.size != genericInfo.size) {
+                throw GenericInfoWrongNumberOfArgumentsError(
+                        expectedNumber = genericDeclarations.size, actualNumber = genericInfo.size
+                )
+            }
+            val type = TypeExpr.Identifier(type = typeName, genericsList = genericInfo)
+            return DecoratedConstructorExpr.NoArgVariant(
+                    typeName = typeName, variantName = variantName, genericInfo = genericInfo,
+                    type = type
+            )
+        }
+
+    }
+
+    /**
+     * [OneArgVariant] represents a tagged enum in variant with [typeName], [variantName] and
+     * associated [data].
+     */
+    data class OneArgVariant(
+            val typeName: String, val variantName: String, val data: Expression
+    ) : ConstructorExpr() {
+
+        override fun constructorTypeCheck(e: TypeCheckingEnv): DecoratedConstructorExpr {
+            val (genericDeclarations, typeDeclarations) = e.typeDefinitions[typeName]
+                    ?: throw UndefinedTypeIdentifierError(badIdentifier = typeName)
+            val variantDeclarationMap = (typeDeclarations as? TypeDeclaration.Variant)?.map
+                    ?: throw VariantNotFoundError(typeName = typeName, variantName = variantName)
+            val declaredVariantType = variantDeclarationMap[variantName]
+                    ?: throw VariantNotFoundError(typeName = typeName, variantName = variantName)
+            val decoratedData = data.typeCheck(environment = e)
+            val decoratedDataType = decoratedData.type
+            TODO(reason = "Reconcile between generic type and actual type.")
+        }
+
+    }
+
+    /**
+     * [Struct] represents a struct initialization with [typeName] and initial value [declarations].
+     */
+    data class Struct(
+            val typeName: String, val declarations: Map<String, Expression>
+    ) : ConstructorExpr() {
+
+        override fun constructorTypeCheck(e: TypeCheckingEnv): DecoratedConstructorExpr {
+            val (genericDeclarations, typeDeclarations) = e.typeDefinitions[typeName]
+                    ?: throw UndefinedTypeIdentifierError(badIdentifier = typeName)
+            val structDeclarationMap = (typeDeclarations as? TypeDeclaration.Struct)?.map
+                    ?: throw StructNotFoundError(structName = typeName)
+            for ((declaredMemberName, declaredMemberType) in structDeclarationMap) {
+                val expr = declarations[declaredMemberName] ?: throw StructMissingMemberError(
+                        structName = typeName, missingMember = declaredMemberName
+                )
+                val decoratedExpr = expr.typeCheck(environment = e)
+                val exprType = decoratedExpr.type
+
+            }
+            TODO(reason = "Reconcile between generic type and actual type.")
+        }
+
+    }
+
+    /**
+     * [StructWithCopy] represents a copy of [old] struct with some new values in [newDeclarations].
+     */
+    data class StructWithCopy(
+            val old: Expression, val newDeclarations: Map<String, Expression>
+    ) : ConstructorExpr() {
+
+        override fun constructorTypeCheck(e: TypeCheckingEnv): DecoratedConstructorExpr {
+            val decoratedOld = old.typeCheck(environment = e)
+            val expectedFinalType = decoratedOld.type as? TypeExpr.Identifier
+                    ?: throw UnexpectedTypeError(expectedType = "<struct>",
+                            actualType = decoratedOld.type)
+            val structName = expectedFinalType.type
+            val (genericDeclarations, typeDeclarations) = e.typeDefinitions[structName]
+                    ?: throw UndefinedTypeIdentifierError(badIdentifier = structName)
+            val structDeclarationMap = (typeDeclarations as? TypeDeclaration.Struct)?.map
+                    ?: throw StructNotFoundError(structName = structName)
+            for ((newMemberName, newMemberExpr) in newDeclarations) {
+                val declaredMemberType = structDeclarationMap[newMemberName]
+                        ?: throw NoSuchMemberInStructError(
+                                structName = structName, memberName = newMemberName)
+                val decoratedExpr = newMemberExpr.typeCheck(environment = e)
+                val exprType = decoratedExpr.type
+
+            }
+            TODO(reason = "Reconcile between generic type and actual type.")
+        }
+
     }
 
 }

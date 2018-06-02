@@ -65,6 +65,8 @@ ARROW : '->';
  * ----------------------------------------------------------------------------
  */
 
+NOT : '!';
+
 BitOperator : SHL | SHR | USHR | XOR | LAND | LOR;
 SHL : 'shl';
 SHR : 'shr';
@@ -87,13 +89,6 @@ F_PLUS : '+.';
 F_MINUS : '-.';
 STR_CONCAT : '^';
 
-AND : '&&';
-OR : '||';
-
-NOT : '!';
-
-ASSIGN : '=';
-
 ComparisonOperator : REF_EQ | STRUCT_EQ | LT | LE | GT | GE | REF_NE | STRUCT_NE;
 
 REF_EQ : '===';
@@ -104,6 +99,11 @@ GT : '>';
 GE : '>=';
 REF_NE : '!==';
 STRUCT_NE : '!=';
+
+ASSIGN : '=';
+
+AND : '&&';
+OR : '||';
 
 /*
  * ----------------------------------------------------------------------------

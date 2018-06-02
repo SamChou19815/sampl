@@ -54,6 +54,7 @@ expression
     : LPAREN expression RPAREN # NestedExpr
     | Literal # LiteralExpr
     | (UpperIdentifier DOT)* LowerIdentifier genericsSpecialization # IdentifierExpr
+    | constructor # ConstructorExpr
     | NOT expression # NotExpr
     | expression BitOperator expression # BitExpr
     | expression FactorOperator expression # FactorExpr
@@ -69,6 +70,20 @@ expression
     | expression LPAREN expression+ RPAREN # FunctionApplicationExpr
     | TRY expression CATCH LowerIdentifier expression # TryCatchExpr
     ;
+
+constructor
+    : (UpperIdentifier DOT)+ UpperIdentifier genericsSpecialization? # NoArgVariantConstructor
+    | (UpperIdentifier DOT)+ UpperIdentifier LPAREN expression RPAREN # OneArgVariantConstructor
+    | (UpperIdentifier DOT)* UpperIdentifier LBRACE
+          structConstructorValueDeclaration (SEMICOLON structConstructorValueDeclaration)*
+      RBRACE # StructConstructor
+    | LBRACE
+          expression WITH
+          structConstructorValueDeclaration (SEMICOLON structConstructorValueDeclaration)*
+      RBRACE # StructWithConstructor
+    ;
+
+structConstructorValueDeclaration : LowerIdentifier ASSIGN expression;
 
 pattern
     : UpperIdentifier LowerIdentifier # VariantPattern
