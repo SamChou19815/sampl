@@ -18,4 +18,13 @@ data class DecoratedModuleFunctionMember(
 
     override val name: String = identifier
 
+    override fun toString(): String {
+        val publicPart = if (isPublic) "" else "private "
+        val genericsPart = if (genericsDeclaration.isEmpty()) "" else {
+            genericsDeclaration.joinToString(separator = ", ", prefix = "<", postfix = ">")
+        }
+        val argumentPart = arguments.joinToString(separator = " ") { (n, t) -> "($n: $t)" }
+        return "${publicPart}let $identifier $genericsPart $argumentPart : $returnType = $body"
+    }
+
 }

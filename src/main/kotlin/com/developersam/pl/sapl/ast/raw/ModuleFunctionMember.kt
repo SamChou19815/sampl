@@ -36,13 +36,17 @@ data class ModuleFunctionMember(
      * recursive functions.
      */
     fun typeCheck(environment: TypeCheckingEnv): DecoratedModuleFunctionMember {
-        functionType.checkTypeValidity(environment = environment.copy(
+        val genericsDeclarationAndArgsAddedEnv = environment.copy(
                 declaredTypes = genericsDeclaration.fold(environment.declaredTypes) { acc, s ->
                     acc.put(key = s, value = emptyList())
+                },
+                typeEnv = arguments.fold(environment.typeEnv) { acc, (name, type) ->
+                    acc.put(key = name, value = type.asTypeInformation)
                 }
-        ))
-        val expectedType = functionType.returnType
-        val bodyExpr = body.typeCheck(environment = environment)
+        )
+        functionType.checkTypeValidity(environment = genericsDeclarationAndArgsAddedEnv)
+        val expectedType = returnType
+        val bodyExpr = body.typeCheck(environment = genericsDeclarationAndArgsAddedEnv)
         val bodyType = bodyExpr.type
         if (expectedType != bodyType) {
             throw UnexpectedTypeError(expectedType = expectedType, actualType = bodyType)

@@ -23,7 +23,7 @@ moduleTypeDeclaration :
 moduleConstantDeclaration: PRIVATE? LET LowerIdentifier ASSIGN expression;
 
 moduleFunctionDeclaration :
-    PRIVATE? LET LowerIdentifier genericsDeclaration?
+    PRIVATE? LET genericsDeclaration? LowerIdentifier
         argumentDeclaration+ typeAnnotation
     ASSIGN expression;
 

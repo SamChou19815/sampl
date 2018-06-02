@@ -8,4 +8,5 @@ data class ModuleConstantMember(
         override val isPublic: Boolean, val identifier: String, val expr: Expression
 ) : ModuleMember {
     override val name: String = identifier
+
 }

@@ -101,8 +101,11 @@ data class VariableIdentifierExpr(
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
-        val typeInfo = environment[variable]
-                ?: throw UndefinedIdentifierError(badIdentifier = variable)
+        val typeInfo = try {environment[variable]
+                ?: throw UndefinedIdentifierError(badIdentifier = variable)} catch (e: Exception) {
+            println(environment.typeEnv)
+            throw e
+        }
         val genericSymbolsToSubstitute = typeInfo.genericInfo
         if (genericSymbolsToSubstitute.size != genericInfo.size) {
             throw GenericInfoWrongNumberOfArgumentsError(

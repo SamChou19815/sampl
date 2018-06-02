@@ -49,16 +49,20 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
     override fun visitLiteralExpr(ctx: LiteralExprContext): Expression =
             LiteralExpr(literal = Literal.from(text = ctx.Literal().text))
 
-    override fun visitIdentifierExpr(ctx: IdentifierExprContext): Expression =
-            VariableIdentifierExpr(
-                    variable = ctx.UpperIdentifier()
-                            .joinToString(separator = ".", transform = TerminalNode::getText)
-                            + "." + ctx.LowerIdentifier().text,
-                    genericInfo = ctx.genericsSpecialization()
-                            ?.typeExprInAnnotation()
-                            ?.map { it.accept(TypeExprInAnnotationBuilder) }
-                            ?: emptyList()
-            )
+    override fun visitIdentifierExpr(ctx: IdentifierExprContext): Expression {
+        val upperIds = ctx.UpperIdentifier()
+        val lower = ctx.LowerIdentifier().text
+        val variable = if (upperIds.isEmpty()) lower else {
+            upperIds.joinToString(
+                    separator = ".", postfix = ".", transform = TerminalNode::getText
+            ) + lower
+        }
+        val genericInfo = ctx.genericsSpecialization()
+                ?.typeExprInAnnotation()
+                ?.map { it.accept(TypeExprInAnnotationBuilder) }
+                ?: emptyList()
+        return VariableIdentifierExpr(variable = variable, genericInfo = genericInfo)
+    }
 
     override fun visitConstructorExpr(ctx: ConstructorExprContext): Expression =
             ctx.accept(ConstructorExprBuilder)

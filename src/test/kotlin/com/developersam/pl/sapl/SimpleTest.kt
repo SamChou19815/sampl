@@ -12,18 +12,15 @@ class SimpleTest {
      * 'Propositions Are Types, Proofs Are Programs'.
      */
     private val propositionsAreTypesProofsAreProgram: String = """
-        /* Unit is true */
-
         type And<A, B> = {
             a: A; b: B
         }
-
-        type Or<A, B> = | First of A | Second of B
-
-        let hey = "A -> B is implication"
-
-        let modusPonens (f: A -> B) (v: A): B = f(v)
-
+        type Or<A, B> =
+            | First of A
+            | Second of B
+        let trueVar = () /* Unit is true */
+        let implication = function (a: String) : Int -> 5 // (String -> Int) Implication
+        let <A, B> modusPonens (f: A -> B) (v: A): B = f(v)
     """.trimIndent()
 
     /**

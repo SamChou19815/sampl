@@ -32,7 +32,6 @@ THROW : 'throw';
 TRY : 'try';
 CATCH : 'catch';
 
-UNIT : '()';
 WILDCARD : '_';
 
 /*
@@ -114,6 +113,8 @@ Literal
     | StringLiteral
     | BooleanLiteral
     ;
+
+UNIT : '()';
 
 IntegerLiteral : HexLiteral | OctalLiteral | DecimalLiteral;
 

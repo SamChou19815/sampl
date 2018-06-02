@@ -11,5 +11,10 @@ data class DecoratedModuleConstantMember(
         override val isPublic: Boolean, val identifier: String, val expr: DecoratedExpression,
         override val type: TypeExpr
 ) : DecoratedModuleMember {
+
     override val name: String = identifier
+
+    override fun toString(): String =
+            "${if (isPublic) "" else "private "}let $identifier: $type = $expr"
+
 }

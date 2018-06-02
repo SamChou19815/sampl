@@ -11,4 +11,18 @@ data class DecoratedModuleMembers(
         val constantMembers: List<DecoratedModuleConstantMember>,
         val functionMembers: List<DecoratedModuleFunctionMember>,
         val nestedModuleMembers: List<DecoratedModule>
-)
+) {
+
+    override fun toString(): String {
+        val typeMembersStr = typeMembers.takeIf { it.isNotEmpty() }
+                ?.joinToString(separator = "\n  ", prefix = "  ", postfix = "\n") ?: ""
+        val constantMembersStr = constantMembers.takeIf { it.isNotEmpty() }
+                ?.joinToString(separator = "\n  ", prefix = "  ", postfix = "\n") ?: ""
+        val functionMembersStr = functionMembers.takeIf { it.isNotEmpty() }
+                ?.joinToString(separator = "\n  ", prefix = "  ", postfix = "\n") ?: ""
+        val nestedModuleMembersStr = nestedModuleMembers.takeIf { it.isNotEmpty() }
+                ?.joinToString(separator = "\n  ", prefix = "  ", postfix = "\n") ?: ""
+        return typeMembersStr + constantMembersStr + functionMembersStr + nestedModuleMembersStr
+    }
+
+}

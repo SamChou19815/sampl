@@ -11,7 +11,7 @@ internal object ArgumentDeclarationBuilder : PLBaseVisitor<Pair<String, TA>>() {
 
     override fun visitArgumentDeclaration(ctx: ArgumentDeclarationContext): Pair<String, TA> {
         val a = ctx.annotatedVariable()
-        val text = a.text
+        val text = a.LowerIdentifier().text
         val type = a.typeAnnotation().typeExprInAnnotation()
                 .accept(TypeExprInAnnotationBuilder)
         return text to type

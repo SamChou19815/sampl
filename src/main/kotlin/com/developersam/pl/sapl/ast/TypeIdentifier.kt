@@ -25,4 +25,11 @@ data class TypeIdentifier(
         return 0
     }
 
+    override fun toString(): String {
+        if (genericsInfo.isEmpty()) {
+            return name
+        }
+        return name + genericsInfo.joinToString(separator = ", ", prefix = "<", postfix = ">")
+    }
+
 }

@@ -36,4 +36,7 @@ data class ModuleTypeMember(
 
     }
 
+    override fun toString(): String =
+            "${if (isPublic) "" else "private "}type $identifier = $declaration"
+
 }

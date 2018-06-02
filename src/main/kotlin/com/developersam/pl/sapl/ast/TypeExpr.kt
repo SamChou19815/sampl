@@ -74,6 +74,13 @@ sealed class TypeExpr : Comparable<TypeExpr> {
             genericsList.forEach { it.checkTypeValidity(environment = environment) }
         }
 
+        override fun toString(): String {
+            val genericsPart = if (genericsList.isEmpty()) "" else {
+                genericsList.joinToString(separator = ", ", prefix = "<", postfix = ">")
+            }
+            return "$type$genericsPart"
+        }
+
     }
 
     /**
@@ -94,6 +101,8 @@ sealed class TypeExpr : Comparable<TypeExpr> {
             argumentType.checkTypeValidity(environment = environment)
             returnType.checkTypeValidity(environment = environment)
         }
+
+        override fun toString(): String = "($argumentType -> $returnType)"
 
     }
 

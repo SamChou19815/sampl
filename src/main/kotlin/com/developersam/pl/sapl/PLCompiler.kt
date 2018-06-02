@@ -13,6 +13,7 @@ object PLCompiler {
      */
     private fun compile(module: Module) {
         val decoratedModule = module.typeCheck()
+        println(decoratedModule)
         // TODO trans-pile to kotlin code
         // TODO invoke kotlin compiler
     }

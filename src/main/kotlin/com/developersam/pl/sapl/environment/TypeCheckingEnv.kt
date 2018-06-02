@@ -95,7 +95,6 @@ data class TypeCheckingEnv(
             }
         }
         val newTypeEnv = typeEnv
-                .let { m.typeMembers.fold(initial = it, operation = removeAndChangeMember) }
                 .let { m.constantMembers.fold(initial = it, operation = removeAndChangeMember) }
                 .let { m.functionMembers.fold(initial = it, operation = removeAndChangeMember) }
         return TypeCheckingEnv(
