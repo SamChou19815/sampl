@@ -104,7 +104,15 @@ enum class BinaryOperator(val symbol: String) {
     /**
      * Structural NOT equality.
      */
-    STRUCT_NE(symbol = "!=");
+    STRUCT_NE(symbol = "!="),
+    /**
+     * Conjunction.
+     */
+    AND(symbol = "&&"),
+    /**
+     * Disjunction.
+     */
+    OR(symbol = "||");
 
     companion object {
         /**

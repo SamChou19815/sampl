@@ -1,6 +1,7 @@
 package com.developersam.pl.sapl.ast.raw
 
 import com.developersam.pl.sapl.ast.BinaryOperator
+import com.developersam.pl.sapl.ast.BinaryOperator.AND
 import com.developersam.pl.sapl.ast.BinaryOperator.DIV
 import com.developersam.pl.sapl.ast.BinaryOperator.F_DIV
 import com.developersam.pl.sapl.ast.BinaryOperator.F_MINUS
@@ -15,6 +16,7 @@ import com.developersam.pl.sapl.ast.BinaryOperator.LT
 import com.developersam.pl.sapl.ast.BinaryOperator.MINUS
 import com.developersam.pl.sapl.ast.BinaryOperator.MOD
 import com.developersam.pl.sapl.ast.BinaryOperator.MUL
+import com.developersam.pl.sapl.ast.BinaryOperator.OR
 import com.developersam.pl.sapl.ast.BinaryOperator.PLUS
 import com.developersam.pl.sapl.ast.BinaryOperator.REF_EQ
 import com.developersam.pl.sapl.ast.BinaryOperator.REF_NE
@@ -110,47 +112,20 @@ data class VariableIdentifierExpr(
 }
 
 /**
- * [FunctionApplicationExpr] is the function application expression, with [functionExpr] as the
- * function and [arguments] as arguments of the function.
+ * [NotExpr] represents the logical inversion of expression [expr].
  */
-data class FunctionApplicationExpr(
-        val functionExpr: Expression, val arguments: List<Expression>
-) : Expression() {
+data class NotExpr(val expr: Expression) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
-        val decoratedFunctionExpr = functionExpr.typeCheck(environment = environment)
-        val functionTypeOpt = decoratedFunctionExpr.type
-        val functionType = functionTypeOpt as? TypeExpr.Function
-                ?: throw UnexpectedTypeError(
-                        expectedType = "<function>", actualType = functionTypeOpt
-                )
-        var expectedArg: TypeExpr? = functionType.argumentType
-        var returnType = functionType.returnType
-        val decoratedArgumentExpr = arrayListOf<DecoratedExpression>()
-        for (expr in arguments) {
-            val expType = expectedArg ?: throw TooManyArgumentsError()
-            val decoratedExpr = expr.typeCheck(environment = environment)
-            decoratedArgumentExpr.add(element = decoratedExpr)
-            val exprType = decoratedExpr.type
-            if (expType != exprType) {
-                throw UnexpectedTypeError(expectedType = expType, actualType = exprType)
-            }
-            val r = returnType
-            when (r) {
-                is TypeExpr.Identifier -> {
-                    expectedArg = null
-                }
-                is TypeExpr.Function -> {
-                    expectedArg = r.argumentType
-                    returnType = r.returnType
-                }
-            }
+        val e = expr.typeCheck(environment = environment)
+        val t = e.type
+        if (t == boolTypeExpr) {
+            return DecoratedNotExpr(expr = e, type = boolTypeExpr)
+        } else {
+            throw UnexpectedTypeError(expectedType = boolTypeExpr, actualType = t)
         }
-        return DecoratedFunctionApplicationExpr(
-                functionExpr = decoratedFunctionExpr, arguments = decoratedArgumentExpr,
-                type = returnType
-        )
     }
+
 }
 
 /**
@@ -227,6 +202,19 @@ data class BinaryExpr(
                     )
                 }
             }
+            AND, OR -> {
+                // conjunction and disjunction
+                if (leftType != boolTypeExpr) {
+                    throw UnexpectedTypeError(
+                            expectedType = boolTypeExpr, actualType = leftType
+                    )
+                }
+                if (leftType == rightType) boolTypeExpr else {
+                    throw UnexpectedTypeError(
+                            expectedType = leftType, actualType = rightType
+                    )
+                }
+            }
         }
         return DecoratedBinaryExpr(left = leftExpr, op = op, right = rightExpr, type = type)
     }
@@ -234,18 +222,97 @@ data class BinaryExpr(
 }
 
 /**
- * [NotExpr] represents the logical inversion of expression [expr].
+ * [ThrowExpr] represents the throw exception expression, where the thrown exception is [expr].
+ * The throw expression is coerced to have [type].
  */
-data class NotExpr(val expr: Expression) : Expression() {
+data class ThrowExpr(val type: TypeExpr, val expr: Expression) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val e = expr.typeCheck(environment = environment)
         val t = e.type
-        if (t == boolTypeExpr) {
-            return DecoratedNotExpr(expr = e, type = boolTypeExpr)
-        } else {
-            throw UnexpectedTypeError(expectedType = boolTypeExpr, actualType = t)
+        if (t != stringTypeExpr) {
+            throw UnexpectedTypeError(expectedType = stringTypeExpr, actualType = t)
         }
+        return DecoratedThrowExpr(type = type, expr = e)
+    }
+
+}
+
+/**
+ * [IfElseExpr] represents the if else expression, guarded by [condition] and having two
+ * branches [e1] and [e2].
+ */
+data class IfElseExpr(
+        val condition: Expression, val e1: Expression, val e2: Expression
+) : Expression() {
+
+    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
+        val conditionExpr = condition.typeCheck(environment = environment)
+        val conditionType = conditionExpr.type
+        if (conditionType != boolTypeExpr) {
+            throw UnexpectedTypeError(expectedType = boolTypeExpr, actualType = conditionType)
+        }
+        val decoratedE1 = e1.typeCheck(environment = environment)
+        val t1 = decoratedE1.type
+        val decoratedE2 = e2.typeCheck(environment = environment)
+        val t2 = decoratedE2.type
+        if (t1 != t2) {
+            throw UnexpectedTypeError(expectedType = t1, actualType = t2)
+        }
+        return DecoratedIfElseExpr(
+                condition = conditionExpr, e1 = decoratedE1, e2 = decoratedE2, type = t1
+        )
+    }
+
+}
+
+/**
+ * [MatchExpr] represents the pattern matching expression, with a list of [matchingList] to match
+ * against [exprToMatch].
+ */
+data class MatchExpr(
+        val exprToMatch: Expression, val matchingList: List<Pair<Pattern, Expression>>
+) : Expression() {
+
+    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
+        val decoratedExprToMatch = exprToMatch.typeCheck(environment = environment)
+        val typeToMatch = decoratedExprToMatch.type
+        val typeIdentifier = (typeToMatch as? TypeExpr.Identifier)
+                ?: throw UnmatchableTypeError(typeExpr = typeToMatch)
+        val (_, typeDefinition) = environment.typeDefinitions[typeIdentifier.type]
+                ?: throw UnmatchableTypeError(typeExpr = typeToMatch)
+        val variantTypeDeclarations = (typeDefinition as? TypeDeclaration.Variant)
+                ?.map?.toMutableMap()
+                ?: throw UnmatchableTypeError(typeExpr = typeToMatch)
+        var type: TypeExpr? = null
+        val decoratedMatchingList = arrayListOf<Pair<DecoratedPattern, DecoratedExpression>>()
+        for ((pattern, expr) in matchingList) {
+            if (variantTypeDeclarations.isEmpty()) {
+                throw UnusedPatternError(pattern = pattern)
+            }
+            val (decoratedPattern, newEnv) = pattern.typeCheck(
+                    typeToMatch = typeToMatch, environment = environment,
+                    variantTypeDefs = variantTypeDeclarations
+            )
+            val decoratedExpr = expr.typeCheck(environment = newEnv)
+            decoratedMatchingList.add(decoratedPattern to decoratedExpr)
+            val exprType = decoratedExpr.type
+            val knownType = type
+            if (knownType == null) {
+                type = exprType
+            } else {
+                if (knownType != exprType) {
+                    throw UnexpectedTypeError(expectedType = knownType, actualType = exprType)
+                }
+            }
+        }
+        if (variantTypeDeclarations.isNotEmpty()) {
+            throw NonExhaustivePatternMatchingError()
+        }
+        return DecoratedMatchExpr(
+                exprToMatch = decoratedExprToMatch, matchingList = decoratedMatchingList,
+                type = type ?: throw NonExhaustivePatternMatchingError()
+        )
     }
 
 }
@@ -302,100 +369,47 @@ data class FunctionExpr(
 }
 
 /**
- * [IfElseExpr] represents the if else expression, guarded by [condition] and having two
- * branches [e1] and [e2].
+ * [FunctionApplicationExpr] is the function application expression, with [functionExpr] as the
+ * function and [arguments] as arguments of the function.
  */
-data class IfElseExpr(
-        val condition: Expression, val e1: Expression, val e2: Expression
+data class FunctionApplicationExpr(
+        val functionExpr: Expression, val arguments: List<Expression>
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
-        val conditionExpr = condition.typeCheck(environment = environment)
-        val conditionType = conditionExpr.type
-        if (conditionType != boolTypeExpr) {
-            throw UnexpectedTypeError(expectedType = boolTypeExpr, actualType = conditionType)
-        }
-        val decoratedE1 = e1.typeCheck(environment = environment)
-        val t1 = decoratedE1.type
-        val decoratedE2 = e2.typeCheck(environment = environment)
-        val t2 = decoratedE2.type
-        if (t1 != t2) {
-            throw UnexpectedTypeError(expectedType = t1, actualType = t2)
-        }
-        return DecoratedIfElseExpr(
-                condition = conditionExpr, e1 = decoratedE1, e2 = decoratedE2, type = t1
-        )
-    }
-
-}
-
-/**
- * [MatchExpr] represents the pattern matching expression, with a list of [matchingList] to match
- * against [exprToMatch].
- */
-data class MatchExpr(
-        val exprToMatch: Expression, val matchingList: List<Pair<Pattern, Expression>>
-) : Expression() {
-
-    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
-        val decoratedExprToMatch = exprToMatch.typeCheck(environment = environment)
-        val typeToMatch = decoratedExprToMatch.type
-        val typeIdentifier = (typeToMatch as? TypeExpr.Identifier)
-                ?: throw UnmatchableTypeError(typeExpr = typeToMatch)
-        // TODO make use of genericsInfo
-        val (genericsInfo, typeDefinition) = environment.typeDefinitions[typeIdentifier.type]
-                ?: throw UnmatchableTypeError(typeExpr = typeToMatch)
-        val variantTypeDeclarations = (typeDefinition as? TypeDeclaration.Variant)
-                ?.map?.toMutableMap()
-                ?: throw UnmatchableTypeError(typeExpr = typeToMatch)
-        var type: TypeExpr? = null
-        val decoratedMatchingList = arrayListOf<Pair<DecoratedPattern, DecoratedExpression>>()
-        for ((pattern, expr) in matchingList) {
-            if (variantTypeDeclarations.isEmpty()) {
-                throw UnusedPatternError(pattern = pattern)
-            }
-            val (decoratedPattern, newEnv) = pattern.typeCheck(
-                    typeToMatch = typeToMatch, environment = environment,
-                    variantTypeDefs = variantTypeDeclarations
-            )
-            val decoratedExpr = expr.typeCheck(environment = newEnv)
-            decoratedMatchingList.add(decoratedPattern to decoratedExpr)
+        val decoratedFunctionExpr = functionExpr.typeCheck(environment = environment)
+        val functionTypeOpt = decoratedFunctionExpr.type
+        val functionType = functionTypeOpt as? TypeExpr.Function
+                ?: throw UnexpectedTypeError(
+                        expectedType = "<function>", actualType = functionTypeOpt
+                )
+        var expectedArg: TypeExpr? = functionType.argumentType
+        var returnType = functionType.returnType
+        val decoratedArgumentExpr = arrayListOf<DecoratedExpression>()
+        for (expr in arguments) {
+            val expType = expectedArg ?: throw TooManyArgumentsError()
+            val decoratedExpr = expr.typeCheck(environment = environment)
+            decoratedArgumentExpr.add(element = decoratedExpr)
             val exprType = decoratedExpr.type
-            val knownType = type
-            if (knownType == null) {
-                type = exprType
-            } else {
-                if (knownType != exprType) {
-                    throw UnexpectedTypeError(expectedType = knownType, actualType = exprType)
+            if (expType != exprType) {
+                throw UnexpectedTypeError(expectedType = expType, actualType = exprType)
+            }
+            val r = returnType
+            when (r) {
+                is TypeExpr.Identifier -> {
+                    expectedArg = null
+                }
+                is TypeExpr.Function -> {
+                    expectedArg = r.argumentType
+                    returnType = r.returnType
                 }
             }
         }
-        if (variantTypeDeclarations.isNotEmpty()) {
-            throw NonExhaustivePatternMatchingError()
-        }
-        return DecoratedMatchExpr(
-                exprToMatch = decoratedExprToMatch, matchingList = decoratedMatchingList,
-                type = type ?: throw NonExhaustivePatternMatchingError()
+        return DecoratedFunctionApplicationExpr(
+                functionExpr = decoratedFunctionExpr, arguments = decoratedArgumentExpr,
+                type = returnType
         )
     }
-
-}
-
-/**
- * [ThrowExpr] represents the throw exception expression, where the thrown exception is [expr].
- * The throw expression is coerced to have [type].
- */
-data class ThrowExpr(val type: TypeExpr, val expr: Expression) : Expression() {
-
-    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
-        val e = expr.typeCheck(environment = environment)
-        val t = e.type
-        if (t != stringTypeExpr) {
-            throw UnexpectedTypeError(expectedType = stringTypeExpr, actualType = t)
-        }
-        return DecoratedThrowExpr(type = type, expr = e)
-    }
-
 }
 
 /**

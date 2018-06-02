@@ -1,5 +1,8 @@
 package com.developersam.pl.sapl.ast
 
+import com.developersam.pl.sapl.exceptions.InvalidLiteralError
+import org.apache.commons.text.StringEscapeUtils
+
 /**
  * [Literal] represents a set of supported literal.
  *
@@ -38,29 +41,34 @@ sealed class Literal(val inferredType: TypeExpr) {
     data class String(val value: kotlin.String) : Literal(inferredType = stringTypeExpr)
 
     companion object {
+
         /**
          * [from] creates a literal from a [text].
+         *
+         * If the literal in [text] is bad, it will throw an [InvalidLiteralError].
          */
         fun from(text: kotlin.String): Literal {
-            if (text == "()") {
-                return Literal.Unit
-            }
-            val longOpt = text.toLongOrNull()
-            if (longOpt != null) {
-                return Literal.Int(value = longOpt)
-            }
-            val doubleOpt = text.toDoubleOrNull()
-            if (doubleOpt != null) {
-                return Literal.Float(value = doubleOpt)
-            }
-            return when (text) {
-                "true" -> Literal.Bool(value = true)
-                "false" -> Literal.Bool(value = false)
+            val unescaped: kotlin.String = StringEscapeUtils.unescapeJava(text)
+            when (unescaped) {
+                "()" -> return Literal.Unit
+                "true" -> return Literal.Bool(value = true)
+                "false" -> return Literal.Bool(value = false)
                 else -> {
-                    if (text.length == 3 && text[0] == '\'' && text[2] == '\'') {
-                        Literal.Char(value = text[1])
+                    unescaped.toLongOrNull()?.let { return Literal.Int(value = it) }
+                    unescaped.toDoubleOrNull()?.let { return Literal.Float(value = it) }
+                    val len = unescaped.length
+                    if (len < 2) {
+                        throw InvalidLiteralError(invalidLiteral = text)
+                    }
+                    val first = unescaped[0]
+                    val last = unescaped[len - 1]
+                    val betweenQuotes = unescaped.substring(startIndex = 1, endIndex = len - 1)
+                    return if (first == '\'' && last == '\'') {
+                        Literal.Char(value = betweenQuotes[0])
+                    } else if (first == '"' && last == '"') {
+                        Literal.String(value = betweenQuotes)
                     } else {
-                        Literal.String(value = text.substring(range = 1 until (text.length - 1)))
+                        throw InvalidLiteralError(invalidLiteral = text)
                     }
                 }
             }

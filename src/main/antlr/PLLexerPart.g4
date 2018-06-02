@@ -31,7 +31,6 @@ WITH : 'with';
 THROW : 'throw';
 TRY : 'try';
 CATCH : 'catch';
-FINALLY : 'finally';
 
 UNIT : '()';
 WILDCARD : '_';
@@ -66,12 +65,10 @@ ARROW : '->';
  * ----------------------------------------------------------------------------
  */
 
-STR_CONCAT : '^';
-
 BitOperator : SHL | SHR | USHR | XOR | LAND | LOR;
-SHL : '<<';
-SHR : '>>';
-USHR : '>>>';
+SHL : 'shl';
+SHR : 'shr';
+USHR : 'ushr';
 XOR : 'xor';
 LAND : '&';
 LOR : '|';
@@ -83,13 +80,13 @@ MOD : '%';
 F_MUL : '.';
 F_DIV : '/.';
 
-TermOperator : PLUS | MINUS | F_PLUS | F_MINUS;
+TermOperator : PLUS | MINUS | F_PLUS | F_MINUS | STR_CONCAT;
 PLUS : '+';
 MINUS : '-';
 F_PLUS : '+.';
 F_MINUS : '-.';
+STR_CONCAT : '^';
 
-BinaryLogicalOperator : AND | OR;
 AND : '&&';
 OR : '||';
 

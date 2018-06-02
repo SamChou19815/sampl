@@ -30,7 +30,7 @@ moduleFunctionDeclaration :
 typeExprInAnnotation
     : LPAREN typeExprInAnnotation RPAREN
       # NestedTypeInAnnotation
-    | (UpperIdentifier DOT)* UpperIdentifier genericsBracket?
+    | (UpperIdentifier DOT)* UpperIdentifier genericsSpecialization?
       # SingleIdentifierTypeInAnnotation
     | <assoc=right> typeExprInAnnotation ARROW typeExprInAnnotation
       # FunctionTypeInAnnotation
@@ -42,31 +42,31 @@ typeExprInDeclaration
     ;
 
 // Some parser type fragment
-genericsBracket : LBRACKET typeExprInAnnotation (COMMA typeExprInAnnotation)* RBRACKET;
+genericsSpecialization : LT typeExprInAnnotation (COMMA typeExprInAnnotation)* GT;
 variantConstructorDeclaration : UpperIdentifier (OF typeExprInAnnotation)?;
 typeAnnotation : COLON typeExprInAnnotation;
 annotatedVariable : LowerIdentifier typeAnnotation;
 argumentDeclaration : LPAREN annotatedVariable RPAREN;
 patternToExpr : LOR pattern ARROW expression;
-genericsDeclaration : LBRACKET UpperIdentifier (COMMA UpperIdentifier)* RBRACKET;
+genericsDeclaration : LT UpperIdentifier (COMMA UpperIdentifier)* GT;
 
 expression
     : LPAREN expression RPAREN # NestedExpr
     | Literal # LiteralExpr
-    | (UpperIdentifier DOT)* LowerIdentifier genericsBracket # IdentifierExpr
-    | expression LPAREN expression+ RPAREN # FunctionApplicationExpr
+    | (UpperIdentifier DOT)* LowerIdentifier genericsSpecialization # IdentifierExpr
+    | NOT expression # NotExpr
     | expression BitOperator expression # BitExpr
     | expression FactorOperator expression # FactorExpr
     | expression TermOperator expression # TermExpr
-    | expression STR_CONCAT expression # StringConcatExpr
-    | expression BinaryLogicalOperator expression # BooleanExpr
     | expression ComparisonOperator expression # ComparisonExpr
-    | NOT expression # NotExpr
-    | LET LowerIdentifier ASSIGN expression SEMICOLON expression # LetExpr
-    | FUNCTION argumentDeclaration+ typeAnnotation ARROW expression # FunExpr
+    | expression AND expression # ConjunctionExpr
+    | expression OR expression # DisjunctionExpr
+    | THROW LBRACKET typeExprInAnnotation RBRACKET expression # ThrowExpr
     | IF expression THEN expression ELSE expression # IfElseExpr
     | MATCH expression WITH patternToExpr+ # MatchExpr
-    | THROW LBRACKET typeExprInAnnotation RBRACKET expression # ThrowExpr
+    | LET LowerIdentifier ASSIGN expression SEMICOLON expression # LetExpr
+    | FUNCTION argumentDeclaration+ typeAnnotation ARROW expression # FunExpr
+    | expression LPAREN expression+ RPAREN # FunctionApplicationExpr
     | TRY expression CATCH LowerIdentifier expression # TryCatchExpr
     ;
 
