@@ -1,6 +1,6 @@
 package com.developersam.pl.sapl.ast.decorated
 
-import com.developersam.pl.sapl.ast.protocol.TranspilerVisitor
+import com.developersam.pl.sapl.codegen.TranspilerVisitor
 import com.developersam.pl.sapl.ast.type.TypeExpr
 import com.developersam.pl.sapl.codegen.IndentationQueue
 

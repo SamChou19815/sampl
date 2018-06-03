@@ -2,7 +2,7 @@ package com.developersam.pl.sapl.ast.type
 
 import com.developersam.pl.sapl.ast.protocol.PrettyPrintable
 import com.developersam.pl.sapl.ast.protocol.Transpilable
-import com.developersam.pl.sapl.ast.protocol.TranspilerVisitor
+import com.developersam.pl.sapl.codegen.TranspilerVisitor
 import com.developersam.pl.sapl.codegen.IndentationQueue
 
 /**

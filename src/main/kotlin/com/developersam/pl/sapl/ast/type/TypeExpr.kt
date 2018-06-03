@@ -1,7 +1,7 @@
 package com.developersam.pl.sapl.ast.type
 
 import com.developersam.pl.sapl.ast.protocol.Transpilable
-import com.developersam.pl.sapl.ast.protocol.TranspilerVisitor
+import com.developersam.pl.sapl.codegen.TranspilerVisitor
 import com.developersam.pl.sapl.codegen.IndentationQueue
 import com.developersam.pl.sapl.environment.TypeCheckingEnv
 import com.developersam.pl.sapl.exceptions.IdentifierError

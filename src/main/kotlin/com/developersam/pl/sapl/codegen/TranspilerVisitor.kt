@@ -1,4 +1,4 @@
-package com.developersam.pl.sapl.ast.protocol
+package com.developersam.pl.sapl.codegen
 
 import com.developersam.pl.sapl.ast.decorated.DecoratedExpression
 import com.developersam.pl.sapl.ast.decorated.DecoratedModule

@@ -1,6 +1,7 @@
 package com.developersam.pl.sapl.ast.protocol
 
 import com.developersam.pl.sapl.codegen.IndentationQueue
+import com.developersam.pl.sapl.codegen.TranspilerVisitor
 
 /**
  * [Transpilable] specifies the methods that an AST node must support in order for the flexible
