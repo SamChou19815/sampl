@@ -36,10 +36,9 @@ typeExprInAnnotation
       # FunctionTypeInAnnotation
     ;
 
-typeExprInDeclaration
-    : (LOR variantConstructorDeclaration)+ # VariantTypeInDeclaration
-    | LBRACE annotatedVariable (SEMICOLON annotatedVariable)* RBRACE # StructTypeInDeclaration
-    ;
+typeExprInDeclaration : variantTypeInDeclaration | structTypeInDeclaration;
+variantTypeInDeclaration : LOR? variantConstructorDeclaration (LOR variantConstructorDeclaration)*;
+structTypeInDeclaration : LBRACE annotatedVariable (SEMICOLON annotatedVariable)* SEMICOLON? RBRACE;
 
 // Some parser type fragment
 genericsSpecialization : LT typeExprInAnnotation (COMMA typeExprInAnnotation)* GT;

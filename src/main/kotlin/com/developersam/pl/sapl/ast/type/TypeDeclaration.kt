@@ -36,8 +36,10 @@ sealed class TypeDeclaration : Printable {
     data class Struct(val map: Map<String, TypeExpr>) : TypeDeclaration() {
 
         override fun prettyPrint(level: Int, builder: StringBuilder) {
-            val dec = map.map { (name, expr) -> "$name: $expr" }.joinToString(separator = "; ")
-            IndentationStrategy.indent2(level, builder).append(dec).append('\n')
+            for ((name, expr) in map) {
+                IndentationStrategy.indent2(level, builder)
+                        .append(name).append(": ").append(expr).append(";\n")
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package com.developersam.pl.sapl
 
 import com.developersam.pl.sapl.modules.ModuleConstructor
+import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
 /**
@@ -16,9 +17,7 @@ class SimpleTest {
         type And<A, B> = {
             a: A; b: B
         }
-        type Or<A, B> =
-            | First of A
-            | Second of B
+        type Or<A, B> = First of A | Second of B
         let trueVar = () /* Unit is true */
         let implication = function (a: String) -> 5 // (String -> Int) Implication
         let <A, B> modusPonens (f: A -> B) (v: A): B = f(v)
@@ -29,16 +28,14 @@ class SimpleTest {
      */
     @Test
     fun run() {
-        println(propositionsAreTypesProofsAreProgram)
-        println()
         val firstCompile = ModuleConstructor
                 .fromSource(code = propositionsAreTypesProofsAreProgram)
                 .typeCheck()
                 .members
-        println(firstCompile.prettyPrint())
         val secondCompile = firstCompile.prettyPrint()
                 .let { ModuleConstructor.fromSource(code = it).typeCheck().members }
         println(secondCompile.prettyPrint())
+        assertEquals(firstCompile, secondCompile)
     }
 
 }

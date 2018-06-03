@@ -294,7 +294,7 @@ data class DecoratedFunctionExpr(
         for ((name, t) in arguments) {
             builder.append('(').append(name).append(": ").append(t.toString()).append(") ")
         }
-        builder.append("-> \n")
+        builder.append("-> (\n")
         body.prettyPrint(level = level + 1, builder = builder)
         IndentationStrategy.indent2(level, builder).append(")\n")
     }

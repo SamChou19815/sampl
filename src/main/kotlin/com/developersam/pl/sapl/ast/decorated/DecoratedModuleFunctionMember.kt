@@ -2,7 +2,6 @@ package com.developersam.pl.sapl.ast.decorated
 
 import com.developersam.pl.sapl.ast.type.TypeExpr
 import com.developersam.pl.sapl.config.IndentationStrategy
-import com.sun.org.apache.xerces.internal.impl.xs.opti.SchemaDOM.indent
 
 /**
  * [DecoratedModuleFunctionMember] represents a function declaration of the form:
@@ -25,12 +24,13 @@ data class DecoratedModuleFunctionMember(
         if (!isPublic) {
             builder.append("private ")
         }
-        builder.append("let ").append(identifier).append(' ')
+        builder.append("let ")
         if (genericsDeclaration.isNotEmpty()) {
             builder.append(genericsDeclaration.joinToString(
                     separator = ", ", prefix = "<", postfix = "> "
             ))
         }
+        builder.append(identifier).append(' ')
         builder.append(arguments.joinToString(separator = " ") { (n, t) -> "($n: $t)" })
                 .append(" : ")
         returnType.prettyPrint(builder = builder)
