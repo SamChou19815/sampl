@@ -1,7 +1,7 @@
 package com.developersam.pl.sapl.ast.type
 
 import com.developersam.pl.sapl.environment.TypeCheckingEnv
-import com.developersam.pl.sapl.exceptions.UndefinedTypeIdentifierError
+import com.developersam.pl.sapl.exceptions.IdentifierError
 import com.developersam.pl.sapl.util.joinToGenericsInfoString
 import kotlin.math.min
 
@@ -22,9 +22,9 @@ sealed class TypeExpr : Comparable<TypeExpr> {
             if (c != 0) {
                 return c
             }
-            val l = min(genericsList.size, other.genericsList.size)
+            val l = min(genericsInfo.size, other.genericsInfo.size)
             for (i in 0 until l) {
-                val cc = genericsList[i].compareTo(other = other.genericsList[i])
+                val cc = genericsInfo[i].compareTo(other = other.genericsInfo[i])
                 if (cc != 0) {
                     return cc
                 }
@@ -56,28 +56,28 @@ sealed class TypeExpr : Comparable<TypeExpr> {
     abstract fun checkTypeValidity(environment: TypeCheckingEnv)
 
     /**
-     * [Identifier] represents a single [type] with optional [genericsList].
+     * [Identifier] represents a single [type] with optional [genericsInfo].
      */
     data class Identifier(
-            val type: String, val genericsList: List<TypeExpr> = emptyList()
+            val type: String, val genericsInfo: List<TypeExpr> = emptyList()
     ) : TypeExpr() {
 
         override fun substituteGenerics(map: Map<String, TypeExpr>): TypeExpr =
-                map[type].takeIf { genericsList.isEmpty() }
-                        ?: Identifier(type, genericsList.map { it.substituteGenerics(map) })
+                map[type].takeIf { genericsInfo.isEmpty() }
+                        ?: Identifier(type, genericsInfo.map { it.substituteGenerics(map) })
 
         override fun checkTypeValidity(environment: TypeCheckingEnv) {
             val declaredGenerics = environment.declaredTypes[type]
-                    ?: throw UndefinedTypeIdentifierError(badIdentifier = type)
-            if (declaredGenerics.size != genericsList.size) {
-                throw UndefinedTypeIdentifierError(badIdentifier = type)
+                    ?: throw IdentifierError.UndefinedTypeIdentifier(badIdentifier = type)
+            if (declaredGenerics.size != genericsInfo.size) {
+                throw IdentifierError.UndefinedTypeIdentifier(badIdentifier = type)
             }
-            genericsList.forEach { it.checkTypeValidity(environment = environment) }
+            genericsInfo.forEach { it.checkTypeValidity(environment = environment) }
         }
 
         override fun toString(): String =
-                if (genericsList.isEmpty()) type else {
-                    type + genericsList.joinToGenericsInfoString()
+                if (genericsInfo.isEmpty()) type else {
+                    type + genericsInfo.joinToGenericsInfoString()
                 }
 
     }

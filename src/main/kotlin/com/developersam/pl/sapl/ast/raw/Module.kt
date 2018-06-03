@@ -1,14 +1,13 @@
 package com.developersam.pl.sapl.ast.raw
 
 import com.developersam.pl.sapl.TOP_LEVEL_MODULE_NAME
-import com.developersam.pl.sapl.ast.type.TypeInfo
 import com.developersam.pl.sapl.ast.decorated.DecoratedModule
 import com.developersam.pl.sapl.ast.decorated.DecoratedModuleConstantMember
 import com.developersam.pl.sapl.ast.decorated.DecoratedModuleMembers
-import com.developersam.pl.sapl.exceptions.CompileTimeError
-import com.developersam.pl.sapl.exceptions.ForbiddenNameError
-import com.developersam.pl.sapl.exceptions.ShadowedNameError
+import com.developersam.pl.sapl.ast.type.TypeInfo
 import com.developersam.pl.sapl.environment.TypeCheckingEnv
+import com.developersam.pl.sapl.exceptions.CompileTimeError
+import com.developersam.pl.sapl.exceptions.IdentifierError
 
 /**
  * [Module] node has a [name] and a set of ordered [members].
@@ -26,15 +25,15 @@ data class Module(override val name: String, val members: ModuleMembers) : Modul
      */
     private fun noNameShadowingValidation(set: HashSet<String>) {
         if (!set.add(name)) {
-            throw ShadowedNameError(shadowedName = name)
+            throw IdentifierError.ShadowedName(shadowedName = name)
         }
         val moduleNameValidator: (ModuleMember) -> Unit = { member ->
             val name = member.name
             if (!set.add(name)) {
                 if (name == TOP_LEVEL_MODULE_NAME) {
-                    throw ForbiddenNameError(name = name)
+                    throw IdentifierError.ForbiddenName(name = name)
                 } else {
-                    throw ShadowedNameError(shadowedName = name)
+                    throw IdentifierError.ShadowedName(shadowedName = name)
                 }
             }
         }
@@ -44,7 +43,7 @@ data class Module(override val name: String, val members: ModuleMembers) : Modul
         val memberNameValidator: (ModuleMember) -> Unit = { member ->
             val name = member.name
             if (!memberSet.add(name)) {
-                throw ShadowedNameError(shadowedName = name)
+                throw IdentifierError.ShadowedName(shadowedName = name)
             }
         }
         members.constantMembers.forEach(memberNameValidator)

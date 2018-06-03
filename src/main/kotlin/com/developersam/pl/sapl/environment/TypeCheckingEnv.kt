@@ -1,14 +1,14 @@
 package com.developersam.pl.sapl.environment
 
 import com.developersam.fp.FpMap
+import com.developersam.pl.sapl.ast.raw.Module
+import com.developersam.pl.sapl.ast.raw.ModuleMember
 import com.developersam.pl.sapl.ast.type.TypeDeclaration
 import com.developersam.pl.sapl.ast.type.TypeInfo
 import com.developersam.pl.sapl.ast.type.boolTypeId
 import com.developersam.pl.sapl.ast.type.charTypeId
 import com.developersam.pl.sapl.ast.type.floatTypeId
 import com.developersam.pl.sapl.ast.type.intTypeId
-import com.developersam.pl.sapl.ast.raw.Module
-import com.developersam.pl.sapl.ast.raw.ModuleMember
 import com.developersam.pl.sapl.ast.type.stringTypeId
 import com.developersam.pl.sapl.ast.type.unitTypeId
 

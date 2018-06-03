@@ -1,7 +1,5 @@
 package com.developersam.pl.sapl.ast.type
 
-import com.developersam.pl.sapl.ast.protocol.Printable
-import com.developersam.pl.sapl.config.IndentationStrategy
 import com.developersam.pl.sapl.util.joinToGenericsInfoString
 import kotlin.math.min
 

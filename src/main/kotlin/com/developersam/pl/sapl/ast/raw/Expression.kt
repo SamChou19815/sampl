@@ -28,28 +28,22 @@ import com.developersam.pl.sapl.ast.common.BinaryOperator.STR_CONCAT
 import com.developersam.pl.sapl.ast.common.BinaryOperator.USHR
 import com.developersam.pl.sapl.ast.common.BinaryOperator.XOR
 import com.developersam.pl.sapl.ast.common.Literal
+import com.developersam.pl.sapl.ast.decorated.DecoratedExpression
+import com.developersam.pl.sapl.ast.decorated.DecoratedPattern
 import com.developersam.pl.sapl.ast.type.TypeDeclaration
 import com.developersam.pl.sapl.ast.type.TypeExpr
 import com.developersam.pl.sapl.ast.type.boolTypeExpr
 import com.developersam.pl.sapl.ast.type.charTypeExpr
-import com.developersam.pl.sapl.ast.decorated.DecoratedExpression
-import com.developersam.pl.sapl.ast.decorated.DecoratedPattern
 import com.developersam.pl.sapl.ast.type.floatTypeExpr
 import com.developersam.pl.sapl.ast.type.intTypeExpr
 import com.developersam.pl.sapl.ast.type.stringTypeExpr
 import com.developersam.pl.sapl.environment.TypeCheckingEnv
-import com.developersam.pl.sapl.exceptions.GenericInfoWrongNumberOfArgumentsError
-import com.developersam.pl.sapl.exceptions.NoSuchMemberInStructError
-import com.developersam.pl.sapl.exceptions.NonExhaustivePatternMatchingError
-import com.developersam.pl.sapl.exceptions.ShadowedNameError
-import com.developersam.pl.sapl.exceptions.StructMissingMemberError
-import com.developersam.pl.sapl.exceptions.StructNotFoundError
+import com.developersam.pl.sapl.exceptions.GenericsError
+import com.developersam.pl.sapl.exceptions.IdentifierError
+import com.developersam.pl.sapl.exceptions.PatternMatchingError
+import com.developersam.pl.sapl.exceptions.StructError
 import com.developersam.pl.sapl.exceptions.TooManyArgumentsError
-import com.developersam.pl.sapl.exceptions.UndefinedIdentifierError
-import com.developersam.pl.sapl.exceptions.UndefinedTypeIdentifierError
 import com.developersam.pl.sapl.exceptions.UnexpectedTypeError
-import com.developersam.pl.sapl.exceptions.UnmatchableTypeError
-import com.developersam.pl.sapl.exceptions.UnusedPatternError
 import com.developersam.pl.sapl.exceptions.VariantNotFoundError
 import com.developersam.pl.sapl.util.inferActualGenericTypeInfo
 import com.developersam.pl.sapl.util.toFunctionTypeExpr
@@ -88,14 +82,11 @@ data class VariableIdentifierExpr(
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
-        val typeInfo = try {environment[variable]
-                ?: throw UndefinedIdentifierError(badIdentifier = variable)} catch (e: Exception) {
-            println(environment.typeEnv)
-            throw e
-        }
-        val genericSymbolsToSubstitute = typeInfo.genericInfo
+        val typeInfo = environment[variable]
+                ?: throw IdentifierError.UndefinedIdentifier(badIdentifier = variable)
+        val genericSymbolsToSubstitute = typeInfo.genericsInfo
         if (genericSymbolsToSubstitute.size != genericInfo.size) {
-            throw GenericInfoWrongNumberOfArgumentsError(
+            throw GenericsError.GenericsInfoWrongNumberOfArguments(
                     expectedNumber = genericSymbolsToSubstitute.size,
                     actualNumber = genericInfo.size
             )
@@ -116,7 +107,7 @@ sealed class ConstructorExpr : Expression() {
 
     /**
      * [constructorTypeCheck] with environment [e] is a more constrained type check that is only
-     * allowed to produce [DecoratedConstructorExpr].
+     * allowed to produce [DecoratedExpression.Constructor].
      */
     protected abstract fun constructorTypeCheck(e: TypeCheckingEnv): DecoratedExpression.Constructor
 
@@ -134,18 +125,18 @@ sealed class ConstructorExpr : Expression() {
 
         override fun constructorTypeCheck(e: TypeCheckingEnv): DecoratedExpression.Constructor {
             val (genericDeclarations, typeDeclarations) = e.typeDefinitions[typeName]
-                    ?: throw UndefinedTypeIdentifierError(badIdentifier = typeName)
+                    ?: throw IdentifierError.UndefinedTypeIdentifier(badIdentifier = typeName)
             val variantDeclarationMap = (typeDeclarations as? TypeDeclaration.Variant)?.map
                     ?: throw VariantNotFoundError(typeName = typeName, variantName = variantName)
             if (variantDeclarationMap[variantName] != null) {
                 throw VariantNotFoundError(typeName = typeName, variantName = variantName)
             }
             if (genericDeclarations.size != genericInfo.size) {
-                throw GenericInfoWrongNumberOfArgumentsError(
+                throw GenericsError.GenericsInfoWrongNumberOfArguments(
                         expectedNumber = genericDeclarations.size, actualNumber = genericInfo.size
                 )
             }
-            val type = TypeExpr.Identifier(type = typeName, genericsList = genericInfo)
+            val type = TypeExpr.Identifier(type = typeName, genericsInfo = genericInfo)
             return DecoratedExpression.Constructor.NoArgVariant(
                     typeName = typeName, variantName = variantName, genericInfo = genericInfo,
                     type = type
@@ -164,7 +155,7 @@ sealed class ConstructorExpr : Expression() {
 
         override fun constructorTypeCheck(e: TypeCheckingEnv): DecoratedExpression.Constructor {
             val (genericDeclarations, typeDeclarations) = e.typeDefinitions[typeName]
-                    ?: throw UndefinedTypeIdentifierError(badIdentifier = typeName)
+                    ?: throw IdentifierError.UndefinedTypeIdentifier(badIdentifier = typeName)
             val variantDeclarationMap = (typeDeclarations as? TypeDeclaration.Variant)?.map
                     ?: throw VariantNotFoundError(typeName = typeName, variantName = variantName)
             val declaredVariantType = variantDeclarationMap[variantName]
@@ -175,7 +166,7 @@ sealed class ConstructorExpr : Expression() {
                     genericDeclarations = genericDeclarations,
                     genericType = declaredVariantType, actualType = decoratedDataType
             )
-            val type = TypeExpr.Identifier(type = typeName, genericsList = inferredGenericInfo)
+            val type = TypeExpr.Identifier(type = typeName, genericsInfo = inferredGenericInfo)
             return DecoratedExpression.Constructor.OneArgVariant(
                     typeName = typeName, variantName = variantName, data = decoratedData,
                     type = type
@@ -193,12 +184,12 @@ sealed class ConstructorExpr : Expression() {
 
         override fun constructorTypeCheck(e: TypeCheckingEnv): DecoratedExpression.Constructor {
             val (genericDeclarations, typeDeclarations) = e.typeDefinitions[typeName]
-                    ?: throw UndefinedTypeIdentifierError(badIdentifier = typeName)
+                    ?: throw IdentifierError.UndefinedTypeIdentifier(badIdentifier = typeName)
             val structDeclarationMap = (typeDeclarations as? TypeDeclaration.Struct)?.map
-                    ?: throw StructNotFoundError(structName = typeName)
+                    ?: throw StructError.NotFound(structName = typeName)
             val decoratedDeclarations = hashMapOf<String, DecoratedExpression>()
             val inferredGenericInfo = structDeclarationMap.map { (declaredName, declaredType) ->
-                val expr = declarations[declaredName] ?: throw StructMissingMemberError(
+                val expr = declarations[declaredName] ?: throw StructError.MissingMember(
                         structName = typeName, missingMember = declaredName
                 )
                 val decoratedExpr = expr.typeCheck(environment = e)
@@ -211,7 +202,7 @@ sealed class ConstructorExpr : Expression() {
                         genericTypeActualTypePairs = pairs
                 )
             }
-            val type = TypeExpr.Identifier(type = typeName, genericsList = inferredGenericInfo)
+            val type = TypeExpr.Identifier(type = typeName, genericsInfo = inferredGenericInfo)
             return DecoratedExpression.Constructor.Struct(
                     typeName = typeName, declarations = decoratedDeclarations, type = type
             )
@@ -231,20 +222,20 @@ sealed class ConstructorExpr : Expression() {
             val expectedFinalType = decoratedOld.type as? TypeExpr.Identifier
                     ?: throw UnexpectedTypeError(expectedType = "<struct>",
                             actualType = decoratedOld.type)
-            val expectedActualGenericInfo = expectedFinalType.genericsList
+            val expectedActualGenericInfo = expectedFinalType.genericsInfo
             val structName = expectedFinalType.type
             val (genericDeclarations, typeDeclarations) = e.typeDefinitions[structName]
-                    ?: throw UndefinedTypeIdentifierError(badIdentifier = structName)
+                    ?: throw IdentifierError.UndefinedTypeIdentifier(badIdentifier = structName)
             val structDeclarationMap = (typeDeclarations as? TypeDeclaration.Struct)
                     ?.map
-                    ?: throw StructNotFoundError(structName = structName)
+                    ?: throw StructError.NotFound(structName = structName)
             val replacementMap = genericDeclarations.zip(expectedActualGenericInfo).toMap()
             val actualTypeMap = structDeclarationMap.mapValues { (_, typeWithGenerics) ->
                 typeWithGenerics.substituteGenerics(map = replacementMap)
             }
             val decoratedNewDeclarations = newDeclarations.mapValues { (newName, newExpr) ->
                 val expectedType = actualTypeMap[newName]
-                        ?: throw NoSuchMemberInStructError(
+                        ?: throw StructError.NoSuchMember(
                                 structName = structName, memberName = newName)
                 val decoratedExpr = newExpr.typeCheck(environment = e)
                 val exprType = decoratedExpr.type
@@ -277,12 +268,12 @@ data class StructMemberAccessExpr(
                         actualType = decoratedStructExpr.type)
         val structTypeName = structType.type
         val (genericDeclarations, typeDeclarations) = environment.typeDefinitions[structTypeName]
-                ?: throw UndefinedTypeIdentifierError(badIdentifier = structTypeName)
+                ?: throw IdentifierError.UndefinedTypeIdentifier(badIdentifier = structTypeName)
         val structDeclarationMap = (typeDeclarations as? TypeDeclaration.Struct)?.map
-                ?: throw StructNotFoundError(structName = structTypeName)
+                ?: throw StructError.NotFound(structName = structTypeName)
         val memberTypeDeclaration = structDeclarationMap[memberName]
-                ?: throw StructMissingMemberError(structTypeName, memberName)
-        val replacementMap = genericDeclarations.zip(structType.genericsList).toMap()
+                ?: throw StructError.MissingMember(structTypeName, memberName)
+        val replacementMap = genericDeclarations.zip(structType.genericsInfo).toMap()
         val actualMemberType = memberTypeDeclaration.substituteGenerics(map = replacementMap)
         return DecoratedExpression.StructMemberAccess(
                 structExpr = decoratedStructExpr, memberName = memberName, type = actualMemberType
@@ -458,17 +449,17 @@ data class MatchExpr(
         val decoratedExprToMatch = exprToMatch.typeCheck(environment = environment)
         val typeToMatch = decoratedExprToMatch.type
         val typeIdentifier = (typeToMatch as? TypeExpr.Identifier)
-                ?: throw UnmatchableTypeError(typeExpr = typeToMatch)
+                ?: throw PatternMatchingError.UnmatchableType(typeExpr = typeToMatch)
         val (_, typeDefinition) = environment.typeDefinitions[typeIdentifier.type]
-                ?: throw UnmatchableTypeError(typeExpr = typeToMatch)
+                ?: throw PatternMatchingError.UnmatchableType(typeExpr = typeToMatch)
         val variantTypeDeclarations = (typeDefinition as? TypeDeclaration.Variant)
                 ?.map?.toMutableMap()
-                ?: throw UnmatchableTypeError(typeExpr = typeToMatch)
+                ?: throw PatternMatchingError.UnmatchableType(typeExpr = typeToMatch)
         var type: TypeExpr? = null
         val decoratedMatchingList = arrayListOf<Pair<DecoratedPattern, DecoratedExpression>>()
         for ((pattern, expr) in matchingList) {
             if (variantTypeDeclarations.isEmpty()) {
-                throw UnusedPatternError(pattern = pattern)
+                throw PatternMatchingError.UnusedPattern(pattern = pattern)
             }
             val (decoratedPattern, newEnv) = pattern.typeCheck(
                     typeToMatch = typeToMatch, environment = environment,
@@ -487,11 +478,11 @@ data class MatchExpr(
             }
         }
         if (variantTypeDeclarations.isNotEmpty()) {
-            throw NonExhaustivePatternMatchingError()
+            throw PatternMatchingError.NonExhaustive()
         }
         return DecoratedExpression.Match(
                 exprToMatch = decoratedExprToMatch, matchingList = decoratedMatchingList,
-                type = type ?: throw NonExhaustivePatternMatchingError()
+                type = type ?: throw PatternMatchingError.NonExhaustive()
         )
     }
 
@@ -542,8 +533,7 @@ data class FunctionApplicationExpr(
 }
 
 /**
- * [FunctionExpr] is the function expression with some [arguments], a [returnType] and finally the
- * function [body].
+ * [FunctionExpr] is the function expression with some [arguments] and the function [body].
  */
 data class FunctionExpr(
         val arguments: List<Pair<String, TypeExpr>>, val body: Expression
@@ -610,7 +600,7 @@ data class LetExpr(
                         identifier = identifier, e1 = decoratedE1, e2 = decoratedE2, type = e2Type
                 )
             } else {
-                throw ShadowedNameError(shadowedName = identifier)
+                throw IdentifierError.ShadowedName(shadowedName = identifier)
             }
 
 }

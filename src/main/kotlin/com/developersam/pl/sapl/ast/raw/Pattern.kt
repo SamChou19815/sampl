@@ -1,8 +1,8 @@
 package com.developersam.pl.sapl.ast.raw
 
-import com.developersam.pl.sapl.ast.type.TypeExpr as T
 import com.developersam.pl.sapl.ast.decorated.DecoratedPattern
-import com.developersam.pl.sapl.exceptions.WrongPatternError
+import com.developersam.pl.sapl.exceptions.PatternMatchingError
+import com.developersam.pl.sapl.ast.type.TypeExpr as T
 import com.developersam.pl.sapl.environment.TypeCheckingEnv as E
 
 /**
@@ -27,7 +27,7 @@ sealed class Pattern {
         override fun typeCheck(typeToMatch: T, environment: E,
                                variantTypeDefs: MutableMap<String, T?>): Pair<DecoratedPattern, E> {
             if (variantIdentifier !in variantTypeDefs) {
-                throw WrongPatternError(patternId = variantIdentifier)
+                throw PatternMatchingError.WrongPattern(patternId = variantIdentifier)
             }
             variantTypeDefs.remove(key = variantIdentifier)
             val associatedVarType = variantTypeDefs[variantIdentifier]
@@ -46,7 +46,7 @@ sealed class Pattern {
                 )
                 p to newE
             } else {
-                throw WrongPatternError(patternId = variantIdentifier)
+                throw PatternMatchingError.WrongPattern(patternId = variantIdentifier)
             }
         }
 

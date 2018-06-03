@@ -3,7 +3,7 @@
 package com.developersam.pl.sapl.util
 
 import com.developersam.pl.sapl.ast.type.TypeExpr
-import com.developersam.pl.sapl.exceptions.GenericTypeInfoDoesNotMatchError
+import com.developersam.pl.sapl.exceptions.GenericsError
 
 /**
  * [toFunctionTypeExpr] converts the function type annotation in list form with [argumentTypes]
@@ -41,8 +41,8 @@ private data class PairedTypeExprVisitor(
     /**
      * [die] declares failure.
      */
-    @Throws(GenericTypeInfoDoesNotMatchError.InternalError::class)
-    private fun die(): Nothing = throw GenericTypeInfoDoesNotMatchError.InternalError()
+    @Throws(GenericsError.GenericsTypeInfoDoesNotMatch.InternalError::class)
+    private fun die(): Nothing = throw GenericsError.GenericsTypeInfoDoesNotMatch.InternalError()
 
     /**
      * [visit] visits the pairs and try to reconcile between declared and actual.
@@ -50,12 +50,12 @@ private data class PairedTypeExprVisitor(
      * @return the type expression of [genericType] with known generic info replaced with
      * actual ones.
      */
-    @Throws(GenericTypeInfoDoesNotMatchError.InternalError::class)
+    @Throws(GenericsError.GenericsTypeInfoDoesNotMatch.InternalError::class)
     fun visit(): TypeExpr {
         return if (genericType is TypeExpr.Identifier && actualType is TypeExpr.Identifier) {
             if (genericType.type == oneGenericDeclaration) {
                 // Name matches the generic name, expect to replace!
-                if (genericType.genericsList.isEmpty()) {
+                if (genericType.genericsInfo.isEmpty()) {
                     knownGenericInfo[index] = actualType
                     actualType
                 } else {
@@ -64,14 +64,14 @@ private data class PairedTypeExprVisitor(
             } else {
                 // expect not to replace, shape and first name must match
                 if (genericType.type != actualType.type
-                        || genericType.genericsList.size != actualType.genericsList.size) {
+                        || genericType.genericsInfo.size != actualType.genericsInfo.size) {
                     die() // Does not match. This is bad.
                 } else {
-                    val visitedChildren = genericType.genericsList
-                            .zip(actualType.genericsList) { g, a ->
+                    val visitedChildren = genericType.genericsInfo
+                            .zip(actualType.genericsInfo) { g, a ->
                                 copy(genericType = g, actualType = a).visit()
                             }
-                    TypeExpr.Identifier(type = genericType.type, genericsList = visitedChildren)
+                    TypeExpr.Identifier(type = genericType.type, genericsInfo = visitedChildren)
                 }
             }
         } else if (genericType is TypeExpr.Function && actualType is TypeExpr.Function) {
@@ -88,7 +88,7 @@ private data class PairedTypeExprVisitor(
                     returnType = partiallyKnownReturnType
             )
         } else if (genericType is TypeExpr.Identifier && actualType is TypeExpr.Function) {
-            if (genericType.genericsList.isNotEmpty()) {
+            if (genericType.genericsInfo.isNotEmpty()) {
                 die()
             }
             val actualGenericName = genericType.type
@@ -126,8 +126,8 @@ private fun inferActualGenericTypeInfo(
                     genericType = typeExpr, actualType = actualType
             ).visit()
         }
-    } catch (e: GenericTypeInfoDoesNotMatchError.InternalError) {
-        throw GenericTypeInfoDoesNotMatchError(
+    } catch (e: GenericsError.GenericsTypeInfoDoesNotMatch.InternalError) {
+        throw GenericsError.GenericsTypeInfoDoesNotMatch(
                 genericDeclarations, genericType, actualType, knownGenericInfo
         )
     }
@@ -148,7 +148,7 @@ internal fun inferActualGenericTypeInfo(
     }
     val knownInfoAsList = knownInfo.filterNotNull()
     if (knownInfoAsList.size != knownInfo.size) {
-        throw GenericTypeInfoDoesNotMatchError(
+        throw GenericsError.GenericsTypeInfoDoesNotMatch(
                 genericDeclarations = genericDeclarations, knownGenericInfo = knownInfo
         )
     }
@@ -168,7 +168,7 @@ internal fun inferActualGenericTypeInfo(
     inferActualGenericTypeInfo(genericDeclarations, genericType, actualType, knownInfo)
     val knownInfoAsList = knownInfo.filterNotNull()
     if (knownInfoAsList.size != knownInfo.size) {
-        throw GenericTypeInfoDoesNotMatchError(
+        throw GenericsError.GenericsTypeInfoDoesNotMatch(
                 genericDeclarations, genericType, actualType, knownInfo
         )
     }
