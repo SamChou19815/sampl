@@ -1,16 +1,22 @@
 package com.developersam.pl.sapl.ast.decorated
 
+import com.developersam.pl.sapl.ast.protocol.Transpilable
+import com.developersam.pl.sapl.ast.protocol.TranspilerVisitor
 import com.developersam.pl.sapl.ast.type.TypeExpr
+import com.developersam.pl.sapl.codegen.IndentationQueue
 
 /**
  * [DecoratedPattern] is the pattern with appropriate and correct type decoration.
  */
-sealed class DecoratedPattern {
+sealed class DecoratedPattern : Transpilable {
 
     /**
      * [asSourceCode] returns itself in source code form.
      */
     abstract val asSourceCode: String
+
+    override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor): Unit =
+            visitor.visit(q = q, pattern = this)
 
     /**
      * [Variant] with an optional [associatedVariableType] represents the variant

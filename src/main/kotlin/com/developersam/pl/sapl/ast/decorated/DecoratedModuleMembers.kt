@@ -1,6 +1,8 @@
 package com.developersam.pl.sapl.ast.decorated
 
 import com.developersam.pl.sapl.ast.protocol.PrettyPrintable
+import com.developersam.pl.sapl.ast.protocol.Transpilable
+import com.developersam.pl.sapl.ast.protocol.TranspilerVisitor
 import com.developersam.pl.sapl.ast.raw.ModuleTypeMember
 import com.developersam.pl.sapl.codegen.IndentationQueue
 
@@ -13,7 +15,7 @@ data class DecoratedModuleMembers(
         val constantMembers: List<DecoratedModuleConstantMember>,
         val functionMembers: List<DecoratedModuleFunctionMember>,
         val nestedModuleMembers: List<DecoratedModule>
-) : PrettyPrintable {
+) : PrettyPrintable, Transpilable {
 
     override fun prettyPrint(q: IndentationQueue) {
         val printerAction: (PrettyPrintable) -> Unit = { m ->
@@ -25,5 +27,8 @@ data class DecoratedModuleMembers(
         functionMembers.forEach(action = printerAction)
         nestedModuleMembers.forEach(action = printerAction)
     }
+
+    override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor): Unit =
+            visitor.visit(q = q, members = this)
 
 }

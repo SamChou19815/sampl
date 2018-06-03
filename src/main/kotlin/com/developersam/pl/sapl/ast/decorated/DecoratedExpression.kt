@@ -2,6 +2,8 @@ package com.developersam.pl.sapl.ast.decorated
 
 import com.developersam.pl.sapl.ast.common.BinaryOperator
 import com.developersam.pl.sapl.ast.protocol.PrettyPrintable
+import com.developersam.pl.sapl.ast.protocol.Transpilable
+import com.developersam.pl.sapl.ast.protocol.TranspilerVisitor
 import com.developersam.pl.sapl.ast.type.TypeExpr
 import com.developersam.pl.sapl.codegen.IndentationQueue
 import com.developersam.pl.sapl.util.joinToGenericsInfoString
@@ -15,7 +17,7 @@ import com.developersam.pl.sapl.ast.common.Literal as CommonLiteral
  */
 sealed class DecoratedExpression(
         val shouldBeInline: Boolean, private val precedenceLevel: Int
-) : PrettyPrintable {
+) : PrettyPrintable, Transpilable {
 
     /**
      * [type] is the type decoration.
@@ -63,6 +65,9 @@ sealed class DecoratedExpression(
             prettyPrint(q = q)
         }
     }
+
+    override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor): Unit =
+            visitor.visit(q = q, expression = this)
 
     /**
      * [Literal] with correct [type] represents a [literal] as an expression.

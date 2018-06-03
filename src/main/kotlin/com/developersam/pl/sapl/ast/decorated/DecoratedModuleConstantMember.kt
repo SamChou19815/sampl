@@ -1,5 +1,6 @@
 package com.developersam.pl.sapl.ast.decorated
 
+import com.developersam.pl.sapl.ast.protocol.TranspilerVisitor
 import com.developersam.pl.sapl.ast.type.TypeExpr
 import com.developersam.pl.sapl.codegen.IndentationQueue
 
@@ -25,5 +26,8 @@ data class DecoratedModuleConstantMember(
         q.addLine(line = header)
         q.indentAndApply { expr.prettyPrintOrInline(q = this) }
     }
+
+    override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor): Unit =
+            visitor.visit(q = q, constantMember = this)
 
 }

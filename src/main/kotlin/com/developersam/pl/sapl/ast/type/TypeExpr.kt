@@ -1,5 +1,8 @@
 package com.developersam.pl.sapl.ast.type
 
+import com.developersam.pl.sapl.ast.protocol.Transpilable
+import com.developersam.pl.sapl.ast.protocol.TranspilerVisitor
+import com.developersam.pl.sapl.codegen.IndentationQueue
 import com.developersam.pl.sapl.environment.TypeCheckingEnv
 import com.developersam.pl.sapl.exceptions.IdentifierError
 import com.developersam.pl.sapl.util.joinToGenericsInfoString
@@ -8,13 +11,16 @@ import kotlin.math.min
 /**
  * [TypeExpr] represents a set of supported type expression in type annotation.
  */
-sealed class TypeExpr : Comparable<TypeExpr> {
+sealed class TypeExpr : Transpilable, Comparable<TypeExpr> {
 
     /**
      * [asTypeInformation] converts itself to [TypeInfo] without generics declaration.
      */
     val asTypeInformation: TypeInfo
         get() = TypeInfo(typeExpr = this)
+
+    override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor): Unit =
+            visitor.visit(q = q, typeExpr = this)
 
     override fun compareTo(other: TypeExpr): Int {
         if (this is Identifier && other is Identifier) {

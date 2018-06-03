@@ -2,10 +2,10 @@ package com.developersam.pl.sapl.ast.protocol
 
 import com.developersam.pl.sapl.ast.decorated.DecoratedExpression
 import com.developersam.pl.sapl.ast.decorated.DecoratedModule
+import com.developersam.pl.sapl.ast.decorated.DecoratedModuleConstantMember
+import com.developersam.pl.sapl.ast.decorated.DecoratedModuleFunctionMember
 import com.developersam.pl.sapl.ast.decorated.DecoratedModuleMembers
 import com.developersam.pl.sapl.ast.decorated.DecoratedPattern
-import com.developersam.pl.sapl.ast.raw.ModuleConstantMember
-import com.developersam.pl.sapl.ast.raw.ModuleFunctionMember
 import com.developersam.pl.sapl.ast.raw.ModuleTypeMember
 import com.developersam.pl.sapl.ast.type.TypeDeclaration
 import com.developersam.pl.sapl.ast.type.TypeExpr
@@ -44,12 +44,12 @@ interface TranspilerVisitor {
     /**
      * [visit] visits the [constantMember] with [q] to add proper indentation and code info.
      */
-    fun visit(q: IndentationQueue, constantMember: ModuleConstantMember)
+    fun visit(q: IndentationQueue, constantMember: DecoratedModuleConstantMember)
 
     /**
      * [visit] visits the [functionMember] with [q] to add proper indentation and code info.
      */
-    fun visit(q: IndentationQueue, functionMember: ModuleFunctionMember)
+    fun visit(q: IndentationQueue, functionMember: DecoratedModuleFunctionMember)
 
     /**
      * [visit] visits the [expression] with [q] to add proper indentation and code info.

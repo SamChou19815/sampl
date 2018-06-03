@@ -1,12 +1,17 @@
 package com.developersam.pl.sapl.ast.type
 
 import com.developersam.pl.sapl.ast.protocol.PrettyPrintable
+import com.developersam.pl.sapl.ast.protocol.Transpilable
+import com.developersam.pl.sapl.ast.protocol.TranspilerVisitor
 import com.developersam.pl.sapl.codegen.IndentationQueue
 
 /**
  * [TypeDeclaration] represents a set of supported type expression in type declaration.
  */
-sealed class TypeDeclaration : PrettyPrintable {
+sealed class TypeDeclaration : PrettyPrintable, Transpilable {
+
+    override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor): Unit =
+            visitor.visit(q = q, typeDeclaration = this)
 
     final override fun toString(): String = asIndentedSourceCode
 
