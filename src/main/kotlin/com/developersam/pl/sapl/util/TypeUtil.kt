@@ -22,6 +22,12 @@ internal fun toFunctionTypeExpr(
 }
 
 /**
+ * [joinToGenericsInfoString] converts a list of info to generics info and returns the string.
+ */
+internal fun <T> List<T>.joinToGenericsInfoString(): String =
+        joinToString(separator = ",", prefix = "<", postfix = ">")
+
+/**
  * [PairedTypeExprVisitor] visits the pair [genericType] and [actualType] in sync and
  * tries to reconcile for [oneGenericDeclaration] at [index], under [knownGenericInfo].
  */

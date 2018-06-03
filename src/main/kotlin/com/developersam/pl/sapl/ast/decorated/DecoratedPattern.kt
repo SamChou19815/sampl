@@ -1,14 +1,16 @@
 package com.developersam.pl.sapl.ast.decorated
 
-import com.developersam.pl.sapl.ast.protocol.Printable
 import com.developersam.pl.sapl.ast.type.TypeExpr
 
 /**
  * [DecoratedPattern] is the pattern with appropriate and correct type decoration.
  */
-sealed class DecoratedPattern : Printable {
+sealed class DecoratedPattern {
 
-    final override fun toString(): String = prettyPrint()
+    /**
+     * [asSourceCode] returns itself in source code form.
+     */
+    abstract val asSourceCode: String
 
     /**
      * [Variant] with an optional [associatedVariableType] represents the variant
@@ -19,37 +21,28 @@ sealed class DecoratedPattern : Printable {
             val associatedVariableType: TypeExpr? = null
     ) : DecoratedPattern() {
 
-        override fun prettyPrint(level: Int, builder: StringBuilder) {
-            builder.append(variantIdentifier)
-            if (associatedVariable != null) {
-                builder.append(" of ").append(associatedVariable)
-            }
-        }
+        override val asSourceCode: String
+            get() = StringBuilder().apply {
+                append(variantIdentifier)
+                if (associatedVariable != null) {
+                    append(" of ").append(associatedVariable)
+                }
+            }.toString()
 
     }
 
     /**
      * [Variable] with [type] represents a variable that matches everything.
      */
-    data class Variable(
-            val identifier: String, val type: TypeExpr
-    ) : DecoratedPattern()  {
-
-        override fun prettyPrint(level: Int, builder: StringBuilder) {
-            builder.append(identifier)
-        }
-
+    data class Variable(val identifier: String, val type: TypeExpr) : DecoratedPattern() {
+        override val asSourceCode: String get() = identifier
     }
 
     /**
      * [WildCard] represents a wildcard but does not bound to anything.
      */
     object WildCard : DecoratedPattern() {
-
-        override fun prettyPrint(level: Int, builder: StringBuilder) {
-            builder.append("_")
-        }
-
+        override val asSourceCode: String get() = "_"
     }
 
 }

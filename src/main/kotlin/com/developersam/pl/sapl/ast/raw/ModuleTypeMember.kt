@@ -3,7 +3,7 @@ package com.developersam.pl.sapl.ast.raw
 import com.developersam.pl.sapl.ast.protocol.Printable
 import com.developersam.pl.sapl.ast.type.TypeDeclaration
 import com.developersam.pl.sapl.ast.type.TypeIdentifier
-import com.developersam.pl.sapl.config.IndentationStrategy
+import com.developersam.pl.sapl.codegen.IndentationQueue
 import com.developersam.pl.sapl.environment.TypeCheckingEnv
 
 /**
@@ -38,24 +38,26 @@ data class ModuleTypeMember(
 
     }
 
-    override fun prettyPrint(level: Int, builder: StringBuilder) {
-        IndentationStrategy.indent2(level, builder)
-        if (!isPublic) {
-            builder.append("private ")
-        }
-        builder.append("type ")
-        identifier.prettyPrint(builder = builder)
+    override fun prettyPrint(q: IndentationQueue) {
+        val firstLineCommon = StringBuilder().apply {
+            if (!isPublic) {
+                append("private ")
+            }
+            append("type ").append(identifier).append(" =")
+        }.toString()
         when (declaration) {
             is TypeDeclaration.Variant -> {
-                builder.append(" =\n")
-                declaration.prettyPrint(level = level + 1, builder = builder)
+                q.addLine(line = firstLineCommon)
+                q.indentAndApply { declaration.prettyPrint(q = this) }
             }
             is TypeDeclaration.Struct -> {
-                builder.append(" = {\n")
-                declaration.prettyPrint(level = level + 1, builder = builder)
-                IndentationStrategy.indent2(level, builder).append("}\n")
+                q.addLine(line = "$firstLineCommon {")
+                q.indentAndApply { declaration.prettyPrint(q = this) }
+                q.addLine(line = "}")
             }
         }
     }
+
+    override fun toString(): String = asIndentedSourceCode
 
 }

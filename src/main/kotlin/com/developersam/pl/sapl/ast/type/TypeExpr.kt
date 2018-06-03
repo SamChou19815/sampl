@@ -1,15 +1,14 @@
 package com.developersam.pl.sapl.ast.type
 
-import com.developersam.pl.sapl.ast.protocol.Printable
-import com.developersam.pl.sapl.config.IndentationStrategy
 import com.developersam.pl.sapl.environment.TypeCheckingEnv
 import com.developersam.pl.sapl.exceptions.UndefinedTypeIdentifierError
+import com.developersam.pl.sapl.util.joinToGenericsInfoString
 import kotlin.math.min
 
 /**
  * [TypeExpr] represents a set of supported type expression in type annotation.
  */
-sealed class TypeExpr : Printable, Comparable<TypeExpr> {
+sealed class TypeExpr : Comparable<TypeExpr> {
 
     /**
      * [asTypeInformation] converts itself to [TypeInfo] without generics declaration.
@@ -76,17 +75,10 @@ sealed class TypeExpr : Printable, Comparable<TypeExpr> {
             genericsList.forEach { it.checkTypeValidity(environment = environment) }
         }
 
-        override fun prettyPrint(level: Int, builder: StringBuilder) {
-            if (genericsList.isEmpty()) {
-                builder.append(type)
-            } else {
-                builder.append(genericsList.joinToString(
-                        separator = ", ", prefix = "$type<", postfix = ">"
-                ))
-            }
-        }
-
-        override fun toString(): String = prettyPrint()
+        override fun toString(): String =
+                if (genericsList.isEmpty()) type else {
+                    type + genericsList.joinToGenericsInfoString()
+                }
 
     }
 
@@ -109,11 +101,7 @@ sealed class TypeExpr : Printable, Comparable<TypeExpr> {
             returnType.checkTypeValidity(environment = environment)
         }
 
-        override fun prettyPrint(level: Int, builder: StringBuilder) {
-            builder.append('(').append(argumentType).append(" -> ").append(returnType).append(')')
-        }
-
-        override fun toString(): String = prettyPrint()
+        override fun toString(): String = "($argumentType -> $returnType)"
 
     }
 

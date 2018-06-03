@@ -1,12 +1,14 @@
 package com.developersam.pl.sapl.ast.type
 
 import com.developersam.pl.sapl.ast.protocol.Printable
-import com.developersam.pl.sapl.config.IndentationStrategy
+import com.developersam.pl.sapl.codegen.IndentationQueue
 
 /**
  * [TypeDeclaration] represents a set of supported type expression in type declaration.
  */
 sealed class TypeDeclaration : Printable {
+
+    final override fun toString(): String = asIndentedSourceCode
 
     /**
      * [Variant] represents the constructor and an optional associated type all defined in [map].
@@ -15,18 +17,17 @@ sealed class TypeDeclaration : Printable {
             val map: Map<String, TypeExpr?>
     ) : TypeDeclaration() {
 
-        override fun prettyPrint(level: Int, builder: StringBuilder) {
-            for ((name, expr) in map) {
-                IndentationStrategy.indent2(level, builder).append("| ").append(name)
-                if (expr == null) {
-                    builder.append('\n')
-                } else {
-                    builder.append(" of ")
-                    expr.prettyPrint(builder = builder)
-                    builder.append('\n')
+        override fun prettyPrint(q: IndentationQueue): Unit =
+                map.forEach { (name, expr) ->
+                    val line = StringBuilder()
+                            .append("| ").append(name)
+                            .apply {
+                                if (expr != null) {
+                                    append(" of ").append(expr.toString())
+                                }
+                            }.toString()
+                    q.addLine(line = line)
                 }
-            }
-        }
 
     }
 
@@ -35,12 +36,9 @@ sealed class TypeDeclaration : Printable {
      */
     data class Struct(val map: Map<String, TypeExpr>) : TypeDeclaration() {
 
-        override fun prettyPrint(level: Int, builder: StringBuilder) {
-            for ((name, expr) in map) {
-                IndentationStrategy.indent2(level, builder)
-                        .append(name).append(": ").append(expr).append(";\n")
-            }
-        }
+        override fun prettyPrint(q: IndentationQueue): Unit =
+                map.forEach { (name, expr) -> q.addLine(line = "$name: $expr;") }
+
     }
 
 }

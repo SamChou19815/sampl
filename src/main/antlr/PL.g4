@@ -65,10 +65,10 @@ expression
     | THROW LT typeExprInAnnotation GT expression # ThrowExpr
     | IF expression THEN expression ELSE expression # IfElseExpr
     | MATCH expression WITH patternToExpr+ # MatchExpr
-    | LET LowerIdentifier ASSIGN expression SEMICOLON expression # LetExpr
-    | FUNCTION argumentDeclaration+ ARROW expression # FunExpr
     | expression LPAREN expression+ RPAREN # FunctionApplicationExpr
+    | FUNCTION argumentDeclaration+ ARROW expression # FunExpr
     | TRY expression CATCH LowerIdentifier expression # TryCatchExpr
+    | LET LowerIdentifier ASSIGN expression SEMICOLON expression # LetExpr
     ;
 
 constructor
@@ -76,10 +76,12 @@ constructor
     | (UpperIdentifier DOT)+ UpperIdentifier LPAREN expression RPAREN # OneArgVariantConstructor
     | (UpperIdentifier DOT)* UpperIdentifier LBRACE
           structConstructorValueDeclaration (SEMICOLON structConstructorValueDeclaration)*
+          SEMICOLON?
       RBRACE # StructConstructor
     | LBRACE
           expression WITH
           structConstructorValueDeclaration (SEMICOLON structConstructorValueDeclaration)*
+          SEMICOLON?
       RBRACE # StructWithConstructor
     ;
 

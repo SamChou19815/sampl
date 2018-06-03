@@ -1,7 +1,7 @@
 package com.developersam.pl.sapl.ast.decorated
 
 import com.developersam.pl.sapl.ast.type.TypeExpr
-import com.developersam.pl.sapl.config.IndentationStrategy
+import com.developersam.pl.sapl.codegen.IndentationQueue
 
 /**
  * [DecoratedModuleFunctionMember] represents a function declaration of the form:
@@ -19,23 +19,24 @@ data class DecoratedModuleFunctionMember(
 
     override val name: String = identifier
 
-    override fun prettyPrint(level: Int, builder: StringBuilder) {
-        IndentationStrategy.indent2(level, builder)
-        if (!isPublic) {
-            builder.append("private ")
-        }
-        builder.append("let ")
-        if (genericsDeclaration.isNotEmpty()) {
-            builder.append(genericsDeclaration.joinToString(
-                    separator = ", ", prefix = "<", postfix = "> "
-            ))
-        }
-        builder.append(identifier).append(' ')
-        builder.append(arguments.joinToString(separator = " ") { (n, t) -> "($n: $t)" })
-                .append(" : ")
-        returnType.prettyPrint(builder = builder)
-        builder.append(" =\n")
-        body.prettyPrint(level = level + 1, builder = builder)
+    override fun prettyPrint(q: IndentationQueue) {
+        val header = StringBuilder().apply {
+            if (!isPublic) {
+                append("private ")
+            }
+            append("let ")
+            if (genericsDeclaration.isNotEmpty()) {
+                append(genericsDeclaration.joinToString(
+                        separator = ", ", prefix = "<", postfix = "> "
+                ))
+            }
+            append(identifier).append(' ')
+                    .append(arguments.joinToString(separator = " ") { (n, t) -> "($n: $t)" })
+                    .append(" : ").append(returnType.toString())
+                    .append(" =")
+        }.toString()
+        q.addLine(line = header)
+        q.indentAndApply { body.prettyPrintOrInline(q = this) }
     }
 
 }

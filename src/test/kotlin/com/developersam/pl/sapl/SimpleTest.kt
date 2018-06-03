@@ -21,6 +21,9 @@ class SimpleTest {
         let trueVar = () /* Unit is true */
         let implication = function (a: String) -> 5 // (String -> Int) Implication
         let <A, B> modusPonens (f: A -> B) (v: A): B = f(v)
+        // Function Application
+        let constant5Impl1 (v: String): Int = implication (v)
+        let constant5Impl2 (v: String): Int = modusPonens<String, Int> (implication v)
     """.trimIndent()
 
     /**
@@ -32,9 +35,9 @@ class SimpleTest {
                 .fromSource(code = propositionsAreTypesProofsAreProgram)
                 .typeCheck()
                 .members
-        val secondCompile = firstCompile.prettyPrint()
+        val secondCompile = firstCompile.asIndentedSourceCode
                 .let { ModuleConstructor.fromSource(code = it).typeCheck().members }
-        println(secondCompile.prettyPrint())
+        println(secondCompile.asIndentedSourceCode)
         assertEquals(firstCompile, secondCompile)
     }
 

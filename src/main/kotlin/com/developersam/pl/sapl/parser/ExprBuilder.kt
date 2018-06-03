@@ -140,13 +140,6 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
                     }
             )
 
-    override fun visitLetExpr(ctx: LetExprContext): Expression =
-            LetExpr(
-                    identifier = ctx.LowerIdentifier().text,
-                    e1 = ctx.expression(0).accept(this),
-                    e2 = ctx.expression(1).accept(this)
-            )
-
     override fun visitFunExpr(ctx: FunExprContext): Expression =
             FunctionExpr(
                     arguments = ctx.argumentDeclaration()
@@ -169,6 +162,13 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
                     tryExpr = ctx.expression(0).accept(this),
                     exception = ctx.LowerIdentifier().text,
                     catchHandler = ctx.expression(1).accept(this)
+            )
+
+    override fun visitLetExpr(ctx: LetExprContext): Expression =
+            LetExpr(
+                    identifier = ctx.LowerIdentifier().text,
+                    e1 = ctx.expression(0).accept(this),
+                    e2 = ctx.expression(1).accept(this)
             )
 
 }

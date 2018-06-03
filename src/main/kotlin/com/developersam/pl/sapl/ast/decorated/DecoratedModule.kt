@@ -1,7 +1,7 @@
 package com.developersam.pl.sapl.ast.decorated
 
 import com.developersam.pl.sapl.ast.protocol.Printable
-import com.developersam.pl.sapl.config.IndentationStrategy
+import com.developersam.pl.sapl.codegen.IndentationQueue
 
 /**
  * [DecoratedModule] node has a [name] and a set of ordered [members].
@@ -9,11 +9,11 @@ import com.developersam.pl.sapl.config.IndentationStrategy
  */
 data class DecoratedModule(val name: String, val members: DecoratedModuleMembers) : Printable {
 
-    override fun prettyPrint(level: Int, builder: StringBuilder) {
-        IndentationStrategy.indent2(level, builder)
-                .append("module ").append(name).append(" {\n\n")
-        members.prettyPrint(level = level + 1, builder = builder)
-        IndentationStrategy.indent2(level, builder).append("}\n")
+    override fun prettyPrint(q: IndentationQueue) {
+        q.addLine(line = "module $name {")
+        q.addEmptyLine()
+        q.indentAndApply { members.prettyPrint(q = this) }
+        q.addLine(line = "}")
     }
 
 }

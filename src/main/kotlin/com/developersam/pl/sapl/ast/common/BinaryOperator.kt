@@ -6,113 +6,114 @@ import com.developersam.pl.sapl.util.toTable
  * [BinaryOperator] is a collection of supported binary operators.
  *
  * @param symbol the text symbol defined in the lexer.
+ * @param precedenceLevel smaller this number, higher the precedence.
  */
-enum class BinaryOperator(val symbol: String) {
+enum class BinaryOperator(val symbol: String, val precedenceLevel: Int) {
 
     /**
      * Shift left.
      */
-    SHL(symbol = "<<"),
+    SHL(symbol = "<<", precedenceLevel = 0),
     /**
      * Shift right.
      */
-    SHR(symbol = ">>"),
+    SHR(symbol = ">>", precedenceLevel = 0),
     /**
      * Unsigned shift right.
      */
-    USHR(symbol = ">>>"),
+    USHR(symbol = ">>>", precedenceLevel = 0),
     /**
      * Xor.
      */
-    XOR(symbol = "xor"),
+    XOR(symbol = "xor", precedenceLevel = 0),
     /**
      * Logical And.
      */
-    LAND(symbol = "&"),
+    LAND(symbol = "&", precedenceLevel = 0),
     /**
      * Logical Or.
      */
-    LOR(symbol = "|"),
+    LOR(symbol = "|", precedenceLevel = 0),
     /**
      * Integer multiplication.
      */
-    MUL(symbol = "*"),
+    MUL(symbol = "*", precedenceLevel = 1),
     /**
      * Integer division.
      */
-    DIV(symbol = "/"),
+    DIV(symbol = "/", precedenceLevel = 1),
     /**
      * Integer mod.
      */
-    MOD(symbol = "%"),
+    MOD(symbol = "%", precedenceLevel = 1),
     /**
      * Float multiplication.
      */
-    F_MUL(symbol = "*."),
+    F_MUL(symbol = "*.", precedenceLevel = 1),
     /**
      * Float division.
      */
-    F_DIV(symbol = "/."),
+    F_DIV(symbol = "/.", precedenceLevel = 1),
     /**
      * Integer addition.
      */
-    PLUS(symbol = "+"),
+    PLUS(symbol = "+", precedenceLevel = 2),
     /**
      * Integer subtraction.
      */
-    MINUS(symbol = "-"),
+    MINUS(symbol = "-", precedenceLevel = 2),
     /**
      * Float addition.
      */
-    F_PLUS(symbol = "+."),
+    F_PLUS(symbol = "+.", precedenceLevel = 2),
     /**
      * Float subtraction.
      */
-    F_MINUS(symbol = "-."),
+    F_MINUS(symbol = "-.", precedenceLevel = 2),
     /**
      * String concatenation.
      */
-    STR_CONCAT(symbol = "^"),
+    STR_CONCAT(symbol = "^", precedenceLevel = 2),
     /**
      * Referential equality.
      */
-    REF_EQ(symbol = "==="),
+    REF_EQ(symbol = "===", precedenceLevel = 3),
     /**
      * Structural equality.
      */
-    STRUCT_EQ(symbol = "=="),
+    STRUCT_EQ(symbol = "==", precedenceLevel = 3),
     /**
      * Less then.
      */
-    LT(symbol = "<"),
+    LT(symbol = "<", precedenceLevel = 3),
     /**
      * Less then or equal to.
      */
-    LE(symbol = "<="),
+    LE(symbol = "<=", precedenceLevel = 3),
     /**
      * Greater than.
      */
-    GT(symbol = ">"),
+    GT(symbol = ">", precedenceLevel = 3),
     /**
      * Greater than or equal to.
      */
-    GE(symbol = ">="),
+    GE(symbol = ">=", precedenceLevel = 3),
     /**
      * Referential NOT equality.
      */
-    REF_NE(symbol = "!=="),
+    REF_NE(symbol = "!==", precedenceLevel = 3),
     /**
      * Structural NOT equality.
      */
-    STRUCT_NE(symbol = "!="),
+    STRUCT_NE(symbol = "!=", precedenceLevel = 3),
     /**
      * Conjunction.
      */
-    AND(symbol = "&&"),
+    AND(symbol = "&&", precedenceLevel = 4),
     /**
      * Disjunction.
      */
-    OR(symbol = "||");
+    OR(symbol = "||", precedenceLevel = 4);
 
     companion object {
         /**
