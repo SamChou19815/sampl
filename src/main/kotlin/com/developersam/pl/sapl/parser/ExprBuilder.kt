@@ -151,8 +151,6 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
             FunctionExpr(
                     arguments = ctx.argumentDeclaration()
                             .map { it.accept(ArgumentDeclarationBuilder) },
-                    returnType = ctx.typeAnnotation().typeExprInAnnotation()
-                            .accept(TypeExprInAnnotationBuilder),
                     body = ctx.expression().accept(this)
             )
 

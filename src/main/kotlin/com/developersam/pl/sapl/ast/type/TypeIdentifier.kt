@@ -1,5 +1,7 @@
 package com.developersam.pl.sapl.ast.type
 
+import com.developersam.pl.sapl.ast.protocol.Printable
+import com.developersam.pl.sapl.config.IndentationStrategy
 import kotlin.math.min
 
 /**
@@ -8,7 +10,7 @@ import kotlin.math.min
  */
 data class TypeIdentifier(
         val name: String, val genericsInfo: List<String> = emptyList()
-) : Comparable<TypeIdentifier> {
+) : Printable, Comparable<TypeIdentifier> {
 
     override fun compareTo(other: TypeIdentifier): Int {
         val c = name.compareTo(other = other.name)
@@ -25,11 +27,16 @@ data class TypeIdentifier(
         return 0
     }
 
-    override fun toString(): String {
+    override fun prettyPrint(level: Int, builder: StringBuilder) {
         if (genericsInfo.isEmpty()) {
-            return name
+            builder.append(name)
+        } else {
+            builder.append(genericsInfo.joinToString(
+                    separator = ", ", prefix = "$name<", postfix = ">"
+            ))
         }
-        return name + genericsInfo.joinToString(separator = ", ", prefix = "<", postfix = ">")
     }
+
+    override fun toString(): String = prettyPrint()
 
 }

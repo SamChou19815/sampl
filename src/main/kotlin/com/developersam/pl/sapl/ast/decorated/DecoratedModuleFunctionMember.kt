@@ -1,6 +1,8 @@
 package com.developersam.pl.sapl.ast.decorated
 
 import com.developersam.pl.sapl.ast.type.TypeExpr
+import com.developersam.pl.sapl.config.IndentationStrategy
+import com.sun.org.apache.xerces.internal.impl.xs.opti.SchemaDOM.indent
 
 /**
  * [DecoratedModuleFunctionMember] represents a function declaration of the form:
@@ -18,13 +20,22 @@ data class DecoratedModuleFunctionMember(
 
     override val name: String = identifier
 
-    override fun toString(): String {
-        val publicPart = if (isPublic) "" else "private "
-        val genericsPart = if (genericsDeclaration.isEmpty()) "" else {
-            genericsDeclaration.joinToString(separator = ", ", prefix = "<", postfix = ">")
+    override fun prettyPrint(level: Int, builder: StringBuilder) {
+        IndentationStrategy.indent2(level, builder)
+        if (!isPublic) {
+            builder.append("private ")
         }
-        val argumentPart = arguments.joinToString(separator = " ") { (n, t) -> "($n: $t)" }
-        return "${publicPart}let $identifier $genericsPart $argumentPart : $returnType = $body"
+        builder.append("let ").append(identifier).append(' ')
+        if (genericsDeclaration.isNotEmpty()) {
+            builder.append(genericsDeclaration.joinToString(
+                    separator = ", ", prefix = "<", postfix = "> "
+            ))
+        }
+        builder.append(arguments.joinToString(separator = " ") { (n, t) -> "($n: $t)" })
+                .append(" : ")
+        returnType.prettyPrint(builder = builder)
+        builder.append(" =\n")
+        body.prettyPrint(level = level + 1, builder = builder)
     }
 
 }

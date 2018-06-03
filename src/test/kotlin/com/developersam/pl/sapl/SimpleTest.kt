@@ -1,5 +1,6 @@
 package com.developersam.pl.sapl
 
+import com.developersam.pl.sapl.modules.ModuleConstructor
 import org.junit.Test
 
 /**
@@ -19,7 +20,7 @@ class SimpleTest {
             | First of A
             | Second of B
         let trueVar = () /* Unit is true */
-        let implication = function (a: String) : Int -> 5 // (String -> Int) Implication
+        let implication = function (a: String) -> 5 // (String -> Int) Implication
         let <A, B> modusPonens (f: A -> B) (v: A): B = f(v)
     """.trimIndent()
 
@@ -28,7 +29,16 @@ class SimpleTest {
      */
     @Test
     fun run() {
-        PLCompiler.compileFromSource(code = propositionsAreTypesProofsAreProgram)
+        println(propositionsAreTypesProofsAreProgram)
+        println()
+        val firstCompile = ModuleConstructor
+                .fromSource(code = propositionsAreTypesProofsAreProgram)
+                .typeCheck()
+                .members
+        println(firstCompile.prettyPrint())
+        val secondCompile = firstCompile.prettyPrint()
+                .let { ModuleConstructor.fromSource(code = it).typeCheck().members }
+        println(secondCompile.prettyPrint())
     }
 
 }

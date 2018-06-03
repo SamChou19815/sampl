@@ -1,5 +1,6 @@
 package com.developersam.pl.sapl.ast.decorated
 
+import com.developersam.pl.sapl.ast.protocol.Printable
 import com.developersam.pl.sapl.ast.raw.ModuleTypeMember
 
 /**
@@ -11,18 +12,17 @@ data class DecoratedModuleMembers(
         val constantMembers: List<DecoratedModuleConstantMember>,
         val functionMembers: List<DecoratedModuleFunctionMember>,
         val nestedModuleMembers: List<DecoratedModule>
-) {
+) : Printable {
 
-    override fun toString(): String {
-        val typeMembersStr = typeMembers.takeIf { it.isNotEmpty() }
-                ?.joinToString(separator = "\n  ", prefix = "  ", postfix = "\n") ?: ""
-        val constantMembersStr = constantMembers.takeIf { it.isNotEmpty() }
-                ?.joinToString(separator = "\n  ", prefix = "  ", postfix = "\n") ?: ""
-        val functionMembersStr = functionMembers.takeIf { it.isNotEmpty() }
-                ?.joinToString(separator = "\n  ", prefix = "  ", postfix = "\n") ?: ""
-        val nestedModuleMembersStr = nestedModuleMembers.takeIf { it.isNotEmpty() }
-                ?.joinToString(separator = "\n  ", prefix = "  ", postfix = "\n") ?: ""
-        return typeMembersStr + constantMembersStr + functionMembersStr + nestedModuleMembersStr
+    override fun prettyPrint(level: Int, builder: StringBuilder) {
+        val printerAction: (Printable) -> Unit = { m ->
+            m.prettyPrint(level = level, builder = builder)
+            builder.append('\n') // extra empty line between members
+        }
+        typeMembers.forEach(action = printerAction)
+        constantMembers.forEach(action = printerAction)
+        functionMembers.forEach(action = printerAction)
+        nestedModuleMembers.forEach(action = printerAction)
     }
 
 }

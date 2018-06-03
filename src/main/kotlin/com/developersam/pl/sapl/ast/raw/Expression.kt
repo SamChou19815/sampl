@@ -539,22 +539,18 @@ data class LetExpr(
  * function [body].
  */
 data class FunctionExpr(
-        val arguments: List<Pair<String, TypeExpr>>,
-        val returnType: TypeExpr, val body: Expression
+        val arguments: List<Pair<String, TypeExpr>>, val body: Expression
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
-        val functionDeclaredType = toFunctionTypeExpr(
-                argumentTypes = arguments.map { it.second }, returnType = returnType
-        )
-        functionDeclaredType.checkTypeValidity(environment = environment)
         val bodyExpr = body.typeCheck(environment = environment)
         val bodyType = bodyExpr.type
-        if (returnType != bodyType) {
-            throw UnexpectedTypeError(expectedType = returnType, actualType = bodyType)
-        }
+        val functionDeclaredType = toFunctionTypeExpr(
+                argumentTypes = arguments.map { it.second }, returnType = bodyType
+        )
+        functionDeclaredType.checkTypeValidity(environment = environment)
         return DecoratedFunctionExpr(
-                arguments = arguments, returnType = returnType, body = bodyExpr,
+                arguments = arguments, returnType = bodyType, body = bodyExpr,
                 type = functionDeclaredType
         )
     }

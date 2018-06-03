@@ -1,7 +1,9 @@
 package com.developersam.pl.sapl.ast.raw
 
+import com.developersam.pl.sapl.ast.protocol.Printable
 import com.developersam.pl.sapl.ast.type.TypeDeclaration
 import com.developersam.pl.sapl.ast.type.TypeIdentifier
+import com.developersam.pl.sapl.config.IndentationStrategy
 import com.developersam.pl.sapl.environment.TypeCheckingEnv
 
 /**
@@ -11,7 +13,7 @@ import com.developersam.pl.sapl.environment.TypeCheckingEnv
 data class ModuleTypeMember(
         override val isPublic: Boolean,
         val identifier: TypeIdentifier, val declaration: TypeDeclaration
-) : ModuleMember {
+) : ModuleMember, Printable {
 
     override val name: String = identifier.name
 
@@ -36,7 +38,24 @@ data class ModuleTypeMember(
 
     }
 
-    override fun toString(): String =
-            "${if (isPublic) "" else "private "}type $identifier = $declaration"
+    override fun prettyPrint(level: Int, builder: StringBuilder) {
+        IndentationStrategy.indent2(level, builder)
+        if (!isPublic) {
+            builder.append("private ")
+        }
+        builder.append("type ")
+        identifier.prettyPrint(builder = builder)
+        when (declaration) {
+            is TypeDeclaration.Variant -> {
+                builder.append(" =\n")
+                declaration.prettyPrint(level = level + 1, builder = builder)
+            }
+            is TypeDeclaration.Struct -> {
+                builder.append(" = {\n")
+                declaration.prettyPrint(level = level + 1, builder = builder)
+                IndentationStrategy.indent2(level, builder).append("}\n")
+            }
+        }
+    }
 
 }

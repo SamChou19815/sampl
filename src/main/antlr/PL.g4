@@ -63,11 +63,11 @@ expression
     | expression comparisonOperator expression # ComparisonExpr
     | expression AND expression # ConjunctionExpr
     | expression OR expression # DisjunctionExpr
-    | THROW LBRACKET typeExprInAnnotation RBRACKET expression # ThrowExpr
+    | THROW LT typeExprInAnnotation GT expression # ThrowExpr
     | IF expression THEN expression ELSE expression # IfElseExpr
     | MATCH expression WITH patternToExpr+ # MatchExpr
     | LET LowerIdentifier ASSIGN expression SEMICOLON expression # LetExpr
-    | FUNCTION argumentDeclaration+ typeAnnotation ARROW expression # FunExpr
+    | FUNCTION argumentDeclaration+ ARROW expression # FunExpr
     | expression LPAREN expression+ RPAREN # FunctionApplicationExpr
     | TRY expression CATCH LowerIdentifier expression # TryCatchExpr
     ;
