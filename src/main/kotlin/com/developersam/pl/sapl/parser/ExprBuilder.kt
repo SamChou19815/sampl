@@ -20,8 +20,8 @@ import com.developersam.pl.sapl.antlr.PLParser.StructMemberAccessExprContext
 import com.developersam.pl.sapl.antlr.PLParser.TermExprContext
 import com.developersam.pl.sapl.antlr.PLParser.ThrowExprContext
 import com.developersam.pl.sapl.antlr.PLParser.TryCatchExprContext
-import com.developersam.pl.sapl.ast.BinaryOperator
-import com.developersam.pl.sapl.ast.Literal
+import com.developersam.pl.sapl.ast.common.BinaryOperator
+import com.developersam.pl.sapl.ast.common.Literal
 import com.developersam.pl.sapl.ast.raw.BinaryExpr
 import com.developersam.pl.sapl.ast.raw.Expression
 import com.developersam.pl.sapl.ast.raw.FunctionApplicationExpr
@@ -36,7 +36,6 @@ import com.developersam.pl.sapl.ast.raw.ThrowExpr
 import com.developersam.pl.sapl.ast.raw.TryCatchExpr
 import com.developersam.pl.sapl.ast.raw.VariableIdentifierExpr
 import org.antlr.v4.runtime.tree.TerminalNode
-import java.awt.SystemColor.text
 
 /**
  * [ExprBuilder] builds expression AST from parse tree.

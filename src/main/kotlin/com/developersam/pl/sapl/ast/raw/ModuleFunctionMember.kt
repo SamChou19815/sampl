@@ -1,6 +1,6 @@
 package com.developersam.pl.sapl.ast.raw
 
-import com.developersam.pl.sapl.ast.TypeExpr
+import com.developersam.pl.sapl.ast.type.TypeExpr
 import com.developersam.pl.sapl.ast.decorated.DecoratedModuleFunctionMember
 import com.developersam.pl.sapl.environment.TypeCheckingEnv
 import com.developersam.pl.sapl.exceptions.UnexpectedTypeError

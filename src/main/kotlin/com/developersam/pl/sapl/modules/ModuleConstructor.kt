@@ -2,7 +2,7 @@ package com.developersam.pl.sapl.modules
 
 import com.developersam.pl.sapl.antlr.PLLexer
 import com.developersam.pl.sapl.antlr.PLParser
-import com.developersam.pl.sapl.ast.CompilationUnit
+import com.developersam.pl.sapl.ast.raw.CompilationUnit
 import com.developersam.pl.sapl.ast.raw.Module
 import com.developersam.pl.sapl.parser.CompilationUnitBuilder
 import com.developersam.pl.sapl.util.getAllSourceFiles

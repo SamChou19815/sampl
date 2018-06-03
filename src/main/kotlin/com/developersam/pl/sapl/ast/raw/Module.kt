@@ -1,7 +1,7 @@
 package com.developersam.pl.sapl.ast.raw
 
 import com.developersam.pl.sapl.TOP_LEVEL_MODULE_NAME
-import com.developersam.pl.sapl.ast.TypeInfo
+import com.developersam.pl.sapl.ast.type.TypeInfo
 import com.developersam.pl.sapl.ast.decorated.DecoratedModule
 import com.developersam.pl.sapl.ast.decorated.DecoratedModuleConstantMember
 import com.developersam.pl.sapl.ast.decorated.DecoratedModuleMembers
@@ -78,7 +78,8 @@ data class Module(override val name: String, val members: ModuleMembers) : Modul
         // Part 3: Process Function Definitions
         val eWithFunctions = eWithConstants.update(
                 newTypeEnv = functionMembers.fold(initial = eWithConstants.typeEnv) { env, m ->
-                    val functionTypeInfo = TypeInfo(m.functionType, m.genericsDeclaration)
+                    val functionTypeInfo =
+                            TypeInfo(m.functionType, m.genericsDeclaration)
                     env.put(key = m.identifier, value = functionTypeInfo)
                 })
         val decoratedFunctions = functionMembers.map { it.typeCheck(environment = eWithFunctions) }

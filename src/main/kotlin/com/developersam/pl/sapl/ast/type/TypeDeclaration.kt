@@ -1,4 +1,4 @@
-package com.developersam.pl.sapl.ast
+package com.developersam.pl.sapl.ast.type
 
 /**
  * [TypeDeclaration] represents a set of supported type expression in type declaration.

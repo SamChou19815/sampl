@@ -1,7 +1,7 @@
 package com.developersam.pl.sapl.ast.raw
 
-import com.developersam.pl.sapl.ast.TypeDeclaration
-import com.developersam.pl.sapl.ast.TypeIdentifier
+import com.developersam.pl.sapl.ast.type.TypeDeclaration
+import com.developersam.pl.sapl.ast.type.TypeIdentifier
 import com.developersam.pl.sapl.environment.TypeCheckingEnv
 
 /**

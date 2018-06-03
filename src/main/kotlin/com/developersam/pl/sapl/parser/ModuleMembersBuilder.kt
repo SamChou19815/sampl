@@ -2,7 +2,7 @@ package com.developersam.pl.sapl.parser
 
 import com.developersam.pl.sapl.antlr.PLBaseVisitor
 import com.developersam.pl.sapl.antlr.PLParser.ModuleMembersDeclarationContext
-import com.developersam.pl.sapl.ast.TypeIdentifier
+import com.developersam.pl.sapl.ast.type.TypeIdentifier
 import com.developersam.pl.sapl.ast.raw.ModuleConstantMember
 import com.developersam.pl.sapl.ast.raw.ModuleFunctionMember
 import com.developersam.pl.sapl.ast.raw.ModuleTypeMember

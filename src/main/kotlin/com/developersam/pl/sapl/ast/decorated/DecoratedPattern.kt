@@ -1,6 +1,6 @@
 package com.developersam.pl.sapl.ast.decorated
 
-import com.developersam.pl.sapl.ast.TypeExpr
+import com.developersam.pl.sapl.ast.type.TypeExpr
 
 /**
  * [DecoratedPattern] is the pattern with appropriate and correct type decoration.

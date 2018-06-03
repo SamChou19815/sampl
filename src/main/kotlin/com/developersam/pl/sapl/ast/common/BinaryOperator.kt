@@ -1,4 +1,4 @@
-package com.developersam.pl.sapl.ast
+package com.developersam.pl.sapl.ast.common
 
 import com.developersam.pl.sapl.util.toTable
 

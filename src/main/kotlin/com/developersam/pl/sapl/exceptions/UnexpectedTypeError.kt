@@ -1,6 +1,6 @@
 package com.developersam.pl.sapl.exceptions
 
-import com.developersam.pl.sapl.ast.TypeExpr
+import com.developersam.pl.sapl.ast.type.TypeExpr
 
 /**
  * [UnexpectedTypeError] reports an unexpected type during compile time type checking.

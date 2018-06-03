@@ -1,9 +1,8 @@
 package com.developersam.pl.sapl.ast.decorated
 
-import com.developersam.pl.sapl.ast.BinaryOperator
-import com.developersam.pl.sapl.ast.Literal
-import com.developersam.pl.sapl.ast.TypeExpr
-import com.developersam.pl.sapl.environment.TypeCheckingEnv
+import com.developersam.pl.sapl.ast.common.BinaryOperator
+import com.developersam.pl.sapl.ast.common.Literal
+import com.developersam.pl.sapl.ast.type.TypeExpr
 
 /**
  * [DecoratedExpression] is an expression with a correct decorated type.

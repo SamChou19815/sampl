@@ -1,4 +1,4 @@
-package com.developersam.pl.sapl.ast
+package com.developersam.pl.sapl.ast.type
 
 /**
  * [TypeInfo] is the data class that contains both an type expression [typeExpr] and another

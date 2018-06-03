@@ -1,6 +1,6 @@
 package com.developersam.pl.sapl.ast.decorated
 
-import com.developersam.pl.sapl.ast.TypeExpr
+import com.developersam.pl.sapl.ast.type.TypeExpr
 
 /**
  * [DecoratedModuleConstantMember] represents a constant declaration of the form:

@@ -1,5 +1,12 @@
-package com.developersam.pl.sapl.ast
+package com.developersam.pl.sapl.ast.common
 
+import com.developersam.pl.sapl.ast.type.TypeExpr
+import com.developersam.pl.sapl.ast.type.boolTypeExpr
+import com.developersam.pl.sapl.ast.type.charTypeExpr
+import com.developersam.pl.sapl.ast.type.floatTypeExpr
+import com.developersam.pl.sapl.ast.type.intTypeExpr
+import com.developersam.pl.sapl.ast.type.stringTypeExpr
+import com.developersam.pl.sapl.ast.type.unitTypeExpr
 import com.developersam.pl.sapl.exceptions.InvalidLiteralError
 import org.apache.commons.text.StringEscapeUtils
 
@@ -74,12 +81,12 @@ sealed class Literal(val inferredType: TypeExpr) {
         fun from(text: kotlin.String): Literal {
             val unescaped: kotlin.String = StringEscapeUtils.unescapeJava(text)
             when (unescaped) {
-                "()" -> return Literal.Unit
-                "true" -> return Literal.Bool(value = true)
-                "false" -> return Literal.Bool(value = false)
+                "()" -> return Unit
+                "true" -> return Bool(value = true)
+                "false" -> return Bool(value = false)
                 else -> {
-                    unescaped.toLongOrNull()?.let { return Literal.Int(value = it) }
-                    unescaped.toDoubleOrNull()?.let { return Literal.Float(value = it) }
+                    unescaped.toLongOrNull()?.let { return Int(value = it) }
+                    unescaped.toDoubleOrNull()?.let { return Float(value = it) }
                     val len = unescaped.length
                     if (len < 2) {
                         throw InvalidLiteralError(invalidLiteral = text)
@@ -88,9 +95,9 @@ sealed class Literal(val inferredType: TypeExpr) {
                     val last = unescaped[len - 1]
                     val betweenQuotes = unescaped.substring(startIndex = 1, endIndex = len - 1)
                     return if (first == '\'' && last == '\'') {
-                        Literal.Char(value = betweenQuotes[0])
+                        Char(value = betweenQuotes[0])
                     } else if (first == '"' && last == '"') {
-                        Literal.String(value = betweenQuotes)
+                        String(value = betweenQuotes)
                     } else {
                         throw InvalidLiteralError(invalidLiteral = text)
                     }

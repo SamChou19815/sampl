@@ -1,7 +1,7 @@
 package com.developersam.pl.sapl.parser
 
 import com.developersam.pl.sapl.antlr.PLBaseVisitor
-import com.developersam.pl.sapl.ast.TypeExpr
+import com.developersam.pl.sapl.ast.type.TypeExpr
 import org.antlr.v4.runtime.tree.TerminalNode
 import com.developersam.pl.sapl.antlr.PLParser.FunctionTypeInAnnotationContext as Func;
 import com.developersam.pl.sapl.antlr.PLParser.NestedTypeInAnnotationContext as Nested

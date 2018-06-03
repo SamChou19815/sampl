@@ -1,6 +1,6 @@
 package com.developersam.pl.sapl.exceptions
 
-import com.developersam.pl.sapl.ast.TypeExpr
+import com.developersam.pl.sapl.ast.type.TypeExpr
 import java.util.Arrays
 
 /**

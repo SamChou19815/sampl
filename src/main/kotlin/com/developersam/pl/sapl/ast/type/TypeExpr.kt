@@ -1,4 +1,4 @@
-package com.developersam.pl.sapl.ast
+package com.developersam.pl.sapl.ast.type
 
 import com.developersam.pl.sapl.environment.TypeCheckingEnv
 import com.developersam.pl.sapl.exceptions.UndefinedTypeIdentifierError
@@ -29,13 +29,13 @@ sealed class TypeExpr : Comparable<TypeExpr> {
                 }
             }
             return 0
-        } else if (this is TypeExpr.Function && other is TypeExpr.Function) {
+        } else if (this is Function && other is Function) {
             val c = argumentType.compareTo(other = other.argumentType)
             if (c != 0) {
                 return c
             }
             return returnType.compareTo(other = other.returnType)
-        } else if (this is Identifier && other is TypeExpr.Function) {
+        } else if (this is Identifier && other is Function) {
             return -1
         } else {
             return 1

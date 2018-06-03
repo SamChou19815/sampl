@@ -2,7 +2,7 @@ package com.developersam.pl.sapl.parser
 
 import com.developersam.pl.sapl.antlr.PLBaseVisitor
 import com.developersam.pl.sapl.antlr.PLParser
-import com.developersam.pl.sapl.ast.CompilationUnit
+import com.developersam.pl.sapl.ast.raw.CompilationUnit
 import java.util.stream.Collectors
 
 /**

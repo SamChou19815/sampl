@@ -1,6 +1,6 @@
 package com.developersam.pl.sapl.ast.raw
 
-import com.developersam.pl.sapl.ast.TypeExpr as T
+import com.developersam.pl.sapl.ast.type.TypeExpr as T
 import com.developersam.pl.sapl.ast.decorated.DecoratedPattern
 import com.developersam.pl.sapl.exceptions.WrongPatternError
 import com.developersam.pl.sapl.environment.TypeCheckingEnv as E

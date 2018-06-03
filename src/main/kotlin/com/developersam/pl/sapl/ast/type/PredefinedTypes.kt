@@ -1,4 +1,4 @@
-package com.developersam.pl.sapl.ast
+package com.developersam.pl.sapl.ast.type
 
 // Part 1: Type Names
 
@@ -37,61 +37,73 @@ const val stringTypeName: String = "String"
 /**
  * [unitTypeId] is the type identifier for the unit type.
  */
-val unitTypeId: TypeIdentifier = TypeIdentifier(name = "Unit")
+val unitTypeId: TypeIdentifier =
+        TypeIdentifier(name = "Unit")
 
 /**
  * [intTypeId] is the type identifier for the int type.
  */
-val intTypeId: TypeIdentifier = TypeIdentifier(name = "Int")
+val intTypeId: TypeIdentifier =
+        TypeIdentifier(name = "Int")
 
 /**
  * [floatTypeId] is the type identifier for the float type.
  */
-val floatTypeId: TypeIdentifier = TypeIdentifier(name = "Float")
+val floatTypeId: TypeIdentifier =
+        TypeIdentifier(name = "Float")
 
 /**
  * [boolTypeId] is the type identifier for the bool type.
  */
-val boolTypeId: TypeIdentifier = TypeIdentifier(name = "Bool")
+val boolTypeId: TypeIdentifier =
+        TypeIdentifier(name = "Bool")
 
 /**
  * [charTypeId] is the type identifier for the char type.
  */
-val charTypeId: TypeIdentifier = TypeIdentifier(name = "Char")
+val charTypeId: TypeIdentifier =
+        TypeIdentifier(name = "Char")
 
 /**
  * [stringTypeId] is the type identifier for the string type.
  */
-val stringTypeId: TypeIdentifier = TypeIdentifier(name = "String")
+val stringTypeId: TypeIdentifier =
+        TypeIdentifier(name = "String")
 
 // Part 3: Type Expressions
 
 /**
  * [unitTypeExpr] is the type expression for the unit type.
  */
-val unitTypeExpr: TypeExpr.Identifier = TypeExpr.Identifier(type = "Unit")
+val unitTypeExpr: TypeExpr.Identifier =
+        TypeExpr.Identifier(type = "Unit")
 
 /**
  * [intTypeExpr] is the type expression for the integer type.
  */
-val intTypeExpr: TypeExpr.Identifier = TypeExpr.Identifier(type = "Int")
+val intTypeExpr: TypeExpr.Identifier =
+        TypeExpr.Identifier(type = "Int")
 
 /**
  * [floatTypeExpr] is the type expression for the float type.
  */
-val floatTypeExpr: TypeExpr.Identifier = TypeExpr.Identifier(type = "Float")
+val floatTypeExpr: TypeExpr.Identifier =
+        TypeExpr.Identifier(type = "Float")
 
 /**
  * [boolTypeExpr] is the type expression for the bool type.
  */
-val boolTypeExpr: TypeExpr.Identifier = TypeExpr.Identifier(type = "Bool")
+val boolTypeExpr: TypeExpr.Identifier =
+        TypeExpr.Identifier(type = "Bool")
 
 /**
  * [charTypeExpr] is the type expression for the char type.
  */
-val charTypeExpr: TypeExpr.Identifier = TypeExpr.Identifier(type = "Char")
+val charTypeExpr: TypeExpr.Identifier =
+        TypeExpr.Identifier(type = "Char")
 
 /**
  * [stringTypeExpr] is the type expression for the string type.
  */
-val stringTypeExpr: TypeExpr.Identifier = TypeExpr.Identifier(type = "String")
+val stringTypeExpr: TypeExpr.Identifier =
+        TypeExpr.Identifier(type = "String")

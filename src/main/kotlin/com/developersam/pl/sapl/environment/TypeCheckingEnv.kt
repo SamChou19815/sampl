@@ -1,16 +1,16 @@
 package com.developersam.pl.sapl.environment
 
 import com.developersam.fp.FpMap
-import com.developersam.pl.sapl.ast.TypeDeclaration
-import com.developersam.pl.sapl.ast.TypeInfo
-import com.developersam.pl.sapl.ast.boolTypeId
-import com.developersam.pl.sapl.ast.charTypeId
-import com.developersam.pl.sapl.ast.floatTypeId
-import com.developersam.pl.sapl.ast.intTypeId
+import com.developersam.pl.sapl.ast.type.TypeDeclaration
+import com.developersam.pl.sapl.ast.type.TypeInfo
+import com.developersam.pl.sapl.ast.type.boolTypeId
+import com.developersam.pl.sapl.ast.type.charTypeId
+import com.developersam.pl.sapl.ast.type.floatTypeId
+import com.developersam.pl.sapl.ast.type.intTypeId
 import com.developersam.pl.sapl.ast.raw.Module
 import com.developersam.pl.sapl.ast.raw.ModuleMember
-import com.developersam.pl.sapl.ast.stringTypeId
-import com.developersam.pl.sapl.ast.unitTypeId
+import com.developersam.pl.sapl.ast.type.stringTypeId
+import com.developersam.pl.sapl.ast.type.unitTypeId
 
 /**
  * [TypeCheckingEnv] is the environment for type checking. It contains a set of currently
