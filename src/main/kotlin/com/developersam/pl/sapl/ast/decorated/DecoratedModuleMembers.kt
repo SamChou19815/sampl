@@ -1,6 +1,6 @@
 package com.developersam.pl.sapl.ast.decorated
 
-import com.developersam.pl.sapl.ast.protocol.Printable
+import com.developersam.pl.sapl.ast.protocol.PrettyPrintable
 import com.developersam.pl.sapl.ast.raw.ModuleTypeMember
 import com.developersam.pl.sapl.codegen.IndentationQueue
 
@@ -13,10 +13,10 @@ data class DecoratedModuleMembers(
         val constantMembers: List<DecoratedModuleConstantMember>,
         val functionMembers: List<DecoratedModuleFunctionMember>,
         val nestedModuleMembers: List<DecoratedModule>
-) : Printable {
+) : PrettyPrintable {
 
     override fun prettyPrint(q: IndentationQueue) {
-        val printerAction: (Printable) -> Unit = { m ->
+        val printerAction: (PrettyPrintable) -> Unit = { m ->
             m.prettyPrint(q = q)
             q.addEmptyLine()
         }

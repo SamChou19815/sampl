@@ -1,12 +1,12 @@
 package com.developersam.pl.sapl.ast.type
 
-import com.developersam.pl.sapl.ast.protocol.Printable
+import com.developersam.pl.sapl.ast.protocol.PrettyPrintable
 import com.developersam.pl.sapl.codegen.IndentationQueue
 
 /**
  * [TypeDeclaration] represents a set of supported type expression in type declaration.
  */
-sealed class TypeDeclaration : Printable {
+sealed class TypeDeclaration : PrettyPrintable {
 
     final override fun toString(): String = asIndentedSourceCode
 

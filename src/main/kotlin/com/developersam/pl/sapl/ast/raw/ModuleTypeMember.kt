@@ -1,6 +1,6 @@
 package com.developersam.pl.sapl.ast.raw
 
-import com.developersam.pl.sapl.ast.protocol.Printable
+import com.developersam.pl.sapl.ast.protocol.PrettyPrintable
 import com.developersam.pl.sapl.ast.type.TypeDeclaration
 import com.developersam.pl.sapl.ast.type.TypeIdentifier
 import com.developersam.pl.sapl.codegen.IndentationQueue
@@ -13,7 +13,7 @@ import com.developersam.pl.sapl.environment.TypeCheckingEnv
 data class ModuleTypeMember(
         override val isPublic: Boolean,
         val identifier: TypeIdentifier, val declaration: TypeDeclaration
-) : ModuleMember, Printable {
+) : ModuleMember, PrettyPrintable {
 
     override val name: String = identifier.name
 

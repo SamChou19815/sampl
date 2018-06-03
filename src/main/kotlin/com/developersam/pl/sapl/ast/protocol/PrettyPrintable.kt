@@ -4,9 +4,9 @@ import com.developersam.pl.sapl.codegen.IndentationQueue
 import com.developersam.pl.sapl.config.IndentationStrategy.TWO_SPACES
 
 /**
- * [Printable] specifies how an AST node can be printed.
+ * [PrettyPrintable] specifies how an AST node can be pretty-printed.
  */
-interface Printable {
+interface PrettyPrintable {
 
     /**
      * [asIndentedSourceCode] returns the source code of the AST node in well formatted way.
@@ -21,9 +21,6 @@ interface Printable {
 
     /**
      * [asInlineSourceCode] returns the source code of the AST node in one-liner way.
-     * It does not need to worry about the x-character-limit issue, but it does need to consider
-     * proper indentation.
-     * Calling this function assumes that you are at indentation level 0.
      */
     val asInlineSourceCode: String
         get() = IndentationQueue(strategy = TWO_SPACES)
@@ -31,7 +28,7 @@ interface Printable {
                 .toInlineCode()
 
     /**
-     * [asIndentedSourceCode] prints the source code of the AST node in well formatted way.
+     * [asIndentedSourceCode] prints the source code of the AST node in well formatted way to [q].
      * It does not need to worry about the x-character-limit issue, but it does need to consider
      * proper indentation.
      *

@@ -1,7 +1,7 @@
 package com.developersam.pl.sapl.ast.decorated
 
 import com.developersam.pl.sapl.ast.common.BinaryOperator
-import com.developersam.pl.sapl.ast.protocol.Printable
+import com.developersam.pl.sapl.ast.protocol.PrettyPrintable
 import com.developersam.pl.sapl.ast.type.TypeExpr
 import com.developersam.pl.sapl.codegen.IndentationQueue
 import com.developersam.pl.sapl.util.joinToGenericsInfoString
@@ -15,7 +15,7 @@ import com.developersam.pl.sapl.ast.common.Literal as CommonLiteral
  */
 sealed class DecoratedExpression(
         val shouldBeInline: Boolean, private val precedenceLevel: Int
-) : Printable {
+) : PrettyPrintable {
 
     /**
      * [type] is the type decoration.
@@ -34,7 +34,7 @@ sealed class DecoratedExpression(
      */
     fun hasLowerPrecedence(parent: DecoratedExpression): Boolean =
             if (this is Binary && parent is Binary) {
-                op.precedenceLevel > parent.op.precedenceLevel
+                op.precedenceLevel >= parent.op.precedenceLevel
             } else {
                 precedenceLevel > parent.precedenceLevel
             }
