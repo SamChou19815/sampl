@@ -2,6 +2,7 @@ package com.developersam.pl.sapl.ast.decorated
 
 import com.developersam.pl.sapl.codegen.TranspilerVisitor
 import com.developersam.pl.sapl.ast.type.TypeExpr
+import com.developersam.pl.sapl.ast.type.unitTypeExpr
 import com.developersam.pl.sapl.codegen.IndentationQueue
 
 /**
@@ -32,7 +33,13 @@ data class DecoratedModuleFunctionMember(
                 ))
             }
             append(identifier).append(' ')
-                    .append(arguments.joinToString(separator = " ") { (n, t) -> "($n: $t)" })
+                    .append(arguments.joinToString(separator = " ") { (n, t) ->
+                        if (n == "_unit_" && t == unitTypeExpr) {
+                            "()"
+                        } else {
+                            "($n: $t)"
+                        }
+                    })
                     .append(" : ").append(returnType.toString())
                     .append(" =")
         }.toString()

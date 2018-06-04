@@ -105,15 +105,6 @@ OR : '||';
  * ----------------------------------------------------------------------------
  */
 
-Literal
-    : UNIT
-    | IntegerLiteral
-    | FloatingPointLiteral
-    | CharacterLiteral
-    | StringLiteral
-    | BooleanLiteral
-    ;
-
 UNIT : '()';
 
 IntegerLiteral : HexLiteral | OctalLiteral | DecimalLiteral;

@@ -46,7 +46,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
             ctx.expression().accept(this)
 
     override fun visitLiteralExpr(ctx: LiteralExprContext): Expression =
-            LiteralExpr(literal = Literal.from(text = ctx.Literal().text))
+            LiteralExpr(literal = Literal.from(text = ctx.literal().text))
 
     override fun visitIdentifierExpr(ctx: IdentifierExprContext): Expression {
         val upperIds = ctx.UpperIdentifier()
@@ -142,8 +142,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
 
     override fun visitFunExpr(ctx: FunExprContext): Expression =
             FunctionExpr(
-                    arguments = ctx.argumentDeclaration()
-                            .map { it.accept(ArgumentDeclarationBuilder) },
+                    arguments = ctx.argumentDeclarations().accept(ArgumentDeclarationsBuilder),
                     body = ctx.expression().accept(this)
             )
 

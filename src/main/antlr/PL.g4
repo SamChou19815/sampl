@@ -24,7 +24,7 @@ moduleConstantDeclaration: PRIVATE? LET LowerIdentifier ASSIGN expression;
 
 moduleFunctionDeclaration :
     PRIVATE? LET genericsDeclaration? LowerIdentifier
-        argumentDeclaration+ typeAnnotation
+        argumentDeclarations typeAnnotation
     ASSIGN expression;
 
 typeExprInAnnotation
@@ -45,13 +45,15 @@ genericsSpecialization : LT typeExprInAnnotation (COMMA typeExprInAnnotation)* G
 variantConstructorDeclaration : UpperIdentifier (OF typeExprInAnnotation)?;
 typeAnnotation : COLON typeExprInAnnotation;
 annotatedVariable : LowerIdentifier typeAnnotation;
+argumentDeclarations : argumentDeclaration* lastArgumentDeclaration;
 argumentDeclaration : LPAREN annotatedVariable RPAREN;
+lastArgumentDeclaration : UNIT | argumentDeclaration;
 patternToExpr : LOR pattern ARROW expression;
 genericsDeclaration : LT UpperIdentifier (COMMA UpperIdentifier)* GT;
 
 expression
     : LPAREN expression RPAREN # NestedExpr
-    | Literal # LiteralExpr
+    | literal # LiteralExpr
     | (UpperIdentifier DOT)* LowerIdentifier genericsSpecialization? # IdentifierExpr
     | constructor # ConstructorExpr
     | expression DOT LowerIdentifier # StructMemberAccessExpr
@@ -66,7 +68,7 @@ expression
     | IF expression THEN expression ELSE expression # IfElseExpr
     | MATCH expression WITH patternToExpr+ # MatchExpr
     | expression LPAREN expression+ RPAREN # FunctionApplicationExpr
-    | FUNCTION argumentDeclaration+ ARROW expression # FunExpr
+    | FUNCTION argumentDeclarations ARROW expression # FunExpr
     | TRY expression CATCH LowerIdentifier expression # TryCatchExpr
     | LET LowerIdentifier ASSIGN expression SEMICOLON expression # LetExpr
     ;
@@ -102,4 +104,15 @@ factorOperator : MUL | DIV | MOD | F_MUL | F_DIV;
 termOperator : PLUS | MINUS | F_PLUS | F_MINUS | STR_CONCAT;
 
 comparisonOperator : REF_EQ | STRUCT_EQ | LT | LE | GT | GE | REF_NE | STRUCT_NE;
+
+// Literal collections
+
+literal
+    : UNIT
+    | IntegerLiteral
+    | FloatingPointLiteral
+    | CharacterLiteral
+    | StringLiteral
+    | BooleanLiteral
+    ;
 

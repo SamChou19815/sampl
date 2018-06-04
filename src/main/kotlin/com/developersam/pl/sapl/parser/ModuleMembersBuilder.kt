@@ -41,8 +41,7 @@ internal object ModuleMembersBuilder : PLBaseVisitor<M>() {
                     identifier = c.LowerIdentifier().text,
                     genericsDeclaration = c.genericsDeclaration()
                             ?.UpperIdentifier()?.map { it.text } ?: emptyList(),
-                    arguments = c.argumentDeclaration()
-                            .map { it.accept(ArgumentDeclarationBuilder) },
+                    arguments = c.argumentDeclarations().accept(ArgumentDeclarationsBuilder),
                     returnType = c.typeAnnotation().typeExprInAnnotation()
                             .accept(TypeExprInAnnotationBuilder),
                     body = c.expression().accept(ExprBuilder)

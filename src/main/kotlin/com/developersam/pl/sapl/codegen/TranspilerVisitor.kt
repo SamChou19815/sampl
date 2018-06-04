@@ -6,6 +6,7 @@ import com.developersam.pl.sapl.ast.decorated.DecoratedModuleConstantMember
 import com.developersam.pl.sapl.ast.decorated.DecoratedModuleFunctionMember
 import com.developersam.pl.sapl.ast.decorated.DecoratedModuleMembers
 import com.developersam.pl.sapl.ast.decorated.DecoratedPattern
+import com.developersam.pl.sapl.ast.decorated.DecoratedProgram
 import com.developersam.pl.sapl.ast.raw.ModuleTypeMember
 import com.developersam.pl.sapl.ast.type.TypeDeclaration
 import com.developersam.pl.sapl.ast.type.TypeExpr
@@ -25,6 +26,11 @@ interface TranspilerVisitor {
      * [indentationStrategy] is the indentation strategy used when finally generating the code.
      */
     val indentationStrategy: IndentationStrategy
+
+    /**
+     * [visit] visits the [program] with [q] to add proper indentation and code info.
+     */
+    fun visit(q: IndentationQueue, program: DecoratedProgram)
 
     /**
      * [visit] visits the [module] with [q] to add proper indentation and code info.

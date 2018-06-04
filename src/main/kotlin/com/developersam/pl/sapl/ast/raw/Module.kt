@@ -4,6 +4,7 @@ import com.developersam.pl.sapl.TOP_LEVEL_MODULE_NAME
 import com.developersam.pl.sapl.ast.decorated.DecoratedModule
 import com.developersam.pl.sapl.ast.decorated.DecoratedModuleConstantMember
 import com.developersam.pl.sapl.ast.decorated.DecoratedModuleMembers
+import com.developersam.pl.sapl.ast.decorated.DecoratedProgram
 import com.developersam.pl.sapl.ast.type.TypeInfo
 import com.developersam.pl.sapl.environment.TypeCheckingEnv
 import com.developersam.pl.sapl.exceptions.CompileTimeError
@@ -21,7 +22,7 @@ data class Module(override val name: String, val members: ModuleMembers) : Modul
      * checking whether there is a name conflict with a name in [set].
      *
      * @return [Unit]
-     * @throws ShadowedNameError if there is a detected shadowed name.
+     * @throws IdentifierError.ShadowedName if there is a detected shadowed name.
      */
     private fun noNameShadowingValidation(set: HashSet<String>) {
         if (!set.add(name)) {
@@ -102,11 +103,12 @@ data class Module(override val name: String, val members: ModuleMembers) : Modul
      * [typeCheck] tries to type check this top-level module.
      * If it does not type check, it will throw an [CompileTimeError]
      *
-     * @return the decorated module after type check.
+     * @return the decorated program after type check.
      */
-    fun typeCheck(): DecoratedModule {
+    fun typeCheck(): DecoratedProgram {
         noNameShadowingValidation(set = hashSetOf())
-        return typeCheck(e = TypeCheckingEnv.initial).first
+        val members = typeCheck(e = TypeCheckingEnv.initial).first.members
+        return DecoratedProgram(members = members)
     }
 
 }

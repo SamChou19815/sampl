@@ -79,7 +79,9 @@ data class TypeCheckingEnv(
             val id = member.identifier
             val name = id.name
             if (member.isPublic) {
-                dec.remove(key = name).put(key = name, value = id.genericsInfo)
+                dec.remove(key = name).put(
+                        key = "${module.name}.$name", value = id.genericsInfo
+                )
             } else {
                 dec.remove(key = id.name)
             }
