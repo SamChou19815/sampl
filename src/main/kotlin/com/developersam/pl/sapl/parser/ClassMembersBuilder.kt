@@ -7,9 +7,9 @@ import com.developersam.pl.sapl.ast.raw.ClassFunctionMember
 import com.developersam.pl.sapl.ast.raw.ClassMembers as M
 
 /**
- * [ModuleMembersBuilder] builds module members into AST.
+ * [ClassMembersBuilder] builds class members into AST.
  */
-internal object ModuleMembersBuilder : PLBaseVisitor<M>() {
+internal object ClassMembersBuilder : PLBaseVisitor<M>() {
 
     override fun visitClassMembersDeclaration(ctx: ClassMembersDeclarationContext): M {
         val constantMembers = ctx.classConstantDeclaration().map { c ->
@@ -31,7 +31,7 @@ internal object ModuleMembersBuilder : PLBaseVisitor<M>() {
                     body = c.expression().accept(ExprBuilder)
             )
         }
-        val nestedModuleMembers = ctx.classDeclaration().map { it.accept(ModuleBuilder) }
+        val nestedModuleMembers = ctx.classDeclaration().map { it.accept(ClassBuilder) }
         return M(
                 constantMembers = constantMembers,
                 functionMembers = functionMembers,

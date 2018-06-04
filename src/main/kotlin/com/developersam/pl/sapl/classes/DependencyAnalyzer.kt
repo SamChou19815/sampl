@@ -20,14 +20,14 @@ internal object DependencyAnalyzer {
      *
      * @param map the map with key as file name and value as the compilation unit.
      * Dependency relationship will be extracted from such map.
-     * @return a module that contains all the modules in the sequence.
+     * @return a class that contains all the modules in the sequence.
      * @throws CyclicDependencyError if there exists cyclic dependencies.
      */
     fun getCompilationSequence(map: Map<String, CompilationUnit>): Clazz {
         // Construct graph from map.
         val dependencyGraph: HashMap<String, Set<String>> = hashMapOf()
         for ((filename, compilationUnit) in map) {
-            val className = compilationUnit.module.name
+            val className = compilationUnit.clazz.name
             if (filename != className) {
                 throw FileClassNameDoesNotMatchError(filename = filename, className = className)
             }
@@ -43,14 +43,14 @@ internal object DependencyAnalyzer {
         } catch (e: IllegalArgumentException) {
             throw CompileTimeError(reason = "Bad import statements!")
         }
-        // Construct a single module
+        // Construct a single class
         return Clazz(
                 identifier = TypeIdentifier(name = "Main"),
                 declaration = TypeDeclaration.Struct(map = emptyMap()),
                 members = ClassMembers(
                         constantMembers = emptyList(),
                         functionMembers = emptyList(),
-                        nestedClassMembers = sequence.map { (_, unit) -> unit.module }
+                        nestedClassMembers = sequence.map { (_, unit) -> unit.clazz }
                 )
         )
     }

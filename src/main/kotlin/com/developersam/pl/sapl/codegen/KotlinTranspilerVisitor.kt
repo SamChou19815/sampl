@@ -1,5 +1,6 @@
 package com.developersam.pl.sapl.codegen
 
+import com.developersam.pl.sapl.TOP_LEVEL_MODULE_NAME
 import com.developersam.pl.sapl.ast.decorated.DecoratedExpression
 import com.developersam.pl.sapl.ast.decorated.DecoratedClass
 import com.developersam.pl.sapl.ast.decorated.DecoratedClassConstantMember
@@ -10,6 +11,7 @@ import com.developersam.pl.sapl.ast.decorated.DecoratedProgram
 import com.developersam.pl.sapl.ast.type.TypeDeclaration
 import com.developersam.pl.sapl.ast.type.TypeExpr
 import com.developersam.pl.sapl.ast.type.TypeIdentifier
+import com.developersam.pl.sapl.ast.type.unitTypeExpr
 import com.developersam.pl.sapl.config.IndentationStrategy
 
 /**
@@ -21,7 +23,20 @@ class KotlinTranspilerVisitor : TranspilerVisitor {
     override val indentationStrategy: IndentationStrategy = IndentationStrategy.FOUR_SPACES
 
     override fun visit(q: IndentationQueue, program: DecoratedProgram) {
-        TODO("not implemented")
+        q.addLine(line = """@file:JvmName(name = "$TOP_LEVEL_MODULE_NAME")""")
+        q.addEmptyLine()
+        val clazz = program.clazz
+        visit(q = q, clazz = clazz)
+        clazz.members.functionMembers.firstOrNull { member ->
+            member.isPublic && member.identifier == "main" && member.arguments.size == 1
+            && member.arguments[0] == "_unit_" to unitTypeExpr && member.returnType == unitTypeExpr
+        } ?: return
+        q.addEmptyLine()
+        q.addLine(line = "fun main(args: Array<String>) {")
+        q.indentAndApply {
+            addLine(line = "${clazz.identifier.name}.main(_unit_ = Unit)")
+        }
+        q.addLine(line = "}")
     }
 
     override fun visit(q: IndentationQueue, clazz: DecoratedClass) {
@@ -29,7 +44,9 @@ class KotlinTranspilerVisitor : TranspilerVisitor {
     }
 
     override fun visit(q: IndentationQueue, members: DecoratedClassMembers) {
-        TODO("not implemented")
+        members.constantMembers.forEach { visit(q = q, constantMember = it) }
+        members.functionMembers.forEach { visit(q = q, functionMember = it) }
+        members.nestedClassMembers.forEach { visit(q = q, clazz = it) }
     }
 
     override fun visit(q: IndentationQueue, constantMember: DecoratedClassConstantMember) {

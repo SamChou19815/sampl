@@ -76,8 +76,8 @@ data class Clazz(
     }
 
     /**
-     * [typeCheck] tries to type check this module under the given [TypeCheckingEnv] [e].
-     * It returns a decorated module and a new environment after type check.
+     * [typeCheck] tries to type check this class under the given [TypeCheckingEnv] [e].
+     * It returns a decorated class and a new environment after type check.
      */
     private fun typeCheck(e: TypeCheckingEnv): Pair<DecoratedClass, TypeCheckingEnv> {
         // Part 0: Members Declaration (for easier access only)
@@ -128,7 +128,7 @@ data class Clazz(
     }
 
     /**
-     * [typeCheck] tries to type check this top-level module.
+     * [typeCheck] tries to type check this top-level class.
      * If it does not type check, it will throw an [CompileTimeError]
      *
      * @return the decorated program after type check.
@@ -137,8 +137,8 @@ data class Clazz(
         val initialSet = hashSetOf<String>()
         initialSet.add(element = TOP_LEVEL_MODULE_NAME)
         noNameShadowingValidation(set = initialSet)
-        val module = typeCheck(e = TypeCheckingEnv.initial).first
-        return DecoratedProgram(module = module)
+        val clazz = typeCheck(e = TypeCheckingEnv.initial).first
+        return DecoratedProgram(clazz = clazz)
     }
 
 }

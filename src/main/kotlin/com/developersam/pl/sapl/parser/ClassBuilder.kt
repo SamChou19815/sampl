@@ -9,9 +9,9 @@ import com.developersam.pl.sapl.ast.type.TypeIdentifier
 import org.antlr.v4.runtime.tree.TerminalNode
 
 /**
- * [ModuleBuilder] builds module into AST.
+ * [ClassBuilder] builds class into AST.
  */
-internal object ModuleBuilder : PLBaseVisitor<Clazz>() {
+internal object ClassBuilder : PLBaseVisitor<Clazz>() {
 
     override fun visitClassDeclaration(ctx: PLParser.ClassDeclarationContext): Clazz {
         val identifier = TypeIdentifier(
@@ -25,7 +25,7 @@ internal object ModuleBuilder : PLBaseVisitor<Clazz>() {
                 ?.accept(TypeExprInDeclarationBuilder)
                 ?: TypeDeclaration.Struct(map = emptyMap())
         val members = ctx.classMembersDeclaration()
-                ?.accept(ModuleMembersBuilder)
+                ?.accept(ClassMembersBuilder)
                 ?: ClassMembers.empty
         return Clazz(identifier = identifier, declaration = declaration, members = members)
     }

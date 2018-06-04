@@ -47,7 +47,7 @@ data class TypeCheckingEnv(
 
     /**
      * [enterModule] produces a new [TypeCheckingEnv] with all the public information preserved and
-     * make all the types declared in the module available. Type checking is not done here.
+     * make all the types declared in the class available. Type checking is not done here.
      */
     fun enterModule(module: Clazz): TypeCheckingEnv {
         return TypeCheckingEnv(
@@ -64,7 +64,7 @@ data class TypeCheckingEnv(
 
     /**
      * [exitModule] produces a new [TypeCheckingEnv] with all the public information preserved and
-     * make the access of current module elements prefixed with module name.
+     * make the access of current class elements prefixed with class name.
      */
     fun exitModule(module: Clazz): TypeCheckingEnv {
         val m = module.members

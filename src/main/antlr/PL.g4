@@ -14,7 +14,7 @@ classDeclaration :
 classMembersDeclaration :
     classConstantDeclaration* // first constant definitions
     classFunctionDeclaration* // then function definitions
-    classDeclaration* // finally nested module definitions
+    classDeclaration* // finally nested class definitions
     ;
 
 classConstantDeclaration: PRIVATE? LET LowerIdentifier ASSIGN expression;

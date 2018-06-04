@@ -33,16 +33,16 @@ internal object ClassConstructor {
     }
 
     /**
-     * [fromSource] tries to construct a module from the source files in the given [code].
+     * [fromSource] tries to construct a class from the source files in the given [code].
      */
     fun fromSource(code: String): Clazz {
         val input = ByteArrayInputStream(code.toByteArray(charset = Charset.defaultCharset()))
         val unit = inputStreamToCompilationUnit(input)
-        return unit.module
+        return unit.clazz
     }
 
     /**
-     * [fromDirectory] tries to construct a module from all the source files in the
+     * [fromDirectory] tries to construct a class from all the source files in the
      * given [directory].
      */
     fun fromDirectory(directory: String): Clazz {
