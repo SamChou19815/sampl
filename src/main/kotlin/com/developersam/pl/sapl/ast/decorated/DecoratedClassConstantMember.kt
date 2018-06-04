@@ -5,14 +5,14 @@ import com.developersam.pl.sapl.ast.type.TypeExpr
 import com.developersam.pl.sapl.codegen.IndentationQueue
 
 /**
- * [DecoratedModuleConstantMember] represents a constant declaration of the form:
+ * [DecoratedClassConstantMember] represents a constant declaration of the form:
  * `public/private`([isPublic]) `let` [identifier] `=` [expr].
  * It has an additional [type] field.
  */
-data class DecoratedModuleConstantMember(
+data class DecoratedClassConstantMember(
         override val isPublic: Boolean, val identifier: String, val expr: DecoratedExpression,
         override val type: TypeExpr
-) : DecoratedModuleMember {
+) : DecoratedClassMember {
 
     override val name: String = identifier
 

@@ -17,7 +17,7 @@ internal object CompilationUnitBuilder : PLBaseVisitor<CompilationUnit>() {
                             ?.map { it.text }
                             ?.collect(Collectors.toSet())
                             ?: emptySet(),
-                    members = ctx.moduleMembersDeclaration().accept(ModuleMembersBuilder)
+                    module = ctx.classDeclaration().accept(ModuleBuilder)
             )
 
 }

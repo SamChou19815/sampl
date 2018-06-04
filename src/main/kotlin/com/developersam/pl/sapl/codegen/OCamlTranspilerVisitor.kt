@@ -1,13 +1,12 @@
 package com.developersam.pl.sapl.codegen
 
 import com.developersam.pl.sapl.ast.decorated.DecoratedExpression
-import com.developersam.pl.sapl.ast.decorated.DecoratedModule
-import com.developersam.pl.sapl.ast.decorated.DecoratedModuleConstantMember
-import com.developersam.pl.sapl.ast.decorated.DecoratedModuleFunctionMember
-import com.developersam.pl.sapl.ast.decorated.DecoratedModuleMembers
+import com.developersam.pl.sapl.ast.decorated.DecoratedClass
+import com.developersam.pl.sapl.ast.decorated.DecoratedClassConstantMember
+import com.developersam.pl.sapl.ast.decorated.DecoratedClassFunctionMember
+import com.developersam.pl.sapl.ast.decorated.DecoratedClassMembers
 import com.developersam.pl.sapl.ast.decorated.DecoratedPattern
 import com.developersam.pl.sapl.ast.decorated.DecoratedProgram
-import com.developersam.pl.sapl.ast.raw.ModuleTypeMember
 import com.developersam.pl.sapl.ast.type.TypeDeclaration
 import com.developersam.pl.sapl.ast.type.TypeExpr
 import com.developersam.pl.sapl.ast.type.TypeIdentifier
@@ -25,23 +24,19 @@ class OCamlTranspilerVisitor : TranspilerVisitor {
         TODO("not implemented")
     }
 
-    override fun visit(q: IndentationQueue, module: DecoratedModule) {
+    override fun visit(q: IndentationQueue, clazz: DecoratedClass) {
         TODO("not implemented")
     }
 
-    override fun visit(q: IndentationQueue, members: DecoratedModuleMembers) {
+    override fun visit(q: IndentationQueue, members: DecoratedClassMembers) {
         TODO("not implemented")
     }
 
-    override fun visit(q: IndentationQueue, typeMember: ModuleTypeMember) {
+    override fun visit(q: IndentationQueue, constantMember: DecoratedClassConstantMember) {
         TODO("not implemented")
     }
 
-    override fun visit(q: IndentationQueue, constantMember: DecoratedModuleConstantMember) {
-        TODO("not implemented")
-    }
-
-    override fun visit(q: IndentationQueue, functionMember: DecoratedModuleFunctionMember) {
+    override fun visit(q: IndentationQueue, functionMember: DecoratedClassFunctionMember) {
         TODO("not implemented")
     }
 

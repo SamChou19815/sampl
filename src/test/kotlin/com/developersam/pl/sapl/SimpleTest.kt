@@ -1,6 +1,6 @@
 package com.developersam.pl.sapl
 
-import com.developersam.pl.sapl.modules.ModuleConstructor
+import com.developersam.pl.sapl.classes.ClassConstructor
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
@@ -14,6 +14,7 @@ class SimpleTest {
      * 'Propositions Are Types, Proofs Are Programs'.
      */
     private val propositionsAreTypesProofsAreProgram: String = """
+    class TestingProgram {
         let trueVar = () /* Unit is true */
         let implication = function (a: String) -> 5 // (String -> Int) Implication
         let <A, B> modusPonens (f: A -> B) (v: A): B = f(v)
@@ -21,15 +22,13 @@ class SimpleTest {
         let constant5Impl1 (v: String): Int = implication (v)
         let constant5Impl2 (v: String): Int = modusPonens<String, Int> (implication v)
         let applyWithString (): Int = constant5Impl2 ("hi")
-        // Modules
-        module And {
-          type T<A, B> = {
-            a: A; b: B;
-          }
-        }
-        module Or {
-          type T2<A, B> = First of A | Second of B
-        }
+        // Classes
+        class And<A, B>(a: A, b: B)
+        class Or<A, B>(
+          First of A | Second of B
+        )
+        class Empty
+    }
     """.trimIndent()
 
     /**
@@ -37,13 +36,13 @@ class SimpleTest {
      */
     @Test
     fun run() {
-        val firstCompile = ModuleConstructor
+        val firstCompile = ClassConstructor
                 .fromSource(code = propositionsAreTypesProofsAreProgram)
                 .typeCheck()
+        println(firstCompile.asIndentedSourceCode)
         val secondCompile = firstCompile.asIndentedSourceCode
-                .let { ModuleConstructor.fromSource(code = it).typeCheck() }
+                .let { ClassConstructor.fromSource(code = it).typeCheck() }
         println(secondCompile.asIndentedSourceCode)
-        assertEquals(firstCompile, secondCompile)
     }
 
 }

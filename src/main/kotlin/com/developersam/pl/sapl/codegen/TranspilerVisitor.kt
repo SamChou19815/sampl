@@ -1,17 +1,15 @@
 package com.developersam.pl.sapl.codegen
 
 import com.developersam.pl.sapl.ast.decorated.DecoratedExpression
-import com.developersam.pl.sapl.ast.decorated.DecoratedModule
-import com.developersam.pl.sapl.ast.decorated.DecoratedModuleConstantMember
-import com.developersam.pl.sapl.ast.decorated.DecoratedModuleFunctionMember
-import com.developersam.pl.sapl.ast.decorated.DecoratedModuleMembers
+import com.developersam.pl.sapl.ast.decorated.DecoratedClass
+import com.developersam.pl.sapl.ast.decorated.DecoratedClassConstantMember
+import com.developersam.pl.sapl.ast.decorated.DecoratedClassFunctionMember
+import com.developersam.pl.sapl.ast.decorated.DecoratedClassMembers
 import com.developersam.pl.sapl.ast.decorated.DecoratedPattern
 import com.developersam.pl.sapl.ast.decorated.DecoratedProgram
-import com.developersam.pl.sapl.ast.raw.ModuleTypeMember
 import com.developersam.pl.sapl.ast.type.TypeDeclaration
 import com.developersam.pl.sapl.ast.type.TypeExpr
 import com.developersam.pl.sapl.ast.type.TypeIdentifier
-import com.developersam.pl.sapl.codegen.IndentationQueue
 import com.developersam.pl.sapl.config.IndentationStrategy
 
 /**
@@ -33,29 +31,24 @@ interface TranspilerVisitor {
     fun visit(q: IndentationQueue, program: DecoratedProgram)
 
     /**
-     * [visit] visits the [module] with [q] to add proper indentation and code info.
+     * [visit] visits the [clazz] with [q] to add proper indentation and code info.
      */
-    fun visit(q: IndentationQueue, module: DecoratedModule)
+    fun visit(q: IndentationQueue, clazz: DecoratedClass)
 
     /**
      * [visit] visits the [members] with [q] to add proper indentation and code info.
      */
-    fun visit(q: IndentationQueue, members: DecoratedModuleMembers)
-
-    /**
-     * [visit] visits the [typeMember] with [q] to add proper indentation and code info.
-     */
-    fun visit(q: IndentationQueue, typeMember: ModuleTypeMember)
+    fun visit(q: IndentationQueue, members: DecoratedClassMembers)
 
     /**
      * [visit] visits the [constantMember] with [q] to add proper indentation and code info.
      */
-    fun visit(q: IndentationQueue, constantMember: DecoratedModuleConstantMember)
+    fun visit(q: IndentationQueue, constantMember: DecoratedClassConstantMember)
 
     /**
      * [visit] visits the [functionMember] with [q] to add proper indentation and code info.
      */
-    fun visit(q: IndentationQueue, functionMember: DecoratedModuleFunctionMember)
+    fun visit(q: IndentationQueue, functionMember: DecoratedClassFunctionMember)
 
     /**
      * [visit] visits the [expression] with [q] to add proper indentation and code info.

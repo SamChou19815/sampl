@@ -2,27 +2,24 @@ grammar PL;
 
 import PLLexerPart;
 
-compilationUnit : importDeclaration? moduleMembersDeclaration EOF;
+compilationUnit : importDeclaration? classDeclaration EOF;
 
 importDeclaration : IMPORT LBRACE UpperIdentifier (COMMA UpperIdentifier)* RBRACE;
 
-moduleDeclaration : MODULE UpperIdentifier LBRACE moduleMembersDeclaration RBRACE;
+classDeclaration :
+    CLASS UpperIdentifier genericsDeclaration?
+    (LPAREN typeExprInDeclaration RPAREN)?
+    (LBRACE classMembersDeclaration RBRACE)?;
 
-moduleMembersDeclaration :
-    moduleTypeDeclaration* // first type definitions
-    moduleConstantDeclaration* // then constant definitions
-    moduleFunctionDeclaration* // then function definitions
-    moduleDeclaration* // finally nested module definitions
+classMembersDeclaration :
+    classConstantDeclaration* // first constant definitions
+    classFunctionDeclaration* // then function definitions
+    classDeclaration* // finally nested module definitions
     ;
 
-moduleTypeDeclaration :
-    PRIVATE? TYPE
-        UpperIdentifier genericsDeclaration?
-    ASSIGN typeExprInDeclaration;
+classConstantDeclaration: PRIVATE? LET LowerIdentifier ASSIGN expression;
 
-moduleConstantDeclaration: PRIVATE? LET LowerIdentifier ASSIGN expression;
-
-moduleFunctionDeclaration :
+classFunctionDeclaration :
     PRIVATE? LET genericsDeclaration? LowerIdentifier
         argumentDeclarations typeAnnotation
     ASSIGN expression;
@@ -38,7 +35,7 @@ typeExprInAnnotation
 
 typeExprInDeclaration : variantTypeInDeclaration | structTypeInDeclaration;
 variantTypeInDeclaration : LOR? variantConstructorDeclaration (LOR variantConstructorDeclaration)*;
-structTypeInDeclaration : LBRACE annotatedVariable (SEMICOLON annotatedVariable)* SEMICOLON? RBRACE;
+structTypeInDeclaration : annotatedVariable (COMMA annotatedVariable)* COMMA?;
 
 // Some parser type fragment
 genericsSpecialization : LT typeExprInAnnotation (COMMA typeExprInAnnotation)* GT;

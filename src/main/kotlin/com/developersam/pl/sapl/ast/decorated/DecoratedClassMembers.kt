@@ -2,30 +2,35 @@ package com.developersam.pl.sapl.ast.decorated
 
 import com.developersam.pl.sapl.ast.protocol.PrettyPrintable
 import com.developersam.pl.sapl.ast.protocol.Transpilable
-import com.developersam.pl.sapl.codegen.TranspilerVisitor
-import com.developersam.pl.sapl.ast.raw.ModuleTypeMember
 import com.developersam.pl.sapl.codegen.IndentationQueue
+import com.developersam.pl.sapl.codegen.TranspilerVisitor
 
 /**
- * [DecoratedModuleMembers] contains collections of different types of module members,
+ * [DecoratedClassMembers] contains collections of different types of class members,
  * in order of declaration.
  */
-data class DecoratedModuleMembers(
-        val typeMembers: List<ModuleTypeMember>,
-        val constantMembers: List<DecoratedModuleConstantMember>,
-        val functionMembers: List<DecoratedModuleFunctionMember>,
-        val nestedModuleMembers: List<DecoratedModule>
+data class DecoratedClassMembers(
+        val constantMembers: List<DecoratedClassConstantMember>,
+        val functionMembers: List<DecoratedClassFunctionMember>,
+        val nestedClassMembers: List<DecoratedClass>
 ) : PrettyPrintable, Transpilable {
+
+    /**
+     * [isEmpty] reports whether there is no actual members in this class.
+     */
+    val isEmpty: Boolean
+        get() = constantMembers.isEmpty()
+                && functionMembers.isEmpty()
+                && nestedClassMembers.isEmpty()
 
     override fun prettyPrint(q: IndentationQueue) {
         val printerAction: (PrettyPrintable) -> Unit = { m ->
             m.prettyPrint(q = q)
             q.addEmptyLine()
         }
-        typeMembers.forEach(action = printerAction)
         constantMembers.forEach(action = printerAction)
         functionMembers.forEach(action = printerAction)
-        nestedModuleMembers.forEach(action = printerAction)
+        nestedClassMembers.forEach(action = printerAction)
     }
 
     override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor): Unit =

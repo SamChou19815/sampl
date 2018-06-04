@@ -1,4 +1,4 @@
-package com.developersam.pl.sapl.modules
+package com.developersam.pl.sapl.classes
 
 /**
  * [DAGAnalyzer] is responsible for understanding the DAG relationship between various

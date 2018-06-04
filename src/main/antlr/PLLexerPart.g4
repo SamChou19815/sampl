@@ -12,7 +12,6 @@ lexer grammar PLLexerPart;
 
 IMPORT : 'import';
 
-MODULE : 'module';
 CLASS : 'class';
 TYPE : 'type';
 OF : 'of';

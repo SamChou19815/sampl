@@ -1,12 +1,11 @@
 package com.developersam.pl.sapl.ast.raw
 
 /**
- * [ModuleConstantMember] represents a constant declaration of the form:
+ * [ClassConstantMember] represents a constant declaration of the form:
  * `public/private`([isPublic]) `let` [identifier] `=` [expr].
  */
-data class ModuleConstantMember(
+data class ClassConstantMember(
         override val isPublic: Boolean, val identifier: String, val expr: Expression
-) : ModuleMember {
+) : ClassMember {
     override val name: String = identifier
-
 }

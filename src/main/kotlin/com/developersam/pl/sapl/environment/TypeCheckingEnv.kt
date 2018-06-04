@@ -1,8 +1,8 @@
 package com.developersam.pl.sapl.environment
 
 import com.developersam.fp.FpMap
-import com.developersam.pl.sapl.ast.raw.Module
-import com.developersam.pl.sapl.ast.raw.ModuleMember
+import com.developersam.pl.sapl.ast.raw.Clazz
+import com.developersam.pl.sapl.ast.raw.ClassMember
 import com.developersam.pl.sapl.ast.type.TypeDeclaration
 import com.developersam.pl.sapl.ast.type.TypeInfo
 import com.developersam.pl.sapl.ast.type.boolTypeId
@@ -49,17 +49,15 @@ data class TypeCheckingEnv(
      * [enterModule] produces a new [TypeCheckingEnv] with all the public information preserved and
      * make all the types declared in the module available. Type checking is not done here.
      */
-    fun enterModule(module: Module): TypeCheckingEnv {
-        val typeMembers = module.members.typeMembers
+    fun enterModule(module: Clazz): TypeCheckingEnv {
         return TypeCheckingEnv(
-                typeDefinitions = typeMembers.fold(typeDefinitions) { acc, m ->
-                    val id = m.identifier
-                    acc.put(key = id.name, value = id.genericsInfo to m.declaration)
-                },
-                declaredTypes = typeMembers.fold(declaredTypes) { acc, m ->
-                    val id = m.identifier
-                    acc.put(key = id.name, value = id.genericsInfo)
-                },
+                typeDefinitions = typeDefinitions.put(
+                        key = module.name,
+                        value = module.identifier.genericsInfo to module.declaration
+                ),
+                declaredTypes = declaredTypes.put(
+                        key = module.name, value = module.identifier.genericsInfo
+                ),
                 typeEnv = typeEnv
         )
     }
@@ -68,26 +66,19 @@ data class TypeCheckingEnv(
      * [exitModule] produces a new [TypeCheckingEnv] with all the public information preserved and
      * make the access of current module elements prefixed with module name.
      */
-    fun exitModule(module: Module): TypeCheckingEnv {
+    fun exitModule(module: Clazz): TypeCheckingEnv {
         val m = module.members
         // remove added type definitions
-        val removedCurrentLevelTypeDefinitions = m.typeMembers.fold(typeDefinitions) { e, member ->
-            e.remove(key = member.identifier.name)
-        }
+        val removedTypeDefinitions = typeDefinitions.remove(key = module.name)
         // remove and change declared types
-        val newDeclaredTypes = m.typeMembers.fold(initial = declaredTypes) { dec, member ->
-            val id = member.identifier
-            val name = id.name
-            if (member.isPublic) {
-                dec.remove(key = name).put(
-                        key = "${module.name}.$name", value = id.genericsInfo
-                )
-            } else {
-                dec.remove(key = id.name)
-            }
-        }
+        val newDeclaredTypes = declaredTypes.asSequence()
+                // when exiting, we need to use fully qualified name.
+                .filter { (name, _) -> name != module.name && !name.contains(other = ".") }
+                .fold(initial = declaredTypes) { dec, (name, genericsInfo) ->
+                    dec.remove(key = name).put(key = "${module.name}.$name", value = genericsInfo)
+                }
         // remove private members
-        val removeAndChangeMember = { env: FpMap<String, TypeInfo>, member: ModuleMember ->
+        val removeAndChangeMember = { env: FpMap<String, TypeInfo>, member: ClassMember ->
             val name = member.name
             if (member.isPublic) {
                 val v = env[name] ?: error(message = "Impossible")
@@ -100,7 +91,7 @@ data class TypeCheckingEnv(
                 .let { m.constantMembers.fold(initial = it, operation = removeAndChangeMember) }
                 .let { m.functionMembers.fold(initial = it, operation = removeAndChangeMember) }
         return TypeCheckingEnv(
-                typeDefinitions = removedCurrentLevelTypeDefinitions,
+                typeDefinitions = removedTypeDefinitions,
                 declaredTypes = newDeclaredTypes, typeEnv = newTypeEnv
         )
     }

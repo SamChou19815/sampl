@@ -6,18 +6,18 @@ import com.developersam.pl.sapl.ast.type.unitTypeExpr
 import com.developersam.pl.sapl.codegen.IndentationQueue
 
 /**
- * [DecoratedModuleFunctionMember] represents a function declaration of the form:
+ * [DecoratedClassFunctionMember] represents a function declaration of the form:
  * `public/private`([isPublic]) `let` [identifier] ([genericsDeclaration])?
  * [arguments] `:` [returnType] `=` [body].
  * It has an additional [type] field.
  */
-data class DecoratedModuleFunctionMember(
+data class DecoratedClassFunctionMember(
         override val isPublic: Boolean, val identifier: String,
         val genericsDeclaration: List<String>,
         val arguments: List<Pair<String, TypeExpr>>,
         val returnType: TypeExpr, val body: DecoratedExpression,
         override val type: TypeExpr.Function
-) : DecoratedModuleMember {
+) : DecoratedClassMember {
 
     override val name: String = identifier
 

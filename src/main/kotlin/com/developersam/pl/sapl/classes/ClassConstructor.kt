@@ -1,9 +1,9 @@
-package com.developersam.pl.sapl.modules
+package com.developersam.pl.sapl.classes
 
 import com.developersam.pl.sapl.antlr.PLLexer
 import com.developersam.pl.sapl.antlr.PLParser
 import com.developersam.pl.sapl.ast.raw.CompilationUnit
-import com.developersam.pl.sapl.ast.raw.Module
+import com.developersam.pl.sapl.ast.raw.Clazz
 import com.developersam.pl.sapl.parser.CompilationUnitBuilder
 import com.developersam.pl.sapl.util.getAllSourceFiles
 import org.antlr.v4.runtime.ANTLRInputStream
@@ -16,9 +16,9 @@ import java.nio.charset.Charset
 import java.util.stream.Collectors
 
 /**
- * [ModuleConstructor] is responsible constructing AST module under different requirements.
+ * [ClassConstructor] is responsible constructing AST class under different requirements.
  */
-internal object ModuleConstructor {
+internal object ClassConstructor {
 
     /**
      * [inputStreamToCompilationUnit] tries to build the compilation unit from an [inputStream] that
@@ -35,17 +35,17 @@ internal object ModuleConstructor {
     /**
      * [fromSource] tries to construct a module from the source files in the given [code].
      */
-    fun fromSource(code: String): Module {
+    fun fromSource(code: String): Clazz {
         val input = ByteArrayInputStream(code.toByteArray(charset = Charset.defaultCharset()))
         val unit = inputStreamToCompilationUnit(input)
-        return Module(name = "Main", members = unit.members)
+        return unit.module
     }
 
     /**
      * [fromDirectory] tries to construct a module from all the source files in the
      * given [directory].
      */
-    fun fromDirectory(directory: String): Module {
+    fun fromDirectory(directory: String): Clazz {
         val compilationUnitMap = getAllSourceFiles(directory = directory)
                 .parallelStream()
                 .collect(Collectors.toMap(File::nameWithoutExtension) { file ->

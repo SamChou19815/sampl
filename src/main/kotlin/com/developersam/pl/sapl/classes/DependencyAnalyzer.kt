@@ -1,10 +1,13 @@
-package com.developersam.pl.sapl.modules
+package com.developersam.pl.sapl.classes
 
 import com.developersam.pl.sapl.ast.raw.CompilationUnit
-import com.developersam.pl.sapl.ast.raw.Module
-import com.developersam.pl.sapl.ast.raw.ModuleMembers
+import com.developersam.pl.sapl.ast.raw.Clazz
+import com.developersam.pl.sapl.ast.raw.ClassMembers
+import com.developersam.pl.sapl.ast.type.TypeDeclaration
+import com.developersam.pl.sapl.ast.type.TypeIdentifier
 import com.developersam.pl.sapl.exceptions.CompileTimeError
 import com.developersam.pl.sapl.exceptions.CyclicDependencyError
+import com.developersam.pl.sapl.exceptions.FileClassNameDoesNotMatchError
 
 /**
  * [DependencyAnalyzer] can analyze the dependency relationship in source.
@@ -20,10 +23,14 @@ internal object DependencyAnalyzer {
      * @return a module that contains all the modules in the sequence.
      * @throws CyclicDependencyError if there exists cyclic dependencies.
      */
-    fun getCompilationSequence(map: Map<String, CompilationUnit>): Module {
+    fun getCompilationSequence(map: Map<String, CompilationUnit>): Clazz {
         // Construct graph from map.
         val dependencyGraph: HashMap<String, Set<String>> = hashMapOf()
         for ((filename, compilationUnit) in map) {
+            val className = compilationUnit.module.name
+            if (filename != className) {
+                throw FileClassNameDoesNotMatchError(filename = filename, className = className)
+            }
             dependencyGraph[filename] = compilationUnit.imports
         }
         // Construct sequence of compilation
@@ -37,15 +44,13 @@ internal object DependencyAnalyzer {
             throw CompileTimeError(reason = "Bad import statements!")
         }
         // Construct a single module
-        return Module(
-                name = "Main",
-                members = ModuleMembers(
-                        typeMembers = emptyList(),
+        return Clazz(
+                identifier = TypeIdentifier(name = "Main"),
+                declaration = TypeDeclaration.Struct(map = emptyMap()),
+                members = ClassMembers(
                         constantMembers = emptyList(),
                         functionMembers = emptyList(),
-                        nestedModuleMembers = sequence.map { (name, unit) ->
-                            Module(name = name, members = unit.members)
-                        }
+                        nestedClassMembers = sequence.map { (_, unit) -> unit.module }
                 )
         )
     }
