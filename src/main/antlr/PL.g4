@@ -25,9 +25,7 @@ classFunctionDeclaration :
     ASSIGN expression;
 
 typeExprInAnnotation
-    : LPAREN typeExprInAnnotation RPAREN
-      # NestedTypeInAnnotation
-    | (UpperIdentifier DOT)* UpperIdentifier genericsSpecialization?
+    : (UpperIdentifier DOT)* UpperIdentifier genericsSpecialization?
       # SingleIdentifierTypeInAnnotation
     | LPAREN typeExprInAnnotation (COMMA typeExprInAnnotation)* RPAREN ARROW typeExprInAnnotation
       # FunctionTypeInAnnotation

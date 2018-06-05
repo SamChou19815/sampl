@@ -132,9 +132,13 @@ class KotlinTranspilerVisitor : TranspilerVisitor {
     }
 
     override fun visit(q: IndentationQueue, members: DecoratedClassMembers) {
-        members.constantMembers.forEach { visit(q = q, constantMember = it) }
-        members.functionMembers.forEach { visit(q = q, functionMember = it) }
+        q.addLine(line = "companion object {")
+        q.indentAndApply {
+            members.constantMembers.forEach { visit(q = this, constantMember = it) }
+            members.functionMembers.forEach { visit(q = this, functionMember = it) }
+        }
         members.nestedClassMembers.forEach { visit(q = q, clazz = it) }
+        q.addLine(line = "}")
     }
 
     override fun visit(q: IndentationQueue, constantMember: DecoratedClassConstantMember) {
@@ -145,7 +149,7 @@ class KotlinTranspilerVisitor : TranspilerVisitor {
     }
 
     override fun visit(q: IndentationQueue, functionMember: DecoratedClassFunctionMember) {
-        val public = if (functionMember.isPublic) "" else "private"
+        val public = if (functionMember.isPublic) "" else "private "
         val generics = functionMember.genericsDeclaration
                 .takeIf { it.isNotEmpty() }
                 ?.joinToGenericsInfoString()
@@ -155,7 +159,7 @@ class KotlinTranspilerVisitor : TranspilerVisitor {
         val argumentsString = functionMember.arguments
                 .joinToString(separator = ", ") { (i, t) -> "$i: $t" }
         val r = functionMember.returnType
-        q.addLine(line = "$public fun$generics $id($argumentsString): $r =")
+        q.addLine(line = "${public}fun$generics $id($argumentsString): $r =")
         q.indentAndApply { visit(q = this, expression = functionMember.body) }
         q.addEmptyLine()
     }

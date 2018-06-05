@@ -28,6 +28,7 @@ class SimpleTest {
         let applyWithString (): Int = constant5Impl2 ("hi")
         let add (a: Int) (b: Int): Int = a + b
         let add1 (b: Int): Int = add (1) (b)
+        let main (): Unit = ()
         // Classes
         class And<A, B>(a: A, b: B)
         class Or<A, B>(
