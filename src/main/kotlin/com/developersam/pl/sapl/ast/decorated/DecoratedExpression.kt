@@ -237,7 +237,7 @@ sealed class DecoratedExpression(
         override val asInlineSourceCode: String
             get() {
                 val leftCode = left.addParenthesisIfNeeded(parent = this)
-                val rightCode = left.addParenthesisIfNeeded(parent = this)
+                val rightCode = right.addParenthesisIfNeeded(parent = this)
                 return "$leftCode ${op.symbol} $rightCode"
             }
 

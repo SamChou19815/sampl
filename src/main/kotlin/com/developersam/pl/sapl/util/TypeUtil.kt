@@ -6,22 +6,6 @@ import com.developersam.pl.sapl.ast.type.TypeExpr
 import com.developersam.pl.sapl.exceptions.GenericsError
 
 /**
- * [toFunctionTypeExpr] converts the function type annotation in list form with [argumentTypes]
- * and [returnType] to a single BST form.
- */
-internal fun toFunctionTypeExpr(
-        argumentTypes: List<TypeExpr>, returnType: TypeExpr
-): TypeExpr.Function {
-    var t = TypeExpr.Function(
-            argumentType = argumentTypes[argumentTypes.size - 1], returnType = returnType
-    )
-    for (i in argumentTypes.size - 2 downTo 0) {
-        t = TypeExpr.Function(argumentType = argumentTypes[i], returnType = t)
-    }
-    return t
-}
-
-/**
  * [joinToGenericsInfoString] converts a list of info to generics info and returns the string.
  */
 internal fun <T> List<T>.joinToGenericsInfoString(): String =
@@ -75,16 +59,19 @@ private data class PairedTypeExprVisitor(
                 }
             }
         } else if (genericType is TypeExpr.Function && actualType is TypeExpr.Function) {
-            val partiallyKnownArgumentType = copy(
-                    genericType = genericType.argumentType,
-                    actualType = genericType.argumentType
-            ).visit()
+            if (genericType.argumentTypes.size != actualType.argumentTypes.size) {
+                die()
+            }
+            val partiallyKnownArgumentTypes = genericType.argumentTypes
+                    .zip(actualType.argumentTypes).map { (g, a) ->
+                        copy(genericType = g, actualType = a).visit()
+                    }
             val partiallyKnownReturnType = copy(
                     genericType = genericType.returnType,
                     actualType = actualType.returnType
             ).visit()
             TypeExpr.Function(
-                    argumentType = partiallyKnownArgumentType,
+                    argumentTypes = partiallyKnownArgumentTypes,
                     returnType = partiallyKnownReturnType
             )
         } else if (genericType is TypeExpr.Identifier && actualType is TypeExpr.Function) {
@@ -141,7 +128,7 @@ private fun inferActualGenericTypeInfo(
 internal fun inferActualGenericTypeInfo(
         genericDeclarations: List<String>,
         genericTypeActualTypePairs: Iterable<Pair<TypeExpr, TypeExpr>>
-) : List<TypeExpr> {
+): List<TypeExpr> {
     val knownInfo = arrayOfNulls<TypeExpr>(size = genericDeclarations.size)
     for ((genericType, actualType) in genericTypeActualTypePairs) {
         inferActualGenericTypeInfo(genericDeclarations, genericType, actualType, knownInfo)

@@ -46,7 +46,7 @@ import com.developersam.pl.sapl.exceptions.TooManyArgumentsError
 import com.developersam.pl.sapl.exceptions.UnexpectedTypeError
 import com.developersam.pl.sapl.exceptions.VariantNotFoundError
 import com.developersam.pl.sapl.util.inferActualGenericTypeInfo
-import com.developersam.pl.sapl.util.toFunctionTypeExpr
+import java.util.LinkedList
 
 /**
  * [Expression] represents a set of supported expression.
@@ -503,28 +503,24 @@ data class FunctionApplicationExpr(
                 ?: throw UnexpectedTypeError(
                         expectedType = "<function>", actualType = functionTypeOpt
                 )
-        var expectedArg: TypeExpr? = functionType.argumentType
-        var returnType = functionType.returnType
+        val unusedArgs: LinkedList<TypeExpr> = LinkedList(functionType.argumentTypes)
         val decoratedArgumentExpr = arrayListOf<DecoratedExpression>()
         for (expr in arguments) {
-            val expType = expectedArg ?: throw TooManyArgumentsError()
+            if (unusedArgs.isEmpty()) {
+                throw TooManyArgumentsError()
+            }
+            val expType = unusedArgs.removeFirst()
             val decoratedExpr = expr.typeCheck(environment = environment)
             decoratedArgumentExpr.add(element = decoratedExpr)
             val exprType = decoratedExpr.type
             if (expType != exprType) {
                 throw UnexpectedTypeError(expectedType = expType, actualType = exprType)
             }
-            val r = returnType
-            when (r) {
-                is TypeExpr.Identifier -> {
-                    expectedArg = null
-                }
-                is TypeExpr.Function -> {
-                    expectedArg = r.argumentType
-                    returnType = r.returnType
-                }
-            }
         }
+        val returnType = if (unusedArgs.isEmpty()) functionType.returnType else
+            TypeExpr.Function(
+                    argumentTypes = ArrayList(unusedArgs), returnType = functionType.returnType
+            )
         return DecoratedExpression.FunctionApplication(
                 functionExpr = decoratedFunctionExpr, arguments = decoratedArgumentExpr,
                 type = returnType
@@ -542,7 +538,7 @@ data class FunctionExpr(
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val bodyExpr = body.typeCheck(environment = environment)
         val bodyType = bodyExpr.type
-        val functionDeclaredType = toFunctionTypeExpr(
+        val functionDeclaredType = TypeExpr.Function(
                 argumentTypes = arguments.map { it.second }, returnType = bodyType
         )
         functionDeclaredType.checkTypeValidity(environment = environment)

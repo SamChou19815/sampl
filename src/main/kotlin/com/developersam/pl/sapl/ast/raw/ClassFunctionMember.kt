@@ -4,7 +4,6 @@ import com.developersam.pl.sapl.ast.decorated.DecoratedClassFunctionMember
 import com.developersam.pl.sapl.ast.type.TypeExpr
 import com.developersam.pl.sapl.environment.TypeCheckingEnv
 import com.developersam.pl.sapl.exceptions.UnexpectedTypeError
-import com.developersam.pl.sapl.util.toFunctionTypeExpr
 
 /**
  * [ClassFunctionMember] represents a function declaration of the form:
@@ -23,7 +22,7 @@ data class ClassFunctionMember(
     /**
      * [functionType] reports the functional type of itself.
      */
-    val functionType: TypeExpr.Function = toFunctionTypeExpr(
+    val functionType: TypeExpr.Function = TypeExpr.Function(
             argumentTypes = arguments.map { it.second },
             returnType = returnType
     )

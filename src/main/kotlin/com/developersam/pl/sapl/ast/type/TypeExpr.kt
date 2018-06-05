@@ -11,7 +11,7 @@ import kotlin.math.min
 /**
  * [TypeExpr] represents a set of supported type expression in type annotation.
  */
-sealed class TypeExpr : Transpilable, Comparable<TypeExpr> {
+sealed class TypeExpr : Transpilable {
 
     /**
      * [asTypeInformation] converts itself to [TypeInfo] without generics declaration.
@@ -21,33 +21,6 @@ sealed class TypeExpr : Transpilable, Comparable<TypeExpr> {
 
     override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor): Unit =
             visitor.visit(q = q, typeExpr = this)
-
-    override fun compareTo(other: TypeExpr): Int {
-        if (this is Identifier && other is Identifier) {
-            val c = type.compareTo(other = other.type)
-            if (c != 0) {
-                return c
-            }
-            val l = min(genericsInfo.size, other.genericsInfo.size)
-            for (i in 0 until l) {
-                val cc = genericsInfo[i].compareTo(other = other.genericsInfo[i])
-                if (cc != 0) {
-                    return cc
-                }
-            }
-            return 0
-        } else if (this is Function && other is Function) {
-            val c = argumentType.compareTo(other = other.argumentType)
-            if (c != 0) {
-                return c
-            }
-            return returnType.compareTo(other = other.returnType)
-        } else if (this is Identifier && other is Function) {
-            return -1
-        } else {
-            return 1
-        }
-    }
 
     /**
      * [substituteGenerics] uses the given [map] to substitute generic symbols in the type
@@ -102,29 +75,30 @@ sealed class TypeExpr : Transpilable, Comparable<TypeExpr> {
 
     /**
      * [Function] represents the function type in the type annotation of the form
-     * [argumentType] `->` [returnType].
+     * ([argumentTypes]) `->` [returnType].
      */
     data class Function(
-            val argumentType: TypeExpr, val returnType: TypeExpr
+            val argumentTypes: List<TypeExpr>, val returnType: TypeExpr
     ) : TypeExpr() {
 
         override fun substituteGenerics(map: Map<String, TypeExpr>): Function =
                 Function(
-                        argumentType = argumentType.substituteGenerics(map = map),
+                        argumentTypes = argumentTypes.map { it.substituteGenerics(map = map) },
                         returnType = returnType.substituteGenerics(map = map)
                 )
 
         override fun checkTypeValidity(environment: TypeCheckingEnv) {
-            argumentType.checkTypeValidity(environment = environment)
+            argumentTypes.forEach { it.checkTypeValidity(environment = environment) }
             returnType.checkTypeValidity(environment = environment)
         }
 
         override fun containsIdentifier(identifier: String): Boolean {
-            return argumentType.containsIdentifier(identifier = identifier)
-                    || returnType.containsIdentifier(identifier = identifier)
+            return returnType.containsIdentifier(identifier = identifier)
+                    || argumentTypes.any { it.containsIdentifier(identifier = identifier) }
         }
 
-        override fun toString(): String = "($argumentType -> $returnType)"
+        override fun toString(): String =
+                "(${argumentTypes.joinToString(separator = ", ")}) -> $returnType"
 
     }
 

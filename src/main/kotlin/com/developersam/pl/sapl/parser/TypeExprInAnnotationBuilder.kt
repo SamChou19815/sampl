@@ -24,10 +24,14 @@ internal object TypeExprInAnnotationBuilder : PLBaseVisitor<TypeExpr>() {
         return TypeExpr.Identifier(type = type, genericsInfo = genericsList)
     }
 
-    override fun visitFunctionTypeInAnnotation(ctx: Func): TypeExpr =
-            TypeExpr.Function(
-                    argumentType = ctx.typeExprInAnnotation(0).accept(this),
-                    returnType = ctx.typeExprInAnnotation(1).accept(this)
-            )
+    override fun visitFunctionTypeInAnnotation(ctx: Func): TypeExpr {
+        val types = ctx.typeExprInAnnotation()
+        val len = types.size
+        return TypeExpr.Function(
+                argumentTypes = types.subList(fromIndex = 0, toIndex = len - 1)
+                        .map { it.accept(this) },
+                returnType = types[len - 1].accept(this)
+        )
+    }
 
 }

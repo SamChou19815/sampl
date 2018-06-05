@@ -105,9 +105,9 @@ class KotlinTranspilerVisitor : TranspilerVisitor {
                     var i = 1
                     for ((name, expr) in map) {
                         if (i == l) {
-                            q.addLine(line = "$name: $expr")
+                            q.addLine(line = "val $name: $expr")
                         } else {
-                            q.addLine(line = "$name: $expr,")
+                            q.addLine(line = "val $name: $expr,")
                         }
                         i++
                     }
@@ -115,7 +115,7 @@ class KotlinTranspilerVisitor : TranspilerVisitor {
                 q.addLine(line = ") {")
                 q.indentAndApply {
                     val args = dec.map.asSequence()
-                            .joinToString(separator = ", ") { (n, e) -> "$n: $e = $n" }
+                            .joinToString(separator = ", ") { (n, e) -> "$n: $e = this.$n" }
                     val values = dec.map.asSequence()
                             .joinToString(separator = ", ") { (n, _) -> "$n = $n" }
                     addLine(line = "fun copy($args): ${clazz.identifier} =")
@@ -139,7 +139,7 @@ class KotlinTranspilerVisitor : TranspilerVisitor {
 
     override fun visit(q: IndentationQueue, constantMember: DecoratedClassConstantMember) {
         val public = if (constantMember.isPublic) "" else "private "
-        q.addLine(line = "$public${constantMember.identifier}: ${constantMember.type} =")
+        q.addLine(line = "${public}val ${constantMember.identifier}: ${constantMember.type} =")
         q.indentAndApply { visit(q = this, expression = constantMember.expr) }
         q.addEmptyLine()
     }
@@ -151,9 +151,11 @@ class KotlinTranspilerVisitor : TranspilerVisitor {
                 ?.joinToGenericsInfoString()
                 ?.let { " $it" }
                 ?: ""
+        val id = functionMember.identifier
         val argumentsString = functionMember.arguments
                 .joinToString(separator = ", ") { (i, t) -> "$i: $t" }
-        q.addLine(line = "$public fun$generics ($argumentsString): ${functionMember.returnType} =")
+        val r = functionMember.returnType
+        q.addLine(line = "$public fun$generics $id($argumentsString): $r =")
         q.indentAndApply { visit(q = this, expression = functionMember.body) }
         q.addEmptyLine()
     }
@@ -200,7 +202,7 @@ class KotlinTranspilerVisitor : TranspilerVisitor {
             )
             is Binary -> {
                 val left = expression.left.toInlineTranspiledCode(visitor = this)
-                val right = expression.left.toInlineTranspiledCode(visitor = this)
+                val right = expression.right.toInlineTranspiledCode(visitor = this)
                 q.addLine(line = "($left) ${expression.op.symbol} ($right)")
             }
             is Throw -> {
@@ -259,34 +261,43 @@ class KotlinTranspilerVisitor : TranspilerVisitor {
                 q.addLine(line = "}}")
             }
             is FunctionApplication -> {
-                val funExpr = (expression.functionExpr as DecoratedExpression.Function)
-                // FIXME cannot cast like this.
-                val funStr = funExpr.toInlineTranspiledCode(visitor = this)
-                if (funExpr.arguments.size == expression.arguments.size) {
+                val funType = expression.functionExpr.type as TypeExpr.Function
+                val needParenthesis = expression.functionExpr.hasLowerPrecedence(expression)
+                var funStr = expression.functionExpr.toInlineTranspiledCode(visitor = this)
+                if (needParenthesis) {
+                    funStr = "($funStr)"
+                }
+                val shorterLen = expression.arguments.size
+                val longerLen = funType.argumentTypes.size
+                if (longerLen == shorterLen) {
                     // perfect application
                     val args = expression.arguments
                             .joinToString(separator = ", ") { e ->
                                 e.toInlineTranspiledCode(visitor = this)
                             }
-                    q.addLine(line = "($funStr)($args)")
+                    q.addLine(line = "$funStr($args)")
                 } else {
                     // currying
-                    val shorterLen = expression.arguments.size
-                    val longerLen = funExpr.arguments.size
-                    val argsInsideLambda = StringBuilder()
+                    val argsInsideLambdaBuilder = StringBuilder()
                     for (i in 0 until shorterLen) {
-                        argsInsideLambda.append(
+                        argsInsideLambdaBuilder.append(
                                 expression.arguments[i].toInlineTranspiledCode(visitor = this)
                         ).append(", ")
                     }
-                    val lambdaArgsRelatedSubList = funExpr.arguments.subList(shorterLen, longerLen)
-                    lambdaArgsRelatedSubList.joinToString(separator = ", ") { it.first }
-                            .run { argsInsideLambda.append(this) }
-                    val lambdaArgs = lambdaArgsRelatedSubList
-                            .joinToString(separator = ", ") { (s, t) -> "$s: $t" }
-                    q.addLine(line = "{ $lambdaArgs ->")
+                    argsInsideLambdaBuilder.setLength(argsInsideLambdaBuilder.length - 2)
+                    for (i in shorterLen until longerLen) {
+                        argsInsideLambdaBuilder.append(", _tempV").append(i)
+                    }
+                    val lambdaArgsBuilder = StringBuilder()
+                    for (i in shorterLen until longerLen) {
+                        lambdaArgsBuilder.append("_tempV").append(i).append(": ")
+                                .append(funType.argumentTypes[i])
+                                .append(", ")
+                    }
+                    lambdaArgsBuilder.setLength(lambdaArgsBuilder.length - 2)
+                    q.addLine(line = "{ $lambdaArgsBuilder ->")
                     q.indentAndApply {
-                        addLine(line = "($funStr)($argsInsideLambda)")
+                        addLine(line = "$funStr($argsInsideLambdaBuilder)")
                     }
                     q.addLine(line = "}")
                 }

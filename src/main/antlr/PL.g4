@@ -29,7 +29,7 @@ typeExprInAnnotation
       # NestedTypeInAnnotation
     | (UpperIdentifier DOT)* UpperIdentifier genericsSpecialization?
       # SingleIdentifierTypeInAnnotation
-    | <assoc=right> typeExprInAnnotation ARROW typeExprInAnnotation
+    | LPAREN typeExprInAnnotation (COMMA typeExprInAnnotation)* RPAREN ARROW typeExprInAnnotation
       # FunctionTypeInAnnotation
     ;
 
