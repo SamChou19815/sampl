@@ -1,14 +1,12 @@
 package com.developersam.pl.sapl.ast.type
 
 import com.developersam.pl.sapl.ast.protocol.PrettyPrintable
-import com.developersam.pl.sapl.ast.protocol.Transpilable
 import com.developersam.pl.sapl.codegen.IndentationQueue
-import com.developersam.pl.sapl.codegen.TranspilerVisitor
 
 /**
  * [TypeDeclaration] represents a set of supported type expression in type declaration.
  */
-sealed class TypeDeclaration : PrettyPrintable, Transpilable {
+sealed class TypeDeclaration : PrettyPrintable {
 
     /**
      * [isEmpty] reports whether the declaration is an empty struct.
@@ -18,9 +16,6 @@ sealed class TypeDeclaration : PrettyPrintable, Transpilable {
             is Variant -> false
             is Struct -> map.isEmpty()
         }
-
-    override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor): Unit =
-            visitor.visit(q = q, typeDeclaration = this)
 
     final override fun toString(): String = asIndentedSourceCode
 

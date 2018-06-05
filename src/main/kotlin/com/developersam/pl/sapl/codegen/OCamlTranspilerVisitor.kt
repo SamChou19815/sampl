@@ -60,10 +60,6 @@ class OCamlTranspilerVisitor : TranspilerVisitor {
         TODO("not implemented")
     }
 
-    override fun visit(q: IndentationQueue, typeDeclaration: TypeDeclaration) {
-        TODO("not implemented")
-    }
-
     override fun visit(q: IndentationQueue, typeExpr: TypeExpr) {
         TODO("not implemented")
     }

@@ -61,11 +61,6 @@ interface TranspilerVisitor {
     fun visit(q: IndentationQueue, pattern: DecoratedPattern)
 
     /**
-     * [visit] visits the [typeDeclaration] with [q] to add proper indentation and code info.
-     */
-    fun visit(q: IndentationQueue, typeDeclaration: TypeDeclaration)
-
-    /**
      * [visit] visits the [typeExpr] with [q] to add proper indentation and code info.
      */
     fun visit(q: IndentationQueue, typeExpr: TypeExpr)

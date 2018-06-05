@@ -33,6 +33,10 @@ CATCH : 'catch';
 
 WILDCARD : '_';
 
+// Forbidden ones
+PROGRAM : 'Program';
+COPY : 'copy';
+
 /*
  * ----------------------------------------------------------------------------
  * PART 2: Parentheses

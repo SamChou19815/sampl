@@ -23,11 +23,11 @@ interface Transpilable {
                     .toIndentedCode()
 
     /**
-     * [asInlineTranspiledCode] returns the source code of the AST node in one-liner way.
+     * [toInlineTranspiledCode] returns the source code of the AST node in one-liner way.
      *
      * @param visitor the visitor of the transpiler that actually does the transpiling logic.
      */
-    fun asInlineTranspiledCode(visitor: TranspilerVisitor): String =
+    fun toInlineTranspiledCode(visitor: TranspilerVisitor): String =
             IndentationQueue(strategy = visitor.indentationStrategy)
                     .apply { acceptTranspilation(q = this, visitor = visitor) }
                     .toInlineCode()

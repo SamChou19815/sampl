@@ -1,8 +1,8 @@
 package com.developersam.pl.sapl.ast.type
 
 import com.developersam.pl.sapl.ast.protocol.Transpilable
-import com.developersam.pl.sapl.codegen.TranspilerVisitor
 import com.developersam.pl.sapl.codegen.IndentationQueue
+import com.developersam.pl.sapl.codegen.TranspilerVisitor
 import com.developersam.pl.sapl.environment.TypeCheckingEnv
 import com.developersam.pl.sapl.exceptions.IdentifierError
 import com.developersam.pl.sapl.util.joinToGenericsInfoString
@@ -57,9 +57,14 @@ sealed class TypeExpr : Transpilable, Comparable<TypeExpr> {
 
     /**
      * [checkTypeValidity] tries to check the type is well-formed under the current given
-     * [environment]. If not, it should throw [UndefinedTypeIdentifierError]
+     * [environment]. If not, it should throw [IdentifierError.UndefinedTypeIdentifier]
      */
     abstract fun checkTypeValidity(environment: TypeCheckingEnv)
+
+    /**
+     * [containsIdentifier] returns whether [identifier] exists in the type expression.
+     */
+    abstract fun containsIdentifier(identifier: String): Boolean
 
     /**
      * [Identifier] represents a single [type] with optional [genericsInfo].
@@ -79,6 +84,13 @@ sealed class TypeExpr : Transpilable, Comparable<TypeExpr> {
                 throw IdentifierError.UndefinedTypeIdentifier(badIdentifier = type)
             }
             genericsInfo.forEach { it.checkTypeValidity(environment = environment) }
+        }
+
+        override fun containsIdentifier(identifier: String): Boolean {
+            if (type == identifier) {
+                return true;
+            }
+            return genericsInfo.any { it.containsIdentifier(identifier = identifier) }
         }
 
         override fun toString(): String =
@@ -105,6 +117,11 @@ sealed class TypeExpr : Transpilable, Comparable<TypeExpr> {
         override fun checkTypeValidity(environment: TypeCheckingEnv) {
             argumentType.checkTypeValidity(environment = environment)
             returnType.checkTypeValidity(environment = environment)
+        }
+
+        override fun containsIdentifier(identifier: String): Boolean {
+            return argumentType.containsIdentifier(identifier = identifier)
+                    || returnType.containsIdentifier(identifier = identifier)
         }
 
         override fun toString(): String = "($argumentType -> $returnType)"
