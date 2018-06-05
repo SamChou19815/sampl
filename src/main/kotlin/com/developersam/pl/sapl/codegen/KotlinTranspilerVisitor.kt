@@ -1,6 +1,6 @@
 package com.developersam.pl.sapl.codegen
 
-import com.developersam.pl.sapl.TOP_LEVEL_MODULE_NAME
+import com.developersam.pl.sapl.TOP_LEVEL_PROGRAM_NAME
 import com.developersam.pl.sapl.ast.common.Literal
 import com.developersam.pl.sapl.ast.decorated.DecoratedClass
 import com.developersam.pl.sapl.ast.decorated.DecoratedClassConstantMember
@@ -36,7 +36,7 @@ class KotlinTranspilerVisitor : TranspilerVisitor {
     override val indentationStrategy: IndentationStrategy = IndentationStrategy.FOUR_SPACES
 
     override fun visit(q: IndentationQueue, program: DecoratedProgram) {
-        q.addLine(line = """@file:JvmName(name = "$TOP_LEVEL_MODULE_NAME")""")
+        q.addLine(line = """@file:JvmName(name = "$TOP_LEVEL_PROGRAM_NAME")""")
         q.addEmptyLine()
         q.addLine(line = "class PLException(val m: String): RuntimeException(m)")
         q.addEmptyLine()
@@ -260,6 +260,7 @@ class KotlinTranspilerVisitor : TranspilerVisitor {
             }
             is FunctionApplication -> {
                 val funExpr = (expression.functionExpr as DecoratedExpression.Function)
+                // FIXME cannot cast like this.
                 val funStr = funExpr.toInlineTranspiledCode(visitor = this)
                 if (funExpr.arguments.size == expression.arguments.size) {
                     // perfect application

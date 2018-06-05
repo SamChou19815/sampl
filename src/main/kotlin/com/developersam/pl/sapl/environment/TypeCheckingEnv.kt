@@ -1,8 +1,8 @@
 package com.developersam.pl.sapl.environment
 
 import com.developersam.fp.FpMap
-import com.developersam.pl.sapl.ast.raw.Clazz
 import com.developersam.pl.sapl.ast.raw.ClassMember
+import com.developersam.pl.sapl.ast.raw.Clazz
 import com.developersam.pl.sapl.ast.type.TypeDeclaration
 import com.developersam.pl.sapl.ast.type.TypeInfo
 import com.developersam.pl.sapl.ast.type.boolTypeId
@@ -46,43 +46,43 @@ data class TypeCheckingEnv(
             update(newTypeEnv = typeEnv.put(variable, typeInfo))
 
     /**
-     * [enterModule] produces a new [TypeCheckingEnv] with all the public information preserved and
+     * [enterClass] produces a new [TypeCheckingEnv] with all the public information preserved and
      * make all the types declared in the class available. Type checking is not done here.
      */
-    fun enterModule(module: Clazz): TypeCheckingEnv {
+    fun enterClass(clazz: Clazz): TypeCheckingEnv {
         return TypeCheckingEnv(
                 typeDefinitions = typeDefinitions.put(
-                        key = module.name,
-                        value = module.identifier.genericsInfo to module.declaration
+                        key = clazz.name,
+                        value = clazz.identifier.genericsInfo to clazz.declaration
                 ),
                 declaredTypes = declaredTypes.put(
-                        key = module.name, value = module.identifier.genericsInfo
+                        key = clazz.name, value = clazz.identifier.genericsInfo
                 ),
                 typeEnv = typeEnv
         )
     }
 
     /**
-     * [exitModule] produces a new [TypeCheckingEnv] with all the public information preserved and
+     * [exitClass] produces a new [TypeCheckingEnv] with all the public information preserved and
      * make the access of current class elements prefixed with class name.
      */
-    fun exitModule(module: Clazz): TypeCheckingEnv {
-        val m = module.members
+    fun exitClass(clazz: Clazz): TypeCheckingEnv {
+        val m = clazz.members
         // remove added type definitions
-        val removedTypeDefinitions = typeDefinitions.remove(key = module.name)
+        val removedTypeDefinitions = typeDefinitions.remove(key = clazz.name)
         // remove and change declared types
         val newDeclaredTypes = declaredTypes.asSequence()
                 // when exiting, we need to use fully qualified name.
-                .filter { (name, _) -> name != module.name && !name.contains(other = ".") }
+                .filter { (name, _) -> name != clazz.name && !name.contains(other = ".") }
                 .fold(initial = declaredTypes) { dec, (name, genericsInfo) ->
-                    dec.remove(key = name).put(key = "${module.name}.$name", value = genericsInfo)
+                    dec.remove(key = name).put(key = "${clazz.name}.$name", value = genericsInfo)
                 }
         // remove private members
         val removeAndChangeMember = { env: FpMap<String, TypeInfo>, member: ClassMember ->
             val name = member.name
             if (member.isPublic) {
                 val v = env[name] ?: error(message = "Impossible")
-                env.remove(key = name).put(key = "${module.name}.$name", value = v)
+                env.remove(key = name).put(key = "${clazz.name}.$name", value = v)
             } else {
                 env.remove(key = name)
             }

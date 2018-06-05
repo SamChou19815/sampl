@@ -13,7 +13,7 @@ const val LANG_NAME: String = "SAPL"
 const val EXTENSION: String = "pl"
 
 /**
- * [TOP_LEVEL_MODULE_NAME] is the pre-defined name for the compiled top-level program name.
+ * [TOP_LEVEL_PROGRAM_NAME] is the pre-defined name for the compiled top-level program name.
  * No upper case identifiers can conflict with this name.
  */
-const val TOP_LEVEL_MODULE_NAME: String = "Program"
+const val TOP_LEVEL_PROGRAM_NAME: String = "Program"

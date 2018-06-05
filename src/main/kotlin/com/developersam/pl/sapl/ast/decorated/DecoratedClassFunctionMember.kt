@@ -1,9 +1,9 @@
 package com.developersam.pl.sapl.ast.decorated
 
-import com.developersam.pl.sapl.codegen.TranspilerVisitor
 import com.developersam.pl.sapl.ast.type.TypeExpr
 import com.developersam.pl.sapl.ast.type.unitTypeExpr
 import com.developersam.pl.sapl.codegen.IndentationQueue
+import com.developersam.pl.sapl.codegen.TranspilerVisitor
 
 /**
  * [DecoratedClassFunctionMember] represents a function declaration of the form:

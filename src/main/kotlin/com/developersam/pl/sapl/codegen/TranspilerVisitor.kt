@@ -1,13 +1,12 @@
 package com.developersam.pl.sapl.codegen
 
-import com.developersam.pl.sapl.ast.decorated.DecoratedExpression
 import com.developersam.pl.sapl.ast.decorated.DecoratedClass
 import com.developersam.pl.sapl.ast.decorated.DecoratedClassConstantMember
 import com.developersam.pl.sapl.ast.decorated.DecoratedClassFunctionMember
 import com.developersam.pl.sapl.ast.decorated.DecoratedClassMembers
+import com.developersam.pl.sapl.ast.decorated.DecoratedExpression
 import com.developersam.pl.sapl.ast.decorated.DecoratedPattern
 import com.developersam.pl.sapl.ast.decorated.DecoratedProgram
-import com.developersam.pl.sapl.ast.type.TypeDeclaration
 import com.developersam.pl.sapl.ast.type.TypeExpr
 import com.developersam.pl.sapl.ast.type.TypeIdentifier
 import com.developersam.pl.sapl.config.IndentationStrategy

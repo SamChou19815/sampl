@@ -1,8 +1,8 @@
 package com.developersam.pl.sapl.ast.decorated
 
-import com.developersam.pl.sapl.codegen.TranspilerVisitor
 import com.developersam.pl.sapl.ast.type.TypeExpr
 import com.developersam.pl.sapl.codegen.IndentationQueue
+import com.developersam.pl.sapl.codegen.TranspilerVisitor
 
 /**
  * [DecoratedClassConstantMember] represents a constant declaration of the form:

@@ -1,9 +1,9 @@
 package com.developersam.pl.sapl.ast.decorated
 
 import com.developersam.pl.sapl.ast.protocol.Transpilable
-import com.developersam.pl.sapl.codegen.TranspilerVisitor
 import com.developersam.pl.sapl.ast.type.TypeExpr
 import com.developersam.pl.sapl.codegen.IndentationQueue
+import com.developersam.pl.sapl.codegen.TranspilerVisitor
 
 /**
  * [DecoratedPattern] is the pattern with appropriate and correct type decoration.

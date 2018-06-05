@@ -1,6 +1,9 @@
 package com.developersam.pl.sapl
 
 import com.developersam.pl.sapl.classes.ClassConstructor
+import com.developersam.pl.sapl.codegen.IndentationQueue
+import com.developersam.pl.sapl.codegen.KotlinTranspilerVisitor
+import com.developersam.pl.sapl.config.IndentationStrategy
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
@@ -39,10 +42,13 @@ class SimpleTest {
         val firstCompile = ClassConstructor
                 .fromSource(code = propositionsAreTypesProofsAreProgram)
                 .typeCheck()
-        println(firstCompile.asIndentedSourceCode)
+        // println(firstCompile.asIndentedSourceCode)
         val secondCompile = firstCompile.asIndentedSourceCode
                 .let { ClassConstructor.fromSource(code = it).typeCheck() }
-        println(secondCompile.asIndentedSourceCode)
+        // println(secondCompile.asIndentedSourceCode)
+        assertEquals(firstCompile, secondCompile)
+        val q = IndentationQueue(strategy = IndentationStrategy.FOUR_SPACES)
+        q.apply { KotlinTranspilerVisitor().visit(q = q, program = secondCompile) }
+                .toIndentedCode().let { println(it) }
     }
-
 }

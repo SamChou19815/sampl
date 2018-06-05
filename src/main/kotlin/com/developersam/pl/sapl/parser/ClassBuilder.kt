@@ -2,8 +2,8 @@ package com.developersam.pl.sapl.parser
 
 import com.developersam.pl.sapl.antlr.PLBaseVisitor
 import com.developersam.pl.sapl.antlr.PLParser
-import com.developersam.pl.sapl.ast.raw.Clazz
 import com.developersam.pl.sapl.ast.raw.ClassMembers
+import com.developersam.pl.sapl.ast.raw.Clazz
 import com.developersam.pl.sapl.ast.type.TypeDeclaration
 import com.developersam.pl.sapl.ast.type.TypeIdentifier
 import org.antlr.v4.runtime.tree.TerminalNode

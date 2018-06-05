@@ -2,8 +2,8 @@ package com.developersam.pl.sapl.classes
 
 import com.developersam.pl.sapl.antlr.PLLexer
 import com.developersam.pl.sapl.antlr.PLParser
-import com.developersam.pl.sapl.ast.raw.CompilationUnit
 import com.developersam.pl.sapl.ast.raw.Clazz
+import com.developersam.pl.sapl.ast.raw.CompilationUnit
 import com.developersam.pl.sapl.parser.CompilationUnitBuilder
 import com.developersam.pl.sapl.util.getAllSourceFiles
 import org.antlr.v4.runtime.ANTLRInputStream

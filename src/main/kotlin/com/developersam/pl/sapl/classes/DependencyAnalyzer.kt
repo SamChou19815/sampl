@@ -1,8 +1,8 @@
 package com.developersam.pl.sapl.classes
 
-import com.developersam.pl.sapl.ast.raw.CompilationUnit
-import com.developersam.pl.sapl.ast.raw.Clazz
 import com.developersam.pl.sapl.ast.raw.ClassMembers
+import com.developersam.pl.sapl.ast.raw.Clazz
+import com.developersam.pl.sapl.ast.raw.CompilationUnit
 import com.developersam.pl.sapl.ast.type.TypeDeclaration
 import com.developersam.pl.sapl.ast.type.TypeIdentifier
 import com.developersam.pl.sapl.exceptions.CompileTimeError

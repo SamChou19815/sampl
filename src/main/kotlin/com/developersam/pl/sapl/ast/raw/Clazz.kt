@@ -1,6 +1,5 @@
 package com.developersam.pl.sapl.ast.raw
 
-import com.developersam.pl.sapl.TOP_LEVEL_MODULE_NAME
 import com.developersam.pl.sapl.ast.decorated.DecoratedClass
 import com.developersam.pl.sapl.ast.decorated.DecoratedClassConstantMember
 import com.developersam.pl.sapl.ast.decorated.DecoratedClassMembers
@@ -36,14 +35,10 @@ data class Clazz(
      */
     private fun noNameShadowingValidation(set: HashSet<String>) {
         if (!set.add(name)) {
-            if (name == TOP_LEVEL_MODULE_NAME) {
-                throw IdentifierError.ForbiddenName(name = name)
-            } else {
-                throw IdentifierError.ShadowedName(shadowedName = name)
-            }
+            throw IdentifierError.ShadowedName(shadowedName = name)
         }
-        // TODO use functional DFS instead
         members.nestedClassMembers.forEach { it.noNameShadowingValidation(set = set) }
+        set.remove(name)
         val memberSet = hashSetOf<String>()
         val memberNameValidator: (ClassMember) -> Unit = { member ->
             val name = member.name
@@ -56,7 +51,7 @@ data class Clazz(
     }
 
     /**
-     * [typeCheckTypeDeclaration] uses the given [environment] to type check the type declaration.
+     * [typeCheckTypeDeclaration] uses the given [e] to type check the type declaration.
      *
      * Requires: [e] must already put all the type members inside to allow
      * recursive types.
@@ -85,7 +80,7 @@ data class Clazz(
         val functionMembers = members.functionMembers
         val nestedModuleMembers = members.nestedClassMembers
         // Part 1: Process Type Declarations
-        val eInit = e.enterModule(module = this)
+        val eInit = e.enterClass(clazz = this)
         typeCheckTypeDeclaration(e = eInit)
         // Part 2: Process Constant Definitions
         val decoratedConstants = arrayListOf<DecoratedClassConstantMember>()
@@ -107,24 +102,24 @@ data class Clazz(
                 })
         val decoratedFunctions = functionMembers.map { it.typeCheck(environment = eWithFunctions) }
         // Part 4: Process Nested Classes
-        val decoratedModules = arrayListOf<DecoratedClass>()
-        val eWithModules = nestedModuleMembers.fold(initial = eWithFunctions) { env, m ->
+        val decoratedClasses = arrayListOf<DecoratedClass>()
+        val eWithClasses = nestedModuleMembers.fold(initial = eWithFunctions) { env, m ->
             val (decoratedModule, newEnv) = m.typeCheck(env)
-            decoratedModules.add(element = decoratedModule)
+            decoratedClasses.add(element = decoratedModule)
             newEnv
         }
         // Part 5: Exit Current Module and Return
-        val decoratedModule = DecoratedClass(
+        val decoratedClass = DecoratedClass(
                 identifier = identifier,
                 declaration = declaration,
                 members = DecoratedClassMembers(
                         constantMembers = decoratedConstants,
                         functionMembers = decoratedFunctions,
-                        nestedClassMembers = decoratedModules
+                        nestedClassMembers = decoratedClasses
                 )
         )
-        val eFinal = eWithModules.exitModule(module = this)
-        return decoratedModule to eFinal
+        val eFinal = eWithClasses.exitClass(clazz = this)
+        return decoratedClass to eFinal
     }
 
     /**
@@ -134,9 +129,7 @@ data class Clazz(
      * @return the decorated program after type check.
      */
     fun typeCheck(): DecoratedProgram {
-        val initialSet = hashSetOf<String>()
-        initialSet.add(element = TOP_LEVEL_MODULE_NAME)
-        noNameShadowingValidation(set = initialSet)
+        noNameShadowingValidation(set = hashSetOf())
         val clazz = typeCheck(e = TypeCheckingEnv.initial).first
         return DecoratedProgram(clazz = clazz)
     }

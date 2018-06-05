@@ -1,9 +1,9 @@
 package com.developersam.pl.sapl.parser
 
 import com.developersam.pl.sapl.antlr.PLBaseVisitor
-import com.developersam.pl.sapl.antlr.PLParser.ArgumentDeclarationsContext as C
 import com.developersam.pl.sapl.ast.type.TypeExpr
 import com.developersam.pl.sapl.ast.type.unitTypeExpr
+import com.developersam.pl.sapl.antlr.PLParser.ArgumentDeclarationsContext as C
 
 /**
  * [ArgumentDeclarationsBuilder] builds argument declarations into AST.

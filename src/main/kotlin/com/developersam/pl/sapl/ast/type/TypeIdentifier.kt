@@ -1,8 +1,8 @@
 package com.developersam.pl.sapl.ast.type
 
 import com.developersam.pl.sapl.ast.protocol.Transpilable
-import com.developersam.pl.sapl.codegen.TranspilerVisitor
 import com.developersam.pl.sapl.codegen.IndentationQueue
+import com.developersam.pl.sapl.codegen.TranspilerVisitor
 import com.developersam.pl.sapl.util.joinToGenericsInfoString
 import kotlin.math.min
 
