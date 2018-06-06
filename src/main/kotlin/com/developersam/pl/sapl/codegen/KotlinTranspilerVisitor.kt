@@ -63,7 +63,12 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
         val dec = clazz.declaration
         when (dec) {
             is TypeDeclaration.Variant -> {
-                q.addLine(line = "sealed class ${clazz.identifier} {")
+                val classRawName = clazz.identifier.name
+                val classType = if (clazz.identifier.genericsInfo.isEmpty()) classRawName else {
+                    classRawName + clazz.identifier.genericsInfo.joinToString(
+                            separator = ", ", prefix = "<", postfix = ">") { "out $it" }
+                }
+                q.addLine(line = "sealed class $classType {")
                 q.indentAndApply {
                     val map = dec.map
                     val genericsInfo = clazz.identifier.genericsInfo
