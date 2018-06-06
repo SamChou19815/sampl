@@ -1,8 +1,5 @@
 package com.developersam.pl.sapl.ast.type
 
-import com.developersam.pl.sapl.ast.protocol.Transpilable
-import com.developersam.pl.sapl.codegen.IndentationQueue
-import com.developersam.pl.sapl.codegen.TranspilerVisitor
 import com.developersam.pl.sapl.util.joinToGenericsInfoString
 import kotlin.math.min
 
@@ -12,10 +9,7 @@ import kotlin.math.min
  */
 data class TypeIdentifier(
         val name: String, val genericsInfo: List<String> = emptyList()
-) : Transpilable, Comparable<TypeIdentifier> {
-
-    override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor): Unit =
-            visitor.visit(q = q, typeIdentifier = this)
+) : Comparable<TypeIdentifier> {
 
     override fun compareTo(other: TypeIdentifier): Int {
         val c = name.compareTo(other = other.name)

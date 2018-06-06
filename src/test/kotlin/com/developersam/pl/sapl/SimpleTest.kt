@@ -4,9 +4,9 @@ import com.developersam.pl.sapl.classes.ClassConstructor
 import com.developersam.pl.sapl.codegen.IndentationQueue
 import com.developersam.pl.sapl.codegen.KotlinTranspilerVisitor
 import com.developersam.pl.sapl.config.IndentationStrategy
+import com.developersam.pl.sapl.util.writeToFile
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
-import java.io.File
 
 /**
  * [SimpleTest] contains some simple programs to demonstrate the working status of the system.
@@ -39,10 +39,11 @@ class SimpleTest {
     """.trimIndent()
 
     /**
-     * [run] simply runs some code to show that the system is working.
+     * [runSimpleInSteps] simply runs some code in compiler's steps to show that the system kinds of
+     * works in each step.
      */
     @Test
-    fun run() {
+    fun runSimpleInSteps() {
         val firstCompile = ClassConstructor
                 .fromSource(code = propositionsAreTypesProofsAreProgram)
                 .typeCheck()
@@ -52,12 +53,17 @@ class SimpleTest {
         // println(secondCompile.asIndentedSourceCode)
         assertEquals(firstCompile, secondCompile)
         val kotlinCode = IndentationQueue(strategy = IndentationStrategy.FOUR_SPACES)
-                .apply { KotlinTranspilerVisitor().visit(q = this, program = secondCompile) }
+                .apply { KotlinTranspilerVisitor.visit(q = this, program = secondCompile) }
                 .toIndentedCode()
-        File("./src/test/resources/Program.kt")
-                .apply { createNewFile() }
-                .printWriter()
-                .apply { write(kotlinCode) }
-                .close()
+        writeToFile(filename = "./src/test/resources/Program.kt", content = kotlinCode)
     }
+
+    /**
+     * [compileSimple] tests the compiler pipe line as a whole on a simple program.
+     */
+    @Test
+    fun compileSimple() {
+        PLCompiler.compileFromSource(code = propositionsAreTypesProofsAreProgram)
+    }
+
 }

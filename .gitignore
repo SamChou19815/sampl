@@ -34,3 +34,5 @@ hs_err_pid*
 
 # Temp Test File
 /src/main/kotlin/com/developersam/pl/sapl/Test.kt
+/src/test/resources/Program.kt
+/_build/

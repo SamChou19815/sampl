@@ -20,3 +20,9 @@ internal fun getAllSourceFiles(directory: String): List<File> {
     }
     return files
 }
+
+/**
+ * [writeToFile] writes the [content] into a file with [filename].
+ */
+internal fun writeToFile(filename: String, content: String): Unit =
+        File(filename).apply {  createNewFile() }.printWriter().apply { write(content) }.close()

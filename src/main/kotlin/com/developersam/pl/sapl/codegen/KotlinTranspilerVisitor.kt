@@ -1,5 +1,6 @@
 package com.developersam.pl.sapl.codegen
 
+import com.developersam.pl.sapl.EASTER_EGG
 import com.developersam.pl.sapl.TOP_LEVEL_PROGRAM_NAME
 import com.developersam.pl.sapl.ast.common.Literal
 import com.developersam.pl.sapl.ast.decorated.DecoratedClass
@@ -22,7 +23,6 @@ import com.developersam.pl.sapl.ast.decorated.DecoratedPattern
 import com.developersam.pl.sapl.ast.decorated.DecoratedProgram
 import com.developersam.pl.sapl.ast.type.TypeDeclaration
 import com.developersam.pl.sapl.ast.type.TypeExpr
-import com.developersam.pl.sapl.ast.type.TypeIdentifier
 import com.developersam.pl.sapl.ast.type.unitTypeExpr
 import com.developersam.pl.sapl.config.IndentationStrategy
 import com.developersam.pl.sapl.util.joinToGenericsInfoString
@@ -31,12 +31,16 @@ import com.developersam.pl.sapl.util.joinToGenericsInfoString
  * [KotlinTranspilerVisitor] is a [TranspilerVisitor] that transpiles the code to Kotlin source
  * code.
  */
-class KotlinTranspilerVisitor : TranspilerVisitor {
+object KotlinTranspilerVisitor : TranspilerVisitor {
 
     override val indentationStrategy: IndentationStrategy = IndentationStrategy.FOUR_SPACES
 
     override fun visit(q: IndentationQueue, program: DecoratedProgram) {
         q.addLine(line = """@file:JvmName(name = "$TOP_LEVEL_PROGRAM_NAME")""")
+        q.addEmptyLine()
+        q.addLine(line = "/*")
+        q.addLine(line = " * $EASTER_EGG")
+        q.addLine(line = " */")
         q.addEmptyLine()
         q.addLine(line = "class PLException(val m: String): RuntimeException(m)")
         q.addEmptyLine()
@@ -177,26 +181,7 @@ class KotlinTranspilerVisitor : TranspilerVisitor {
                         ?: ""
                 q.addLine(line = expression.variable + genericsInfo)
             }
-            is Constructor.NoArgVariant -> q.addLine(
-                    line = "${expression.typeName}.${expression.variantName}"
-            )
-            is Constructor.OneArgVariant -> {
-                val dataStr = expression.data.toInlineTranspiledCode(visitor = this)
-                q.addLine(line = "${expression.typeName}($dataStr)")
-            }
-            is Constructor.Struct -> {
-                val args = expression.declarations.map { (n, e) ->
-                    "$n = ${e.toInlineTranspiledCode(visitor = this)}"
-                }.joinToString(separator = ", ")
-                q.addLine(line = "${expression.typeName}($args)")
-            }
-            is Constructor.StructWithCopy -> {
-                val oldStr = expression.old.toInlineTranspiledCode(visitor = this)
-                val args = expression.newDeclarations.map { (n, e) ->
-                    "$n = ${e.toInlineTranspiledCode(visitor = this)}"
-                }.joinToString(separator = ", ")
-                q.addLine(line = "($oldStr).copy($args)")
-            }
+            is Constructor -> visitConstructorExpr(q = q, expression = expression)
             is StructMemberAccess -> {
                 val s = expression.structExpr.toInlineTranspiledCode(visitor = this)
                 q.addLine(line = "($s).${expression.memberName}")
@@ -231,81 +216,8 @@ class KotlinTranspilerVisitor : TranspilerVisitor {
                 }
                 q.addLine(line = "}")
             }
-            is Match -> {
-                val matchedStr = expression.exprToMatch.toInlineTranspiledCode(visitor = this)
-                q.addLine(line = "with($matchedStr){ when(it) {")
-                q.indentAndApply {
-                    val list = expression.matchingList
-                    for ((pattern, expr) in expression.matchingList) {
-                        when (pattern) {
-                            is DecoratedPattern.Variant -> {
-                                addLine(line = "is ${pattern.variantIdentifier} -> {")
-                                indentAndApply {
-                                    pattern.associatedVariable?.let { v ->
-                                        addLine(line = "val $v = it.data;")
-                                    }
-                                    visit(q = this, expression = expr)
-                                }
-                            }
-                            is DecoratedPattern.Variable -> {
-                                addLine(line = "else -> {")
-                                indentAndApply {
-                                    addLine(line = "val ${pattern.identifier} = it.data;")
-                                    visit(q = this, expression = expr)
-                                }
-                            }
-                            is DecoratedPattern.WildCard -> {
-                                addLine(line = "else -> {")
-                                indentAndApply { visit(q = this, expression = expr) }
-                            }
-                        }
-                        addLine(line = "}")
-                    }
-                }
-                q.addLine(line = "}}")
-            }
-            is FunctionApplication -> {
-                val funType = expression.functionExpr.type as TypeExpr.Function
-                val needParenthesis = expression.functionExpr.hasLowerPrecedence(expression)
-                var funStr = expression.functionExpr.toInlineTranspiledCode(visitor = this)
-                if (needParenthesis) {
-                    funStr = "($funStr)"
-                }
-                val shorterLen = expression.arguments.size
-                val longerLen = funType.argumentTypes.size
-                if (longerLen == shorterLen) {
-                    // perfect application
-                    val args = expression.arguments
-                            .joinToString(separator = ", ") { e ->
-                                e.toInlineTranspiledCode(visitor = this)
-                            }
-                    q.addLine(line = "$funStr($args)")
-                } else {
-                    // currying
-                    val argsInsideLambdaBuilder = StringBuilder()
-                    for (i in 0 until shorterLen) {
-                        argsInsideLambdaBuilder.append(
-                                expression.arguments[i].toInlineTranspiledCode(visitor = this)
-                        ).append(", ")
-                    }
-                    argsInsideLambdaBuilder.setLength(argsInsideLambdaBuilder.length - 2)
-                    for (i in shorterLen until longerLen) {
-                        argsInsideLambdaBuilder.append(", _tempV").append(i)
-                    }
-                    val lambdaArgsBuilder = StringBuilder()
-                    for (i in shorterLen until longerLen) {
-                        lambdaArgsBuilder.append("_tempV").append(i).append(": ")
-                                .append(funType.argumentTypes[i])
-                                .append(", ")
-                    }
-                    lambdaArgsBuilder.setLength(lambdaArgsBuilder.length - 2)
-                    q.addLine(line = "{ $lambdaArgsBuilder ->")
-                    q.indentAndApply {
-                        addLine(line = "$funStr($argsInsideLambdaBuilder)")
-                    }
-                    q.addLine(line = "}")
-                }
-            }
+            is Match -> visitMatchExpr(q = q, expression = expression)
+            is FunctionApplication -> visitFunctionApplicationExpr(q = q, expression = expression)
             is DecoratedExpression.Function -> {
                 val args = expression.arguments.asSequence()
                         .joinToString(separator = ", ") { (n, e) -> "$n: $e" }
@@ -332,10 +244,117 @@ class KotlinTranspilerVisitor : TranspilerVisitor {
         }
     }
 
-    override fun visit(q: IndentationQueue, pattern: DecoratedPattern): Unit = Unit
+    /**
+     * [visitConstructorExpr] is a specialized expression visiting method that only visits
+     * constructor [expression]s with [q].
+     */
+    private fun visitConstructorExpr(q: IndentationQueue, expression: Constructor) {
+        when (expression) {
+            is Constructor.NoArgVariant -> q.addLine(
+                    line = "${expression.typeName}.${expression.variantName}"
+            )
+            is Constructor.OneArgVariant -> {
+                val dataStr = expression.data.toInlineTranspiledCode(visitor = this)
+                q.addLine(line = "${expression.typeName}($dataStr)")
+            }
+            is Constructor.Struct -> {
+                val args = expression.declarations.map { (n, e) ->
+                    "$n = ${e.toInlineTranspiledCode(visitor = this)}"
+                }.joinToString(separator = ", ")
+                q.addLine(line = "${expression.typeName}($args)")
+            }
+            is Constructor.StructWithCopy -> {
+                val oldStr = expression.old.toInlineTranspiledCode(visitor = this)
+                val args = expression.newDeclarations.map { (n, e) ->
+                    "$n = ${e.toInlineTranspiledCode(visitor = this)}"
+                }.joinToString(separator = ", ")
+                q.addLine(line = "($oldStr).copy($args)")
+            }
+        }
+    }
 
-    override fun visit(q: IndentationQueue, typeExpr: TypeExpr): Unit = Unit
+    /**
+     * [visitConstructorExpr] is a specialized expression visiting method that only visits
+     * match [expression]s with [q].
+     */
+    private fun visitMatchExpr(q: IndentationQueue, expression: DecoratedExpression.Match) {
+        val matchedStr = expression.exprToMatch.toInlineTranspiledCode(visitor = this)
+        q.addLine(line = "with($matchedStr){ when(it) {")
+        q.indentAndApply {
+            for ((pattern, expr) in expression.matchingList) {
+                when (pattern) {
+                    is DecoratedPattern.Variant -> {
+                        addLine(line = "is ${pattern.variantIdentifier} -> {")
+                        indentAndApply {
+                            pattern.associatedVariable?.let { v ->
+                                addLine(line = "val $v = it.data;")
+                            }
+                            visit(q = this, expression = expr)
+                        }
+                    }
+                    is DecoratedPattern.Variable -> {
+                        addLine(line = "else -> {")
+                        indentAndApply {
+                            addLine(line = "val ${pattern.identifier} = it.data;")
+                            visit(q = this, expression = expr)
+                        }
+                    }
+                    is DecoratedPattern.WildCard -> {
+                        addLine(line = "else -> {")
+                        indentAndApply { visit(q = this, expression = expr) }
+                    }
+                }
+                addLine(line = "}")
+            }
+        }
+        q.addLine(line = "}}")
+    }
 
-    override fun visit(q: IndentationQueue, typeIdentifier: TypeIdentifier): Unit = Unit
+    /**
+     * [visitConstructorExpr] is a specialized expression visiting method that only visits
+     * function application [expression]s with [q].
+     */
+    private fun visitFunctionApplicationExpr(q: IndentationQueue, expression: FunctionApplication) {
+        val funType = expression.functionExpr.type as TypeExpr.Function
+        val needParenthesis = expression.functionExpr.hasLowerPrecedence(expression)
+        var funStr = expression.functionExpr.toInlineTranspiledCode(visitor = this)
+        if (needParenthesis) {
+            funStr = "($funStr)"
+        }
+        val shorterLen = expression.arguments.size
+        val longerLen = funType.argumentTypes.size
+        if (longerLen == shorterLen) {
+            // perfect application
+            val args = expression.arguments
+                    .joinToString(separator = ", ") { e ->
+                        e.toInlineTranspiledCode(visitor = this)
+                    }
+            q.addLine(line = "$funStr($args)")
+        } else {
+            // currying
+            val argsInsideLambdaBuilder = StringBuilder()
+            for (i in 0 until shorterLen) {
+                argsInsideLambdaBuilder.append(
+                        expression.arguments[i].toInlineTranspiledCode(visitor = this)
+                ).append(", ")
+            }
+            argsInsideLambdaBuilder.setLength(argsInsideLambdaBuilder.length - 2)
+            for (i in shorterLen until longerLen) {
+                argsInsideLambdaBuilder.append(", _tempV").append(i)
+            }
+            val lambdaArgsBuilder = StringBuilder()
+            for (i in shorterLen until longerLen) {
+                lambdaArgsBuilder.append("_tempV").append(i).append(": ")
+                        .append(funType.argumentTypes[i])
+                        .append(", ")
+            }
+            lambdaArgsBuilder.setLength(lambdaArgsBuilder.length - 2)
+            q.addLine(line = "{ $lambdaArgsBuilder ->")
+            q.indentAndApply {
+                addLine(line = "$funStr($argsInsideLambdaBuilder)")
+            }
+            q.addLine(line = "}")
+        }
+    }
 
 }

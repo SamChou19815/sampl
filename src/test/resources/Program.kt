@@ -1,5 +1,9 @@
 @file:JvmName(name = "Program")
 
+/*
+ * SAMPL is created and maintained by Developer Sam.
+ */
+
 class PLException(val m: String): RuntimeException(m)
 
 class TestingProgram (

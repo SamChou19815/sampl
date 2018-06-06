@@ -5,10 +5,7 @@ import com.developersam.pl.sapl.ast.decorated.DecoratedClassConstantMember
 import com.developersam.pl.sapl.ast.decorated.DecoratedClassFunctionMember
 import com.developersam.pl.sapl.ast.decorated.DecoratedClassMembers
 import com.developersam.pl.sapl.ast.decorated.DecoratedExpression
-import com.developersam.pl.sapl.ast.decorated.DecoratedPattern
 import com.developersam.pl.sapl.ast.decorated.DecoratedProgram
-import com.developersam.pl.sapl.ast.type.TypeExpr
-import com.developersam.pl.sapl.ast.type.TypeIdentifier
 import com.developersam.pl.sapl.config.IndentationStrategy
 
 /**
@@ -53,20 +50,5 @@ interface TranspilerVisitor {
      * [visit] visits the [expression] with [q] to add proper indentation and code info.
      */
     fun visit(q: IndentationQueue, expression: DecoratedExpression)
-
-    /**
-     * [visit] visits the [pattern] with [q] to add proper indentation and code info.
-     */
-    fun visit(q: IndentationQueue, pattern: DecoratedPattern)
-
-    /**
-     * [visit] visits the [typeExpr] with [q] to add proper indentation and code info.
-     */
-    fun visit(q: IndentationQueue, typeExpr: TypeExpr)
-
-    /**
-     * [visit] visits the [typeIdentifier] with [q] to add proper indentation and code info.
-     */
-    fun visit(q: IndentationQueue, typeIdentifier: TypeIdentifier)
 
 }
