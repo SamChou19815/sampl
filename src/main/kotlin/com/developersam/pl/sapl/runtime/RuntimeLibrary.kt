@@ -1,10 +1,7 @@
 package com.developersam.pl.sapl.runtime
 
-@Target(AnnotationTarget.CLASS)
-@Retention(AnnotationRetention.RUNTIME)
-@MustBeDocumented
 /**
- * [RuntimeLibrary] is the marker annotation for the interpreter to detect and validate
- * runtime class library.
+ * [RuntimeLibrary] is a marker interface for a class that is intended to be used as a Runtime
+ * library for the PL library.
  */
-annotation class RuntimeLibrary
+interface RuntimeLibrary

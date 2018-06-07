@@ -33,6 +33,11 @@ sealed class TypeExpr {
     abstract fun containsIdentifier(identifier: String): Boolean
 
     /**
+     * [toCode] converts the type expression to code form.
+     */
+    abstract fun toCode(): String
+
+    /**
      * [Identifier] represents a single [type] with optional [genericsInfo].
      */
     data class Identifier(
@@ -57,6 +62,17 @@ sealed class TypeExpr {
                 return true;
             }
             return genericsInfo.any { it.containsIdentifier(identifier = identifier) }
+        }
+
+        override fun toCode(): String = when {
+            this == unitTypeExpr -> "Unit"
+            this == intTypeExpr -> "Long"
+            this == floatTypeExpr -> "Double"
+            this == boolTypeExpr -> "Boolean"
+            this == charTypeExpr -> "Char"
+            this == stringTypeExpr -> "String"
+            genericsInfo.isEmpty() -> type
+            else -> type + genericsInfo.joinToGenericsInfoString()
         }
 
         override fun toString(): String =
@@ -88,6 +104,11 @@ sealed class TypeExpr {
         override fun containsIdentifier(identifier: String): Boolean {
             return returnType.containsIdentifier(identifier = identifier)
                     || argumentTypes.any { it.containsIdentifier(identifier = identifier) }
+        }
+
+        override fun toCode(): String {
+            val argumentStrings = argumentTypes.joinToString(separator = ", ") { it.toCode() }
+            return "($argumentStrings) -> ${returnType.toCode()}"
         }
 
         override fun toString(): String =
