@@ -49,6 +49,67 @@ interface TranspilerVisitor {
     /**
      * [visit] visits the [expression] with [q] to add proper indentation and code info.
      */
-    fun visit(q: IndentationQueue, expression: DecoratedExpression)
+    fun visit(q: IndentationQueue, expression: DecoratedExpression.Literal)
+
+    /**
+     * [visit] visits the [expression] with [q] to add proper indentation and code info.
+     */
+    fun visit(q: IndentationQueue, expression: DecoratedExpression.VariableIdentifier)
+
+    /**
+     * [visit] visits the [expression] with [q] to add proper indentation and code info.
+     */
+    fun visit(q: IndentationQueue, expression: DecoratedExpression.Constructor)
+
+    /**
+     * [visit] visits the [expression] with [q] to add proper indentation and code info.
+     */
+    fun visit(q: IndentationQueue, expression: DecoratedExpression.StructMemberAccess)
+
+    /**
+     * [visit] visits the [expression] with [q] to add proper indentation and code info.
+     */
+    fun visit(q: IndentationQueue, expression: DecoratedExpression.Not)
+
+    /**
+     * [visit] visits the [expression] with [q] to add proper indentation and code info.
+     */
+    fun visit(q: IndentationQueue, expression: DecoratedExpression.Binary)
+
+    /**
+     * [visit] visits the [expression] with [q] to add proper indentation and code info.
+     */
+    fun visit(q: IndentationQueue, expression: DecoratedExpression.Throw)
+
+    /**
+     * [visit] visits the [expression] with [q] to add proper indentation and code info.
+     */
+    fun visit(q: IndentationQueue, expression: DecoratedExpression.IfElse)
+
+    /**
+     * [visit] visits the [expression] with [q] to add proper indentation and code info.
+     */
+    fun visit(q: IndentationQueue, expression: DecoratedExpression.Match)
+
+    /**
+     * [visit] visits the [expression] with [q] to add proper indentation and code info.
+     */
+    fun visit(q: IndentationQueue, expression: DecoratedExpression.FunctionApplication)
+
+    /**
+     * [visit] visits the [expression] with [q] to add proper indentation and code info.
+     */
+    fun visit(q: IndentationQueue, expression: DecoratedExpression.Function)
+
+    /**
+     * [visit] visits the [expression] with [q] to add proper indentation and code info.
+     */
+    fun visit(q: IndentationQueue, expression: DecoratedExpression.TryCatch)
+
+    /**
+     * [visit] visits the [expression] with [q] to add proper indentation and code info.
+     */
+    fun visit(q: IndentationQueue, expression: DecoratedExpression.Let)
+
 
 }

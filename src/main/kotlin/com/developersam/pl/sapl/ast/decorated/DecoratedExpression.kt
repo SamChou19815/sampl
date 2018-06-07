@@ -66,9 +66,6 @@ sealed class DecoratedExpression(
         }
     }
 
-    override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor): Unit =
-            visitor.visit(q = q, expression = this)
-
     /**
      * [Literal] with correct [type] represents a [literal] as an expression.
      */
@@ -78,6 +75,10 @@ sealed class DecoratedExpression(
 
         override val asInlineSourceCode: String
             get() = literal.toString()
+
+        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+            visitor.visit(q = q, expression = this)
+        }
 
     }
 
@@ -100,6 +101,10 @@ sealed class DecoratedExpression(
                 }
             }.toString()
 
+        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+            visitor.visit(q = q, expression = this)
+        }
+
     }
 
     /**
@@ -112,6 +117,9 @@ sealed class DecoratedExpression(
             shouldBeInline = shouldBeInline, precedenceLevel = 2
     ) {
 
+        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+            visitor.visit(q = q, expression = this)
+        }
 
         /**
          * [NoArgVariant] with correct [type] represents a singleton value in variant with
@@ -211,6 +219,10 @@ sealed class DecoratedExpression(
                 return "$structExprCode.$memberName"
             }
 
+        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+            visitor.visit(q = q, expression = this)
+        }
+
     }
 
     /**
@@ -222,6 +234,10 @@ sealed class DecoratedExpression(
 
         override val asInlineSourceCode: String
             get() = "!${expr.addParenthesisIfNeeded(parent = this)}"
+
+        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+            visitor.visit(q = q, expression = this)
+        }
 
     }
 
@@ -241,6 +257,10 @@ sealed class DecoratedExpression(
                 return "$leftCode ${op.symbol} $rightCode"
             }
 
+        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+            visitor.visit(q = q, expression = this)
+        }
+
     }
 
     /**
@@ -253,6 +273,10 @@ sealed class DecoratedExpression(
 
         override val asInlineSourceCode: String
             get() = "throw<$type> ${expr.addParenthesisIfNeeded(parent = this)}"
+
+        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+            visitor.visit(q = q, expression = this)
+        }
 
     }
 
@@ -271,6 +295,10 @@ sealed class DecoratedExpression(
             q.addLine(line = ") else (")
             q.indentAndApply { e2.prettyPrintOrInline(q = this) }
             q.addLine(line = ")")
+        }
+
+        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+            visitor.visit(q = q, expression = this)
         }
 
     }
@@ -302,6 +330,10 @@ sealed class DecoratedExpression(
             }
         }
 
+        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+            visitor.visit(q = q, expression = this)
+        }
+
     }
 
     /**
@@ -321,6 +353,10 @@ sealed class DecoratedExpression(
                 ) { it.asInlineSourceCode }
                 return "$functionCode $argumentCode"
             }
+
+        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+            visitor.visit(q = q, expression = this)
+        }
     }
 
     /**
@@ -346,6 +382,10 @@ sealed class DecoratedExpression(
             q.addLine(line = header)
             q.indentAndApply { body.prettyPrintOrInline(q = this) }
             q.addLine(line = ")")
+        }
+
+        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+            visitor.visit(q = q, expression = this)
         }
 
     }
@@ -377,6 +417,10 @@ sealed class DecoratedExpression(
             }
         }
 
+        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+            visitor.visit(q = q, expression = this)
+        }
+
     }
 
     /**
@@ -391,6 +435,10 @@ sealed class DecoratedExpression(
         override fun prettyPrint(q: IndentationQueue) {
             q.addLine(line = "let $identifier = ${e1.addParenthesisIfNeeded(parent = this)};")
             e2.prettyPrintOrInline(q = q)
+        }
+
+        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+            visitor.visit(q = q, expression = this)
         }
 
     }

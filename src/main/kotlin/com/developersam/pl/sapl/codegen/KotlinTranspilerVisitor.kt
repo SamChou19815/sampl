@@ -153,7 +153,11 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
     override fun visit(q: IndentationQueue, constantMember: DecoratedClassConstantMember) {
         val public = if (constantMember.isPublic) "" else "private "
         q.addLine(line = "${public}val ${constantMember.identifier}: ${constantMember.type} =")
-        q.indentAndApply { visit(q = this, expression = constantMember.expr) }
+        q.indentAndApply {
+            constantMember.expr.acceptTranspilation(
+                    q = this, visitor = this@KotlinTranspilerVisitor
+            )
+        }
         q.addEmptyLine()
     }
 
@@ -169,91 +173,30 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
                 .joinToString(separator = ", ") { (i, t) -> "$i: $t" }
         val r = functionMember.returnType
         q.addLine(line = "${public}fun$generics $id($argumentsString): $r =")
-        q.indentAndApply { visit(q = this, expression = functionMember.body) }
+        q.indentAndApply {
+            functionMember.body.acceptTranspilation(
+                    q = this, visitor = this@KotlinTranspilerVisitor
+            )
+        }
         q.addEmptyLine()
     }
 
-    override fun visit(q: IndentationQueue, expression: DecoratedExpression) {
-        when (expression) {
-            is DecoratedExpression.Literal -> q.addLine(line = when (expression.literal) {
-                Literal.Unit -> "Unit"
-                else -> expression.literal.toString()
-            })
-            is VariableIdentifier -> {
-                val genericsInfo = expression.genericInfo
-                        .takeIf { it.isNotEmpty() }
-                        ?.joinToGenericsInfoString()
-                        ?: ""
-                q.addLine(line = expression.variable + genericsInfo)
-            }
-            is Constructor -> visitConstructorExpr(q = q, expression = expression)
-            is StructMemberAccess -> {
-                val s = expression.structExpr.toInlineTranspiledCode(visitor = this)
-                q.addLine(line = "($s).${expression.memberName}")
-            }
-            is Not -> q.addLine(
-                    line = "!(${expression.expr.toInlineTranspiledCode(visitor = this)})"
-            )
-            is Binary -> {
-                val left = expression.left.toInlineTranspiledCode(visitor = this)
-                val right = expression.right.toInlineTranspiledCode(visitor = this)
-                q.addLine(line = "($left) ${expression.op.symbol} ($right)")
-            }
-            is Throw -> {
-                val e = expression.expr.toInlineTranspiledCode(visitor = this)
-                q.addLine(line = "throw PLException($e)")
-            }
-            is IfElse -> {
-                val c = expression.condition.toInlineTranspiledCode(visitor = this)
-                q.addLine(line = "if ($c) {")
-                q.indentAndApply {
-                    visit(q = this, expression = expression.e1)
-                }
-                q.addLine(line = "} else {")
-                q.indentAndApply {
-                    if (expression.e2.shouldBeInline) {
-                        addLine(line = expression.e2.toInlineTranspiledCode(
-                                visitor = this@KotlinTranspilerVisitor
-                        ))
-                    } else {
-                        visit(q = this, expression = expression.e2)
-                    }
-                }
-                q.addLine(line = "}")
-            }
-            is Match -> visitMatchExpr(q = q, expression = expression)
-            is FunctionApplication -> visitFunctionApplicationExpr(q = q, expression = expression)
-            is DecoratedExpression.Function -> {
-                val args = expression.arguments.asSequence()
-                        .joinToString(separator = ", ") { (n, e) -> "$n: $e" }
-                q.addLine(line = "{ $args ->")
-                q.indentAndApply { visit(q = this, expression = expression.body) }
-                q.addLine(line = "}")
-            }
-            is TryCatch -> {
-                q.addLine(line = "try {")
-                q.indentAndApply { visit(q = this, expression = expression.tryExpr) }
-                q.addLine(line = "} catch (_e: PLException) {")
-                q.indentAndApply {
-                    addLine(line = "val ${expression.exception} = _e.m;")
-                    visit(q = this, expression = expression.catchHandler)
-                }
-                q.addLine(line = "}")
-            }
-            is Let -> {
-                q.addLine(line = "let ${expression.identifier} = run {")
-                q.indentAndApply { visit(q = this, expression = expression.e1) }
-                q.addLine(line = "};")
-                visit(q = q, expression = expression.e2)
-            }
-        }
+    override fun visit(q: IndentationQueue, expression: DecoratedExpression.Literal) {
+        q.addLine(line = when (expression.literal) {
+            Literal.Unit -> "Unit"
+            else -> expression.literal.toString()
+        })
     }
 
-    /**
-     * [visitConstructorExpr] is a specialized expression visiting method that only visits
-     * constructor [expression]s with [q].
-     */
-    private fun visitConstructorExpr(q: IndentationQueue, expression: Constructor) {
+    override fun visit(q: IndentationQueue, expression: VariableIdentifier) {
+        val genericsInfo = expression.genericInfo
+                .takeIf { it.isNotEmpty() }
+                ?.joinToGenericsInfoString()
+                ?: ""
+        q.addLine(line = expression.variable + genericsInfo)
+    }
+
+    override fun visit(q: IndentationQueue, expression: Constructor) {
         when (expression) {
             is Constructor.NoArgVariant -> q.addLine(
                     line = "${expression.typeName}.${expression.variantName}"
@@ -278,11 +221,46 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
         }
     }
 
-    /**
-     * [visitConstructorExpr] is a specialized expression visiting method that only visits
-     * match [expression]s with [q].
-     */
-    private fun visitMatchExpr(q: IndentationQueue, expression: DecoratedExpression.Match) {
+    override fun visit(q: IndentationQueue, expression: StructMemberAccess) {
+        val s = expression.structExpr.toInlineTranspiledCode(visitor = this)
+        q.addLine(line = "($s).${expression.memberName}")
+    }
+
+    override fun visit(q: IndentationQueue, expression: Not) {
+        q.addLine(line = "!(${expression.expr.toInlineTranspiledCode(visitor = this)})")
+    }
+
+    override fun visit(q: IndentationQueue, expression: Binary) {
+        val left = expression.left.toInlineTranspiledCode(visitor = this)
+        val right = expression.right.toInlineTranspiledCode(visitor = this)
+        q.addLine(line = "($left) ${expression.op.symbol} ($right)")
+    }
+
+    override fun visit(q: IndentationQueue, expression: Throw) {
+        val e = expression.expr.toInlineTranspiledCode(visitor = this)
+        q.addLine(line = "throw PLException($e)")
+    }
+
+    override fun visit(q: IndentationQueue, expression: IfElse) {
+        val c = expression.condition.toInlineTranspiledCode(visitor = this)
+        q.addLine(line = "if ($c) {")
+        q.indentAndApply {
+            expression.e1.acceptTranspilation(q = this, visitor = this@KotlinTranspilerVisitor)
+        }
+        q.addLine(line = "} else {")
+        q.indentAndApply {
+            if (expression.e2.shouldBeInline) {
+                addLine(line = expression.e2.toInlineTranspiledCode(
+                        visitor = this@KotlinTranspilerVisitor
+                ))
+            } else {
+                expression.e2.acceptTranspilation(q = this, visitor = this@KotlinTranspilerVisitor)
+            }
+        }
+        q.addLine(line = "}")
+    }
+
+    override fun visit(q: IndentationQueue, expression: Match) {
         val matchedStr = expression.exprToMatch.toInlineTranspiledCode(visitor = this)
         q.addLine(line = "with($matchedStr){ when(it) {")
         q.indentAndApply {
@@ -294,19 +272,27 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
                             pattern.associatedVariable?.let { v ->
                                 addLine(line = "val $v = it.data;")
                             }
-                            visit(q = this, expression = expr)
+                            expr.acceptTranspilation(
+                                    q = this, visitor = this@KotlinTranspilerVisitor
+                            )
                         }
                     }
                     is DecoratedPattern.Variable -> {
                         addLine(line = "else -> {")
                         indentAndApply {
                             addLine(line = "val ${pattern.identifier} = it.data;")
-                            visit(q = this, expression = expr)
+                            expr.acceptTranspilation(
+                                    q = this, visitor = this@KotlinTranspilerVisitor
+                            )
                         }
                     }
                     is DecoratedPattern.WildCard -> {
                         addLine(line = "else -> {")
-                        indentAndApply { visit(q = this, expression = expr) }
+                        indentAndApply {
+                            expr.acceptTranspilation(
+                                    q = this, visitor = this@KotlinTranspilerVisitor
+                            )
+                        }
                     }
                 }
                 addLine(line = "}")
@@ -315,11 +301,7 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
         q.addLine(line = "}}")
     }
 
-    /**
-     * [visitConstructorExpr] is a specialized expression visiting method that only visits
-     * function application [expression]s with [q].
-     */
-    private fun visitFunctionApplicationExpr(q: IndentationQueue, expression: FunctionApplication) {
+    override fun visit(q: IndentationQueue, expression: FunctionApplication) {
         val funType = expression.functionExpr.type as TypeExpr.Function
         val needParenthesis = expression.functionExpr.hasLowerPrecedence(expression)
         var funStr = expression.functionExpr.toInlineTranspiledCode(visitor = this)
@@ -360,6 +342,40 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
             }
             q.addLine(line = "}")
         }
+    }
+
+    override fun visit(q: IndentationQueue, expression: DecoratedExpression.Function) {
+        val args = expression.arguments.asSequence()
+                .joinToString(separator = ", ") { (n, e) -> "$n: $e" }
+        q.addLine(line = "{ $args ->")
+        q.indentAndApply {
+            expression.body.acceptTranspilation(q = this, visitor = this@KotlinTranspilerVisitor)
+        }
+        q.addLine(line = "}")
+    }
+
+    override fun visit(q: IndentationQueue, expression: TryCatch) {
+        q.addLine(line = "try {")
+        q.indentAndApply {
+            expression.tryExpr.acceptTranspilation(q = this, visitor = this@KotlinTranspilerVisitor)
+        }
+        q.addLine(line = "} catch (_e: PLException) {")
+        q.indentAndApply {
+            addLine(line = "val ${expression.exception} = _e.m;")
+            expression.catchHandler.acceptTranspilation(
+                    q = this, visitor = this@KotlinTranspilerVisitor
+            )
+        }
+        q.addLine(line = "}")
+    }
+
+    override fun visit(q: IndentationQueue, expression: Let) {
+        q.addLine(line = "let ${expression.identifier} = run {")
+        q.indentAndApply {
+            expression.e1.acceptTranspilation(q = this, visitor = this@KotlinTranspilerVisitor)
+        }
+        q.addLine(line = "};")
+        expression.e2.acceptTranspilation(q = q, visitor = this)
     }
 
 }
