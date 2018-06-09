@@ -6,7 +6,6 @@ import com.developersam.pl.sapl.ast.decorated.DecoratedClassFunctionMember
 import com.developersam.pl.sapl.ast.decorated.DecoratedClassMembers
 import com.developersam.pl.sapl.ast.decorated.DecoratedExpression
 import com.developersam.pl.sapl.ast.decorated.DecoratedProgram
-import com.developersam.pl.sapl.config.IndentationStrategy
 
 /**
  * [TranspilerVisitor] defines a series of related visitor methods for an transpiler visitor to

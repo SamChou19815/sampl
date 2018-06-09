@@ -24,7 +24,6 @@ import com.developersam.pl.sapl.ast.decorated.DecoratedProgram
 import com.developersam.pl.sapl.ast.type.TypeDeclaration
 import com.developersam.pl.sapl.ast.type.TypeExpr
 import com.developersam.pl.sapl.ast.type.unitTypeExpr
-import com.developersam.pl.sapl.config.IndentationStrategy
 import com.developersam.pl.sapl.util.joinToGenericsInfoString
 
 /**
@@ -370,7 +369,7 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
     }
 
     override fun visit(q: IndentationQueue, expression: Let) {
-        q.addLine(line = "let ${expression.identifier} = run {")
+        q.addLine(line = "val ${expression.identifier} = run {")
         q.indentAndApply {
             expression.e1.acceptTranspilation(q = this, visitor = this@KotlinTranspilerVisitor)
         }

@@ -1,4 +1,4 @@
-package com.developersam.pl.sapl.config
+package com.developersam.pl.sapl.codegen
 
 /**
  * [IndentationStrategy] contains a collections of supported indentation strategy.

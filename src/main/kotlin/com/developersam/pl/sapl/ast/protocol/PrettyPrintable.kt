@@ -1,7 +1,7 @@
 package com.developersam.pl.sapl.ast.protocol
 
 import com.developersam.pl.sapl.codegen.IndentationQueue
-import com.developersam.pl.sapl.config.IndentationStrategy.TWO_SPACES
+import com.developersam.pl.sapl.codegen.IndentationStrategy.TWO_SPACES
 
 /**
  * [PrettyPrintable] specifies how an AST node can be pretty-printed.
@@ -20,9 +20,9 @@ interface PrettyPrintable {
                 .toIndentedCode()
 
     /**
-     * [asInlineSourceCode] returns the source code of the AST node in one-liner way.
+     * [asOneLineSourceCode] returns the source code of the AST node in one-liner way.
      */
-    val asInlineSourceCode: String
+    val asOneLineSourceCode: String
         get() = IndentationQueue(strategy = TWO_SPACES)
                 .apply { prettyPrint(q = this) }
                 .toInlineCode()

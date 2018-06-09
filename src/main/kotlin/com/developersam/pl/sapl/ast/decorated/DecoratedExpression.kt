@@ -46,7 +46,7 @@ sealed class DecoratedExpression(
      * It determines by comparing itself's precedence level with [parent].
      */
     private fun addParenthesisIfNeeded(parent: DecoratedExpression): String =
-            asInlineSourceCode.let {
+            asOneLineSourceCode.let {
                 if (hasLowerPrecedence(parent = parent)) "($it)" else it
             }
 
@@ -60,7 +60,7 @@ sealed class DecoratedExpression(
      */
     fun prettyPrintOrInline(q: IndentationQueue) {
         if (shouldBeInline) {
-            q.addLine(line = asInlineSourceCode)
+            q.addLine(line = asOneLineSourceCode)
         } else {
             prettyPrint(q = q)
         }
@@ -73,7 +73,7 @@ sealed class DecoratedExpression(
             val literal: CommonLiteral, override val type: TypeExpr
     ) : DecoratedExpression(shouldBeInline = true, precedenceLevel = 0) {
 
-        override val asInlineSourceCode: String
+        override val asOneLineSourceCode: String
             get() = literal.toString()
 
         override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
@@ -93,7 +93,7 @@ sealed class DecoratedExpression(
             override val type: TypeExpr
     ) : DecoratedExpression(shouldBeInline = true, precedenceLevel = 1) {
 
-        override val asInlineSourceCode: String
+        override val asOneLineSourceCode: String
             get() = StringBuilder().apply {
                 append(variable)
                 if (genericInfo.isNotEmpty()) {
@@ -131,7 +131,7 @@ sealed class DecoratedExpression(
                 override val type: TypeExpr
         ) : Constructor(shouldBeInline = true) {
 
-            override val asInlineSourceCode: String
+            override val asOneLineSourceCode: String
                 get() = StringBuilder().apply {
                     append(typeName).append('.').append(variantName)
                     if (genericInfo.isNotEmpty()) {
@@ -150,10 +150,10 @@ sealed class DecoratedExpression(
                 override val type: TypeExpr
         ) : Constructor(shouldBeInline = true) {
 
-            override val asInlineSourceCode: String
+            override val asOneLineSourceCode: String
                 get() = StringBuilder().append(typeName)
                         .append('.').append(variantName)
-                        .append(" (").append(data.asInlineSourceCode).append(")")
+                        .append(" (").append(data.asOneLineSourceCode).append(")")
                         .toString()
 
         }
@@ -171,7 +171,7 @@ sealed class DecoratedExpression(
                 q.addLine(line = "$typeName {")
                 q.indentAndApply {
                     for ((name, expr) in declarations) {
-                        addLine(line = "$name = ${expr.asInlineSourceCode};")
+                        addLine(line = "$name = ${expr.asOneLineSourceCode};")
                     }
                 }
                 q.addLine(line = "}")
@@ -213,7 +213,7 @@ sealed class DecoratedExpression(
             val structExpr: DecoratedExpression, val memberName: String, override val type: TypeExpr
     ) : DecoratedExpression(shouldBeInline = true, precedenceLevel = 3) {
 
-        override val asInlineSourceCode: String
+        override val asOneLineSourceCode: String
             get() {
                 val structExprCode = structExpr.addParenthesisIfNeeded(parent = this)
                 return "$structExprCode.$memberName"
@@ -232,7 +232,7 @@ sealed class DecoratedExpression(
             val expr: DecoratedExpression, override val type: TypeExpr
     ) : DecoratedExpression(shouldBeInline = true, precedenceLevel = 4) {
 
-        override val asInlineSourceCode: String
+        override val asOneLineSourceCode: String
             get() = "!${expr.addParenthesisIfNeeded(parent = this)}"
 
         override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
@@ -250,7 +250,7 @@ sealed class DecoratedExpression(
             override val type: TypeExpr
     ) : DecoratedExpression(shouldBeInline = true, precedenceLevel = 5) {
 
-        override val asInlineSourceCode: String
+        override val asOneLineSourceCode: String
             get() {
                 val leftCode = left.addParenthesisIfNeeded(parent = this)
                 val rightCode = right.addParenthesisIfNeeded(parent = this)
@@ -271,7 +271,7 @@ sealed class DecoratedExpression(
             override val type: TypeExpr, val expr: DecoratedExpression
     ) : DecoratedExpression(shouldBeInline = true, precedenceLevel = 6) {
 
-        override val asInlineSourceCode: String
+        override val asOneLineSourceCode: String
             get() = "throw<$type> ${expr.addParenthesisIfNeeded(parent = this)}"
 
         override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
@@ -290,7 +290,7 @@ sealed class DecoratedExpression(
     ) : DecoratedExpression(shouldBeInline = false, precedenceLevel = 7) {
 
         override fun prettyPrint(q: IndentationQueue) {
-            q.addLine(line = "if (${condition.asInlineSourceCode}) then (")
+            q.addLine(line = "if (${condition.asOneLineSourceCode}) then (")
             q.indentAndApply { e1.prettyPrintOrInline(q = this) }
             q.addLine(line = ") else (")
             q.indentAndApply { e2.prettyPrintOrInline(q = this) }
@@ -345,12 +345,12 @@ sealed class DecoratedExpression(
             override val type: TypeExpr
     ) : DecoratedExpression(shouldBeInline = true, precedenceLevel = 9) {
 
-        override val asInlineSourceCode: String
+        override val asOneLineSourceCode: String
             get() {
                 val functionCode = functionExpr.addParenthesisIfNeeded(parent = this)
                 val argumentCode = arguments.joinToString(
                         separator = " ", prefix = "(", postfix = ")"
-                ) { it.asInlineSourceCode }
+                ) { it.asOneLineSourceCode }
                 return "$functionCode $argumentCode"
             }
 
@@ -402,14 +402,14 @@ sealed class DecoratedExpression(
 
         override fun prettyPrint(q: IndentationQueue) {
             if (tryExpr.shouldBeInline) {
-                q.addLine(line = "try (${tryExpr.asInlineSourceCode})")
+                q.addLine(line = "try (${tryExpr.asOneLineSourceCode})")
             } else {
                 q.addLine(line = "try (")
                 q.indentAndApply { tryExpr.prettyPrint(q = this) }
                 q.addLine(line = ")")
             }
             if (catchHandler.shouldBeInline) {
-                q.addLine(line = "catch $exception (${catchHandler.asInlineSourceCode})")
+                q.addLine(line = "catch $exception (${catchHandler.asOneLineSourceCode})")
             } else {
                 q.addLine(line = "catch $exception (")
                 q.indentAndApply { catchHandler.prettyPrint(q = this) }

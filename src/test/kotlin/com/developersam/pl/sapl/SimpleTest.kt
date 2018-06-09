@@ -3,7 +3,7 @@ package com.developersam.pl.sapl
 import com.developersam.pl.sapl.classes.ClassConstructor
 import com.developersam.pl.sapl.codegen.IndentationQueue
 import com.developersam.pl.sapl.codegen.KotlinTranspilerVisitor
-import com.developersam.pl.sapl.config.IndentationStrategy
+import com.developersam.pl.sapl.codegen.IndentationStrategy
 import com.developersam.pl.sapl.util.writeToFile
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
