@@ -1,4 +1,4 @@
-# SAPL Language Specification
+# SAMPL Language Specification
 
 ## Grammar Specification
 

@@ -1,8 +1,8 @@
-# SAPL
+# SAMPL - Sound And Modern Programming Language
 
-Sam's Advanced Programming Language. It is a JVM language that embraces the functional programming
-paradigm, which currently supports immutable data structures, null safety, pattern matching, 
-currying, limited type inference, and limited interop with other JVM languages.
+It is a JVM language that embraces the functional programming paradigm, which currently supports 
+immutable data structures, null safety, pattern matching, currying, limited type inference, and 
+limited interop with other JVM languages.
 
 ## Scope of this Project
 
