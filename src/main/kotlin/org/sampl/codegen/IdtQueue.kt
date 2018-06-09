@@ -4,14 +4,14 @@ import java.util.LinkedList
 import java.util.Queue
 
 /**
- * [IndentationQueue] is a mutable data structure that stores a queue of indentation related
+ * [IdtQueue] is a mutable data structure that stores a queue of indentation related
  * information.
  * It is intended usage is: push indentation info into the queue during AST visiting phase, and then
  * iterate through the queue to provide the indented code.
  *
  * @param strategy the strategy for indentation.
  */
-class IndentationQueue(private val strategy: IndentationStrategy) {
+class IdtQueue(private val strategy: IdtStrategy) {
 
     /**
      * [Element] represents an element that can appear in the Indentation Queue.
@@ -46,7 +46,7 @@ class IndentationQueue(private val strategy: IndentationStrategy) {
      * [indentAndApply] indents and lets [action] does some indentation or adding lines in the
      * inner indentation level.
      */
-    fun indentAndApply(action: IndentationQueue.() -> Unit) {
+    fun indentAndApply(action: IdtQueue.() -> Unit) {
         queue.add(Element.Further)
         action.invoke(this)
         queue.add(Element.Back)
@@ -91,14 +91,14 @@ class IndentationQueue(private val strategy: IndentationStrategy) {
     }
 
     /**
-     * [toIndentedCode] uses all the available information in the queue to generate a code that only
+     * [toOneLineCode] uses all the available information in the queue to generate a code that only
      * has one line.
      * This function does not care about the well-balancing of indentation.
      * It will simply ignore them.
      */
-    fun toInlineCode(): String = queue.asSequence()
-            .filter { it is Element.Line }
-            .map { (it as Element.Line).line.trim() }
+    fun toOneLineCode(): String = queue.asSequence()
+            .map { (it as? Element.Line)?.line?.trim() }
+            .filterNotNull()
             .joinToString(separator = " ")
 
 }

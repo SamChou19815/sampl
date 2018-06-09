@@ -1,7 +1,7 @@
 package org.sampl.ast.type
 
 import org.sampl.ast.protocol.PrettyPrintable
-import org.sampl.codegen.IndentationQueue
+import org.sampl.codegen.IdtQueue
 
 /**
  * [TypeDeclaration] represents a set of supported type expression in type declaration.
@@ -26,7 +26,7 @@ sealed class TypeDeclaration : PrettyPrintable {
             val map: Map<String, TypeExpr?>
     ) : TypeDeclaration() {
 
-        override fun prettyPrint(q: IndentationQueue): Unit =
+        override fun prettyPrint(q: IdtQueue): Unit =
                 map.forEach { (name, expr) ->
                     val line = StringBuilder()
                             .append("| ").append(name)
@@ -45,7 +45,7 @@ sealed class TypeDeclaration : PrettyPrintable {
      */
     data class Struct(val map: Map<String, TypeExpr>) : TypeDeclaration() {
 
-        override fun prettyPrint(q: IndentationQueue) {
+        override fun prettyPrint(q: IdtQueue) {
             val l = map.size
             var i = 1
             for ((name, expr) in map) {

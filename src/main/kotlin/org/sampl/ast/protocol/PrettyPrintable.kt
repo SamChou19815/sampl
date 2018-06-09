@@ -1,7 +1,7 @@
 package org.sampl.ast.protocol
 
-import org.sampl.codegen.IndentationQueue
-import org.sampl.codegen.IndentationStrategy.TWO_SPACES
+import org.sampl.codegen.IdtQueue
+import org.sampl.codegen.IdtStrategy.TWO_SPACES
 
 /**
  * [PrettyPrintable] specifies how an AST node can be pretty-printed.
@@ -15,7 +15,7 @@ interface PrettyPrintable {
      * Calling this function assumes that you are at indentation level 0.
      */
     val asIndentedSourceCode: String
-        get() = IndentationQueue(strategy = TWO_SPACES)
+        get() = IdtQueue(strategy = TWO_SPACES)
                 .apply { prettyPrint(q = this) }
                 .toIndentedCode()
 
@@ -23,9 +23,9 @@ interface PrettyPrintable {
      * [asOneLineSourceCode] returns the source code of the AST node in one-liner way.
      */
     val asOneLineSourceCode: String
-        get() = IndentationQueue(strategy = TWO_SPACES)
+        get() = IdtQueue(strategy = TWO_SPACES)
                 .apply { prettyPrint(q = this) }
-                .toInlineCode()
+                .toOneLineCode()
 
     /**
      * [asIndentedSourceCode] prints the source code of the AST node in well formatted way to [q].
@@ -34,6 +34,6 @@ interface PrettyPrintable {
      *
      * @param q the queue used to push indentation info.
      */
-    fun prettyPrint(q: IndentationQueue)
+    fun prettyPrint(q: IdtQueue)
 
 }

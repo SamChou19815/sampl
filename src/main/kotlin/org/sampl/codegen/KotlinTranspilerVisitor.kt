@@ -32,9 +32,9 @@ import org.sampl.util.joinToGenericsInfoString
  */
 object KotlinTranspilerVisitor : TranspilerVisitor {
 
-    override val indentationStrategy: IndentationStrategy = IndentationStrategy.FOUR_SPACES
+    override val indentationStrategy: IdtStrategy = IdtStrategy.FOUR_SPACES
 
-    override fun visit(q: IndentationQueue, program: DecoratedProgram) {
+    override fun visit(q: IdtQueue, program: DecoratedProgram) {
         q.addLine(line = """@file:JvmName(name = "$TOP_LEVEL_PROGRAM_NAME")""")
         q.addEmptyLine()
         q.addLine(line = "/*")
@@ -58,7 +58,7 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
         q.addLine(line = "}")
     }
 
-    override fun visit(q: IndentationQueue, clazz: DecoratedClass) {
+    override fun visit(q: IdtQueue, clazz: DecoratedClass) {
         val dec = clazz.declaration
         when (dec) {
             is TypeDeclaration.Variant -> {
@@ -139,7 +139,7 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
         q.addEmptyLine()
     }
 
-    override fun visit(q: IndentationQueue, members: DecoratedClassMembers) {
+    override fun visit(q: IdtQueue, members: DecoratedClassMembers) {
         q.addLine(line = "companion object {")
         q.indentAndApply {
             members.constantMembers.forEach { visit(q = this, constantMember = it) }
@@ -149,7 +149,7 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
         q.addLine(line = "}")
     }
 
-    override fun visit(q: IndentationQueue, constantMember: DecoratedClassConstantMember) {
+    override fun visit(q: IdtQueue, constantMember: DecoratedClassConstantMember) {
         val public = if (constantMember.isPublic) "" else "private "
         q.addLine(line = "${public}val ${constantMember.identifier}: ${constantMember.type} =")
         q.indentAndApply {
@@ -160,7 +160,7 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
         q.addEmptyLine()
     }
 
-    override fun visit(q: IndentationQueue, functionMember: DecoratedClassFunctionMember) {
+    override fun visit(q: IdtQueue, functionMember: DecoratedClassFunctionMember) {
         val public = if (functionMember.isPublic) "" else "private "
         val generics = functionMember.genericsDeclaration
                 .takeIf { it.isNotEmpty() }
@@ -180,14 +180,14 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
         q.addEmptyLine()
     }
 
-    override fun visit(q: IndentationQueue, expression: DecoratedExpression.Literal) {
+    override fun visit(q: IdtQueue, expression: DecoratedExpression.Literal) {
         q.addLine(line = when (expression.literal) {
             Literal.Unit -> "Unit"
             else -> expression.literal.toString()
         })
     }
 
-    override fun visit(q: IndentationQueue, expression: VariableIdentifier) {
+    override fun visit(q: IdtQueue, expression: VariableIdentifier) {
         val genericsInfo = expression.genericInfo
                 .takeIf { it.isNotEmpty() }
                 ?.joinToGenericsInfoString()
@@ -195,7 +195,7 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
         q.addLine(line = expression.variable + genericsInfo)
     }
 
-    override fun visit(q: IndentationQueue, expression: Constructor) {
+    override fun visit(q: IdtQueue, expression: Constructor) {
         when (expression) {
             is Constructor.NoArgVariant -> q.addLine(
                     line = "${expression.typeName}.${expression.variantName}"
@@ -220,27 +220,27 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
         }
     }
 
-    override fun visit(q: IndentationQueue, expression: StructMemberAccess) {
+    override fun visit(q: IdtQueue, expression: StructMemberAccess) {
         val s = expression.structExpr.toInlineTranspiledCode(visitor = this)
         q.addLine(line = "($s).${expression.memberName}")
     }
 
-    override fun visit(q: IndentationQueue, expression: Not) {
+    override fun visit(q: IdtQueue, expression: Not) {
         q.addLine(line = "!(${expression.expr.toInlineTranspiledCode(visitor = this)})")
     }
 
-    override fun visit(q: IndentationQueue, expression: Binary) {
+    override fun visit(q: IdtQueue, expression: Binary) {
         val left = expression.left.toInlineTranspiledCode(visitor = this)
         val right = expression.right.toInlineTranspiledCode(visitor = this)
         q.addLine(line = "($left) ${expression.op.symbol} ($right)")
     }
 
-    override fun visit(q: IndentationQueue, expression: Throw) {
+    override fun visit(q: IdtQueue, expression: Throw) {
         val e = expression.expr.toInlineTranspiledCode(visitor = this)
         q.addLine(line = "throw PLException($e)")
     }
 
-    override fun visit(q: IndentationQueue, expression: IfElse) {
+    override fun visit(q: IdtQueue, expression: IfElse) {
         val c = expression.condition.toInlineTranspiledCode(visitor = this)
         q.addLine(line = "if ($c) {")
         q.indentAndApply {
@@ -259,7 +259,7 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
         q.addLine(line = "}")
     }
 
-    override fun visit(q: IndentationQueue, expression: Match) {
+    override fun visit(q: IdtQueue, expression: Match) {
         val matchedStr = expression.exprToMatch.toInlineTranspiledCode(visitor = this)
         q.addLine(line = "with($matchedStr){ when(it) {")
         q.indentAndApply {
@@ -300,7 +300,7 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
         q.addLine(line = "}}")
     }
 
-    override fun visit(q: IndentationQueue, expression: FunctionApplication) {
+    override fun visit(q: IdtQueue, expression: FunctionApplication) {
         val funType = expression.functionExpr.type as TypeExpr.Function
         val needParenthesis = expression.functionExpr.hasLowerPrecedence(expression)
         var funStr = expression.functionExpr.toInlineTranspiledCode(visitor = this)
@@ -343,7 +343,7 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
         }
     }
 
-    override fun visit(q: IndentationQueue, expression: DecoratedExpression.Function) {
+    override fun visit(q: IdtQueue, expression: DecoratedExpression.Function) {
         val args = expression.arguments.asSequence()
                 .joinToString(separator = ", ") { (n, e) -> "$n: $e" }
         q.addLine(line = "{ $args ->")
@@ -353,7 +353,7 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
         q.addLine(line = "}")
     }
 
-    override fun visit(q: IndentationQueue, expression: TryCatch) {
+    override fun visit(q: IdtQueue, expression: TryCatch) {
         q.addLine(line = "try {")
         q.indentAndApply {
             expression.tryExpr.acceptTranspilation(q = this, visitor = this@KotlinTranspilerVisitor)
@@ -368,7 +368,7 @@ object KotlinTranspilerVisitor : TranspilerVisitor {
         q.addLine(line = "}")
     }
 
-    override fun visit(q: IndentationQueue, expression: Let) {
+    override fun visit(q: IdtQueue, expression: Let) {
         q.addLine(line = "val ${expression.identifier} = run {")
         q.indentAndApply {
             expression.e1.acceptTranspilation(q = this, visitor = this@KotlinTranspilerVisitor)

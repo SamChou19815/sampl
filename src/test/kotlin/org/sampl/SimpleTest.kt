@@ -3,8 +3,8 @@ package org.sampl
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 import org.sampl.classes.ClassConstructor
-import org.sampl.codegen.IndentationQueue
-import org.sampl.codegen.IndentationStrategy
+import org.sampl.codegen.IdtQueue
+import org.sampl.codegen.IdtStrategy
 import org.sampl.codegen.KotlinTranspilerVisitor
 import org.sampl.util.writeToFile
 
@@ -52,7 +52,7 @@ class SimpleTest {
                 .let { ClassConstructor.fromSource(code = it).typeCheck() }
         // println(secondCompile.asIndentedSourceCode)
         assertEquals(firstCompile, secondCompile)
-        val kotlinCode = IndentationQueue(strategy = IndentationStrategy.FOUR_SPACES)
+        val kotlinCode = IdtQueue(strategy = IdtStrategy.FOUR_SPACES)
                 .apply { KotlinTranspilerVisitor.visit(q = this, program = secondCompile) }
                 .toIndentedCode()
         writeToFile(filename = "./src/test/resources/Program.kt", content = kotlinCode)

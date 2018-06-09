@@ -1,6 +1,6 @@
 package org.sampl.ast.protocol
 
-import org.sampl.codegen.IndentationQueue
+import org.sampl.codegen.IdtQueue
 import org.sampl.codegen.TranspilerVisitor
 
 /**
@@ -18,7 +18,7 @@ interface Transpilable {
      * @param visitor the visitor of the transpiler that actually does the transpiling logic.
      */
     fun toIndentedTranspiledCode(visitor: TranspilerVisitor): String =
-            IndentationQueue(strategy = visitor.indentationStrategy)
+            IdtQueue(strategy = visitor.indentationStrategy)
                     .apply { acceptTranspilation(q = this, visitor = visitor) }
                     .toIndentedCode()
 
@@ -28,9 +28,9 @@ interface Transpilable {
      * @param visitor the visitor of the transpiler that actually does the transpiling logic.
      */
     fun toInlineTranspiledCode(visitor: TranspilerVisitor): String =
-            IndentationQueue(strategy = visitor.indentationStrategy)
+            IdtQueue(strategy = visitor.indentationStrategy)
                     .apply { acceptTranspilation(q = this, visitor = visitor) }
-                    .toInlineCode()
+                    .toOneLineCode()
 
     /**
      * [acceptTranspilation] adds the transpiled code of the AST node in well formatted way to [q].
@@ -40,6 +40,6 @@ interface Transpilable {
      * @param q the queue used to push indentation info.
      * @param visitor the visitor of the transpiler that actually does the transpiling logic.
      */
-    fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor)
+    fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor)
 
 }

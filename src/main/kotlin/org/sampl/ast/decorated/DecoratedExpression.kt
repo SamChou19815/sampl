@@ -4,7 +4,7 @@ import org.sampl.ast.common.BinaryOperator
 import org.sampl.ast.protocol.PrettyPrintable
 import org.sampl.ast.protocol.Transpilable
 import org.sampl.ast.type.TypeExpr
-import org.sampl.codegen.IndentationQueue
+import org.sampl.codegen.IdtQueue
 import org.sampl.codegen.TranspilerVisitor
 import org.sampl.util.joinToGenericsInfoString
 import org.sampl.ast.common.Literal as CommonLiteral
@@ -50,7 +50,7 @@ sealed class DecoratedExpression(
                 if (hasLowerPrecedence(parent = parent)) "($it)" else it
             }
 
-    override fun prettyPrint(q: IndentationQueue) {
+    override fun prettyPrint(q: IdtQueue) {
         throw UnsupportedOperationException()
     }
 
@@ -58,7 +58,7 @@ sealed class DecoratedExpression(
      * [prettyPrintOrInline] tries to pretty print or to inline the expression onto [q] depends
      * on whether this expression [shouldBeInline].
      */
-    fun prettyPrintOrInline(q: IndentationQueue) {
+    fun prettyPrintOrInline(q: IdtQueue) {
         if (shouldBeInline) {
             q.addLine(line = asOneLineSourceCode)
         } else {
@@ -76,7 +76,7 @@ sealed class DecoratedExpression(
         override val asOneLineSourceCode: String
             get() = literal.toString()
 
-        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+        override fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor) {
             visitor.visit(q = q, expression = this)
         }
 
@@ -101,7 +101,7 @@ sealed class DecoratedExpression(
                 }
             }.toString()
 
-        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+        override fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor) {
             visitor.visit(q = q, expression = this)
         }
 
@@ -117,7 +117,7 @@ sealed class DecoratedExpression(
             shouldBeInline = shouldBeInline, precedenceLevel = 2
     ) {
 
-        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+        override fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor) {
             visitor.visit(q = q, expression = this)
         }
 
@@ -167,7 +167,7 @@ sealed class DecoratedExpression(
                 override val type: TypeExpr
         ) : Constructor(shouldBeInline = false) {
 
-            override fun prettyPrint(q: IndentationQueue) {
+            override fun prettyPrint(q: IdtQueue) {
                 q.addLine(line = "$typeName {")
                 q.indentAndApply {
                     for ((name, expr) in declarations) {
@@ -188,7 +188,7 @@ sealed class DecoratedExpression(
                 override val type: TypeExpr
         ) : Constructor(shouldBeInline = false) {
 
-            override fun prettyPrint(q: IndentationQueue) {
+            override fun prettyPrint(q: IdtQueue) {
                 q.addLine(line = "{")
                 val oldStructCode = old.addParenthesisIfNeeded(parent = this)
                 q.indentAndApply {
@@ -219,7 +219,7 @@ sealed class DecoratedExpression(
                 return "$structExprCode.$memberName"
             }
 
-        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+        override fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor) {
             visitor.visit(q = q, expression = this)
         }
 
@@ -235,7 +235,7 @@ sealed class DecoratedExpression(
         override val asOneLineSourceCode: String
             get() = "!${expr.addParenthesisIfNeeded(parent = this)}"
 
-        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+        override fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor) {
             visitor.visit(q = q, expression = this)
         }
 
@@ -257,7 +257,7 @@ sealed class DecoratedExpression(
                 return "$leftCode ${op.symbol} $rightCode"
             }
 
-        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+        override fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor) {
             visitor.visit(q = q, expression = this)
         }
 
@@ -274,7 +274,7 @@ sealed class DecoratedExpression(
         override val asOneLineSourceCode: String
             get() = "throw<$type> ${expr.addParenthesisIfNeeded(parent = this)}"
 
-        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+        override fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor) {
             visitor.visit(q = q, expression = this)
         }
 
@@ -289,7 +289,7 @@ sealed class DecoratedExpression(
             val e2: DecoratedExpression, override val type: TypeExpr
     ) : DecoratedExpression(shouldBeInline = false, precedenceLevel = 7) {
 
-        override fun prettyPrint(q: IndentationQueue) {
+        override fun prettyPrint(q: IdtQueue) {
             q.addLine(line = "if (${condition.asOneLineSourceCode}) then (")
             q.indentAndApply { e1.prettyPrintOrInline(q = this) }
             q.addLine(line = ") else (")
@@ -297,7 +297,7 @@ sealed class DecoratedExpression(
             q.addLine(line = ")")
         }
 
-        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+        override fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor) {
             visitor.visit(q = q, expression = this)
         }
 
@@ -313,12 +313,12 @@ sealed class DecoratedExpression(
             override val type: TypeExpr
     ) : DecoratedExpression(shouldBeInline = false, precedenceLevel = 8) {
 
-        override fun prettyPrint(q: IndentationQueue) {
+        override fun prettyPrint(q: IdtQueue) {
             val matchedCode = exprToMatch.addParenthesisIfNeeded(parent = this)
             q.addLine(line = "match $matchedCode with")
             for ((pattern, expr) in matchingList) {
                 val lineCommon = "| ${pattern.asSourceCode} ->"
-                val action: IndentationQueue.() -> Unit = { expr.prettyPrintOrInline(q = this) }
+                val action: IdtQueue.() -> Unit = { expr.prettyPrintOrInline(q = this) }
                 if (expr.hasLowerPrecedence(parent = this)) {
                     q.addLine(line = "$lineCommon (")
                     q.indentAndApply(action = action)
@@ -330,7 +330,7 @@ sealed class DecoratedExpression(
             }
         }
 
-        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+        override fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor) {
             visitor.visit(q = q, expression = this)
         }
 
@@ -354,7 +354,7 @@ sealed class DecoratedExpression(
                 return "$functionCode $argumentCode"
             }
 
-        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+        override fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor) {
             visitor.visit(q = q, expression = this)
         }
     }
@@ -369,7 +369,7 @@ sealed class DecoratedExpression(
             override val type: TypeExpr
     ) : DecoratedExpression(shouldBeInline = false, precedenceLevel = 10) {
 
-        override fun prettyPrint(q: IndentationQueue) {
+        override fun prettyPrint(q: IdtQueue) {
             val header = StringBuilder().append("function ").apply {
                 for ((name, t) in arguments) {
                     append('(')
@@ -384,7 +384,7 @@ sealed class DecoratedExpression(
             q.addLine(line = ")")
         }
 
-        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+        override fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor) {
             visitor.visit(q = q, expression = this)
         }
 
@@ -400,7 +400,7 @@ sealed class DecoratedExpression(
             val catchHandler: DecoratedExpression, override val type: TypeExpr
     ) : DecoratedExpression(shouldBeInline = false, precedenceLevel = 11) {
 
-        override fun prettyPrint(q: IndentationQueue) {
+        override fun prettyPrint(q: IdtQueue) {
             if (tryExpr.shouldBeInline) {
                 q.addLine(line = "try (${tryExpr.asOneLineSourceCode})")
             } else {
@@ -417,7 +417,7 @@ sealed class DecoratedExpression(
             }
         }
 
-        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+        override fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor) {
             visitor.visit(q = q, expression = this)
         }
 
@@ -432,12 +432,12 @@ sealed class DecoratedExpression(
             override val type: TypeExpr
     ) : DecoratedExpression(shouldBeInline = false, precedenceLevel = 12) {
 
-        override fun prettyPrint(q: IndentationQueue) {
+        override fun prettyPrint(q: IdtQueue) {
             q.addLine(line = "let $identifier = ${e1.addParenthesisIfNeeded(parent = this)};")
             e2.prettyPrintOrInline(q = q)
         }
 
-        override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor) {
+        override fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor) {
             visitor.visit(q = q, expression = this)
         }
 

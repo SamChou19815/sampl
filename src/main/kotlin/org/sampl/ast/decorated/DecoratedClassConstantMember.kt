@@ -1,7 +1,7 @@
 package org.sampl.ast.decorated
 
 import org.sampl.ast.type.TypeExpr
-import org.sampl.codegen.IndentationQueue
+import org.sampl.codegen.IdtQueue
 import org.sampl.codegen.TranspilerVisitor
 
 /**
@@ -16,7 +16,7 @@ data class DecoratedClassConstantMember(
 
     override val name: String = identifier
 
-    override fun prettyPrint(q: IndentationQueue) {
+    override fun prettyPrint(q: IdtQueue) {
         val header = StringBuilder().apply {
             if (!isPublic) {
                 append("private ")
@@ -27,7 +27,7 @@ data class DecoratedClassConstantMember(
         q.indentAndApply { expr.prettyPrintOrInline(q = this) }
     }
 
-    override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor): Unit =
+    override fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor): Unit =
             visitor.visit(q = q, constantMember = this)
 
 }

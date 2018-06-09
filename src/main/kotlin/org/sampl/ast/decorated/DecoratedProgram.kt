@@ -2,7 +2,7 @@ package org.sampl.ast.decorated
 
 import org.sampl.ast.protocol.PrettyPrintable
 import org.sampl.ast.protocol.Transpilable
-import org.sampl.codegen.IndentationQueue
+import org.sampl.codegen.IdtQueue
 import org.sampl.codegen.TranspilerVisitor
 
 /**
@@ -11,9 +11,9 @@ import org.sampl.codegen.TranspilerVisitor
  */
 data class DecoratedProgram(val clazz: DecoratedClass) : PrettyPrintable, Transpilable {
 
-    override fun prettyPrint(q: IndentationQueue): Unit = clazz.prettyPrint(q = q)
+    override fun prettyPrint(q: IdtQueue): Unit = clazz.prettyPrint(q = q)
 
-    override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor): Unit =
+    override fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor): Unit =
             visitor.visit(q = q, program = this)
 
 }

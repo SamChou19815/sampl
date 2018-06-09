@@ -2,7 +2,7 @@ package org.sampl.ast.decorated
 
 import org.sampl.ast.protocol.PrettyPrintable
 import org.sampl.ast.protocol.Transpilable
-import org.sampl.codegen.IndentationQueue
+import org.sampl.codegen.IdtQueue
 import org.sampl.codegen.TranspilerVisitor
 
 /**
@@ -23,7 +23,7 @@ data class DecoratedClassMembers(
                 && functionMembers.isEmpty()
                 && nestedClassMembers.isEmpty()
 
-    override fun prettyPrint(q: IndentationQueue) {
+    override fun prettyPrint(q: IdtQueue) {
         val printerAction: (PrettyPrintable) -> Unit = { m ->
             m.prettyPrint(q = q)
             q.addEmptyLine()
@@ -33,7 +33,7 @@ data class DecoratedClassMembers(
         nestedClassMembers.forEach(action = printerAction)
     }
 
-    override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor): Unit =
+    override fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor): Unit =
             visitor.visit(q = q, members = this)
 
 }

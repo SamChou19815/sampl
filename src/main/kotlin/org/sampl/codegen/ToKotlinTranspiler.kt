@@ -6,7 +6,7 @@ import org.sampl.codegen.KotlinTranspilerVisitor.visit
 object ToKotlinTranspiler {
 
     fun transpile(program: DecoratedProgram): String =
-            IndentationQueue(strategy = KotlinTranspilerVisitor.indentationStrategy)
+            IdtQueue(strategy = KotlinTranspilerVisitor.indentationStrategy)
                     .apply { visit(q = this, program = program) }.toIndentedCode()
 
 }

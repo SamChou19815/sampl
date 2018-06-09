@@ -4,7 +4,7 @@ import org.sampl.ast.protocol.PrettyPrintable
 import org.sampl.ast.protocol.Transpilable
 import org.sampl.ast.type.TypeDeclaration
 import org.sampl.ast.type.TypeIdentifier
-import org.sampl.codegen.IndentationQueue
+import org.sampl.codegen.IdtQueue
 import org.sampl.codegen.TranspilerVisitor
 
 /**
@@ -18,7 +18,7 @@ data class DecoratedClass(
         val members: DecoratedClassMembers
 ) : PrettyPrintable, Transpilable {
 
-    override fun prettyPrint(q: IndentationQueue) {
+    override fun prettyPrint(q: IdtQueue) {
         if (declaration.isEmpty && members.isEmpty) {
             q.addLine(line = "class $identifier")
             return
@@ -42,7 +42,7 @@ data class DecoratedClass(
         }
     }
 
-    override fun acceptTranspilation(q: IndentationQueue, visitor: TranspilerVisitor): Unit =
+    override fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor): Unit =
             visitor.visit(q = q, clazz = this)
 
 }
