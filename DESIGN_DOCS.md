@@ -2,6 +2,8 @@
 
 This design document aims to provide the workflow of the interpretation and compilation, a 
 high-level overview of the structures of the codebase, and some conventions in the implementation.
+In the end, we also admit some known problems and we will use them as the roadmap before we reach
+stable.
 
 ## Workflow: 
 
@@ -81,7 +83,10 @@ have no *visible* side effects.
 
 ### Compilation
 
-`TODO there is a great structral change going on...`
+The compilation and the pretty printing shares the same visitor interface and exhibit similar 
+structures. The AST nodes are not responsible for these complex logic; instead, they simply accept
+the code generation visitor, which we call `AstToCodeConverter`. This flexible structure allows us
+to support even more target code (although this is not a priority). 
 
 ## Conventions
 
@@ -101,10 +106,14 @@ However, we do prefer immutable data structures over mutable ones.
 
 ### Naming Conventions
 
-*Note: This is not a discussion about CamelCase vs. snake_case.*
+*Note: This is not a discussion about camelCase vs. snake_case. We use camelCase.*
 
 - The type checker functions are named `typeCheck`.
-- The functions that convert AST to well-indented source code are named `toIndentedSourceCode`.
-- The functions that convert AST to well-indented Kotlin code are named `toIndentedCompiledCode`
-- The functions that convert AST to one-liner source code are named `toOneLineSourceCode`.
-- The functions that convert AST to one-liner Kotlin code are named `toOneLineCompiledCode`
+- Indentation is usually written as `idt`.
+
+## Known Problems
+
+- The error messages are very bad. In the AST construction process, line info is not added to the 
+AST for the convenience of rapid prototyping. It will be improved later.
+- Type checking and code generation has not been thoroughly tested. They are expected to have at 
+least 10 bugs or some undefined behavior.
