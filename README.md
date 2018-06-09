@@ -1,6 +1,6 @@
 # SAMPL - Sound And Modern Programming Language
 
-<img src="./logo.jpeg" width="50%" />
+<img src="./logo.jpeg" width="50%" style="margin: 0 auto;" />
 
 It is a JVM language that embraces the functional programming paradigm, which currently supports 
 immutable data structures, null safety, pattern matching, currying, limited type inference, and 
