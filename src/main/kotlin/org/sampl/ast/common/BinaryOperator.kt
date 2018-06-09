@@ -75,14 +75,6 @@ enum class BinaryOperator(val symbol: String, val precedenceLevel: Int) {
      */
     STR_CONCAT(symbol = "^", precedenceLevel = 2),
     /**
-     * Referential equality.
-     */
-    REF_EQ(symbol = "===", precedenceLevel = 3),
-    /**
-     * Structural equality.
-     */
-    STRUCT_EQ(symbol = "==", precedenceLevel = 3),
-    /**
      * Less then.
      */
     LT(symbol = "<", precedenceLevel = 3),
@@ -99,21 +91,29 @@ enum class BinaryOperator(val symbol: String, val precedenceLevel: Int) {
      */
     GE(symbol = ">=", precedenceLevel = 3),
     /**
+     * Referential equality.
+     */
+    REF_EQ(symbol = "===", precedenceLevel = 4),
+    /**
+     * Structural equality.
+     */
+    STRUCT_EQ(symbol = "==", precedenceLevel = 4),
+    /**
      * Referential NOT equality.
      */
-    REF_NE(symbol = "!==", precedenceLevel = 3),
+    REF_NE(symbol = "!==", precedenceLevel = 4),
     /**
      * Structural NOT equality.
      */
-    STRUCT_NE(symbol = "!=", precedenceLevel = 3),
+    STRUCT_NE(symbol = "!=", precedenceLevel = 4),
     /**
      * Conjunction.
      */
-    AND(symbol = "&&", precedenceLevel = 4),
+    AND(symbol = "&&", precedenceLevel = 5),
     /**
      * Disjunction.
      */
-    OR(symbol = "||", precedenceLevel = 4);
+    OR(symbol = "||", precedenceLevel = 6);
 
     companion object {
         /**

@@ -2,6 +2,7 @@ package org.sampl.codegen
 
 import org.sampl.EASTER_EGG
 import org.sampl.TOP_LEVEL_PROGRAM_NAME
+import org.sampl.ast.common.BinaryOperator
 import org.sampl.ast.common.Literal
 import org.sampl.ast.decorated.DecoratedClass
 import org.sampl.ast.decorated.DecoratedClassConstantMember
@@ -291,7 +292,19 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
     override fun convert(node: DecoratedExpression.Binary) {
         val left = node.left.toOneLineCode()
         val right = node.right.toOneLineCode()
-        q.addLine(line = "($left) ${node.op.symbol} ($right)")
+        q.addLine(line = "($left) ${node.op.toKotlinForm()} ($right)")
+    }
+
+    /**
+     * [BinaryOperator.toKotlinForm] maps the binary operator to its form in Kotlin
+     */
+    private fun BinaryOperator.toKotlinForm(): String = when (this) {
+        BinaryOperator.F_MUL -> "*"
+        BinaryOperator.F_DIV -> "/"
+        BinaryOperator.F_PLUS -> "+"
+        BinaryOperator.F_MINUS -> "-"
+        BinaryOperator.STR_CONCAT -> "+"
+        else -> symbol
     }
 
     override fun convert(node: DecoratedExpression.Throw) {
