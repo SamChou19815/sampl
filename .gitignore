@@ -33,6 +33,4 @@ hs_err_pid*
 *.tokens
 
 # Temp Test File
-/src/main/kotlin/com/developersam/pl/sapl/Test.kt
 /src/test/resources/Program.kt
-/_build/

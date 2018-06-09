@@ -9,7 +9,7 @@ buildscript {
     }
 }
 
-group 'com.developersam.pl'
+group 'org.sampl'
 version '0.0.1'
 
 apply plugin: 'antlr'
@@ -24,15 +24,15 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     antlr "org.antlr:antlr4:4.5" // use ANTLR version 4
     testCompile 'junit:junit:4.12'
-    // OKaml-Lib
+    // Okaml-Lib
     compile 'com.github.SamChou19815:okaml-lib:0.3.2'
     // Apache Common Lang
     compile 'org.apache.commons:commons-text:+'
 }
 
 generateGrammarSource {
-    outputDirectory = file("${project.rootDir}/src/main/java/com/developersam/pl/sapl/antlr")
-    arguments += ['-package', 'com.developersam.pl.sapl.antlr', '-no-listener', '-visitor']
+    outputDirectory = file("${project.rootDir}/src/main/java/org/sampl/antlr")
+    arguments += ['-package', 'org.sampl.antlr', '-no-listener', '-visitor']
 }
 
 compileKotlin {
@@ -42,9 +42,12 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = "1.8"
 }
 
+compileJava.dependsOn generateGrammarSource
+compileKotlin.dependsOn generateGrammarSource
+
 jar {
     manifest {
-        attributes 'Main-Class': 'com.developersam.pl.sapl.Main'
+        attributes 'Main-Class': 'org.sampl.Main'
     }
     from {
         configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
