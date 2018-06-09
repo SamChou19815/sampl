@@ -2,7 +2,7 @@ package org.sampl
 
 import org.sampl.ast.raw.Clazz
 import org.sampl.classes.ClassConstructor
-import org.sampl.codegen.ToKotlinTranspiler
+import org.sampl.codegen.ToKotlinCompiler
 import org.sampl.util.executeAndGetValue
 import org.sampl.util.writeToFile
 import java.io.File
@@ -17,11 +17,11 @@ object PLCompiler {
      */
     private fun compile(clazz: Clazz) {
         val decoratedProgram = clazz.typeCheck()
-        val transpiledCode = ToKotlinTranspiler.transpile(program = decoratedProgram)
-        // Write transpiled code to file
+        val kotlinCode = ToKotlinCompiler.compile(node = decoratedProgram)
+        // Write Kotlin code to file
         File(KOTLIN_CODE_OUT_DIR).mkdirs()
         val filename = "$KOTLIN_CODE_OUT_DIR$TOP_LEVEL_PROGRAM_NAME.kt"
-        writeToFile(filename = filename, content = transpiledCode)
+        writeToFile(filename = filename, content = kotlinCode)
         // Invoke Kotlin compiler
         File(JAR_OUT_DIR).mkdirs()
         val command = "kotlinc-jvm $filename $KOTLIN_COMPILER_ARGS"

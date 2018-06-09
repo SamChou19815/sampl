@@ -1,4 +1,4 @@
-package org.sampl.ast.protocol
+package org.sampl.codegen
 
 import org.sampl.codegen.AstToCodeConverter
 
@@ -8,10 +8,10 @@ import org.sampl.codegen.AstToCodeConverter
  */
 interface CodeConvertible {
 
-    fun toIndentedCode(converter: AstToCodeConverter): String
-
-    fun toOneLineCode(converter: AstToCodeConverter): String
-
+    /**
+     * [acceptConversion] accepts the conversion from the [converter] and lets the [converter]
+     * add information about this node. to the converter.
+     */
     fun acceptConversion(converter: AstToCodeConverter)
 
 }

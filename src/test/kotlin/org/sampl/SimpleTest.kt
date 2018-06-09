@@ -1,11 +1,13 @@
 package org.sampl
 
 import junit.framework.TestCase.assertEquals
+import org.junit.Ignore
 import org.junit.Test
 import org.sampl.classes.ClassConstructor
 import org.sampl.codegen.IdtQueue
 import org.sampl.codegen.IdtStrategy
-import org.sampl.codegen.KotlinTranspilerVisitor
+import org.sampl.codegen.PrettyPrinter
+import org.sampl.codegen.ToKotlinCompiler
 import org.sampl.util.writeToFile
 
 /**
@@ -44,16 +46,15 @@ class SimpleTest {
      */
     @Test
     fun runSimpleInSteps() {
-        val firstCompile = ClassConstructor
+        val firstTypeCheck = ClassConstructor
                 .fromSource(code = propositionsAreTypesProofsAreProgram)
                 .typeCheck()
-        // println(firstCompile.asIndentedSourceCode)
-        val secondCompile = firstCompile.asIndentedSourceCode
-                .let { ClassConstructor.fromSource(code = it).typeCheck() }
-        // println(secondCompile.asIndentedSourceCode)
-        assertEquals(firstCompile, secondCompile)
+        val prettyPrintedCode = PrettyPrinter.prettyPrint(node = firstTypeCheck)
+        // println(prettyPrintedCode)
+        val secondTypeCheck = ClassConstructor.fromSource(code = prettyPrintedCode).typeCheck()
+        assertEquals(firstTypeCheck, secondTypeCheck)
         val kotlinCode = IdtQueue(strategy = IdtStrategy.FOUR_SPACES)
-                .apply { KotlinTranspilerVisitor.visit(q = this, program = secondCompile) }
+                .apply { ToKotlinCompiler.compile(node = secondTypeCheck) }
                 .toIndentedCode()
         writeToFile(filename = "./src/test/resources/Program.kt", content = kotlinCode)
     }

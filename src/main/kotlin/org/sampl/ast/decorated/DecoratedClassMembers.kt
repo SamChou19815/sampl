@@ -1,9 +1,7 @@
 package org.sampl.ast.decorated
 
-import org.sampl.ast.protocol.PrettyPrintable
-import org.sampl.ast.protocol.Transpilable
-import org.sampl.codegen.IdtQueue
-import org.sampl.codegen.TranspilerVisitor
+import org.sampl.codegen.CodeConvertible
+import org.sampl.codegen.AstToCodeConverter
 
 /**
  * [DecoratedClassMembers] contains collections of different types of class members,
@@ -13,7 +11,7 @@ data class DecoratedClassMembers(
         val constantMembers: List<DecoratedClassConstantMember>,
         val functionMembers: List<DecoratedClassFunctionMember>,
         val nestedClassMembers: List<DecoratedClass>
-) : PrettyPrintable, Transpilable {
+) : CodeConvertible {
 
     /**
      * [isEmpty] reports whether there is no actual members in this class.
@@ -23,17 +21,7 @@ data class DecoratedClassMembers(
                 && functionMembers.isEmpty()
                 && nestedClassMembers.isEmpty()
 
-    override fun prettyPrint(q: IdtQueue) {
-        val printerAction: (PrettyPrintable) -> Unit = { m ->
-            m.prettyPrint(q = q)
-            q.addEmptyLine()
-        }
-        constantMembers.forEach(action = printerAction)
-        functionMembers.forEach(action = printerAction)
-        nestedClassMembers.forEach(action = printerAction)
-    }
-
-    override fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor): Unit =
-            visitor.visit(q = q, members = this)
+    override fun acceptConversion(converter: AstToCodeConverter): Unit =
+            converter.convert(node = this)
 
 }

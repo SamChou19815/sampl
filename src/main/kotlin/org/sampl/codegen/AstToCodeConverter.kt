@@ -5,18 +5,6 @@ import org.sampl.ast.decorated.DecoratedClassConstantMember
 import org.sampl.ast.decorated.DecoratedClassFunctionMember
 import org.sampl.ast.decorated.DecoratedClassMembers
 import org.sampl.ast.decorated.DecoratedExpression
-import org.sampl.ast.decorated.DecoratedExpression.Binary
-import org.sampl.ast.decorated.DecoratedExpression.Constructor
-import org.sampl.ast.decorated.DecoratedExpression.FunctionApplication
-import org.sampl.ast.decorated.DecoratedExpression.IfElse
-import org.sampl.ast.decorated.DecoratedExpression.Let
-import org.sampl.ast.decorated.DecoratedExpression.Literal
-import org.sampl.ast.decorated.DecoratedExpression.Match
-import org.sampl.ast.decorated.DecoratedExpression.Not
-import org.sampl.ast.decorated.DecoratedExpression.StructMemberAccess
-import org.sampl.ast.decorated.DecoratedExpression.Throw
-import org.sampl.ast.decorated.DecoratedExpression.TryCatch
-import org.sampl.ast.decorated.DecoratedExpression.VariableIdentifier
 import org.sampl.ast.decorated.DecoratedProgram
 import org.sampl.ast.type.TypeExpr
 import org.sampl.ast.type.TypeIdentifier
@@ -27,27 +15,6 @@ import org.sampl.ast.type.TypeIdentifier
  * print and compilation.
  */
 interface AstToCodeConverter {
-
-    // Part 1: Methods for defining default behaviors.
-
-    /**
-     * [createEmptyIndentationQueue] returns a newly created empty [IdtQueue].
-     * This function is used for local code generation, such as one-liner code generation.
-     */
-    fun createEmptyIndentationQueue(): IdtQueue
-
-    /**
-     * [convert] converts the top-level [program] to well-indented code and returns the code.
-     *
-     * The default implementation assumes that the [program] is a suitable top-level node.
-     * Generally, this method does not need to be overridden.
-     */
-    fun convertProgramToCode(program: DecoratedProgram): String =
-            createEmptyIndentationQueue()
-                    .apply { convert(node = program) }
-                    .toIndentedCode()
-
-    // Part 2: Visitor methods.
 
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.
@@ -77,62 +44,52 @@ interface AstToCodeConverter {
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.
      */
-    fun convert(node: TypeExpr)
+    fun convert(node: DecoratedExpression.Literal)
 
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.
      */
-    fun convert(node: TypeIdentifier)
+    fun convert(node: DecoratedExpression.VariableIdentifier)
 
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.
      */
-    fun convert(node: Literal)
+    fun convert(node: DecoratedExpression.Constructor)
 
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.
      */
-    fun convert(node: VariableIdentifier)
+    fun convert(node: DecoratedExpression.StructMemberAccess)
 
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.
      */
-    fun convert(node: Constructor)
+    fun convert(node: DecoratedExpression.Not)
 
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.
      */
-    fun convert(node: StructMemberAccess)
+    fun convert(node: DecoratedExpression.Binary)
 
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.
      */
-    fun convert(node: Not)
+    fun convert(node: DecoratedExpression.Throw)
 
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.
      */
-    fun convert(node: Binary)
+    fun convert(node: DecoratedExpression.IfElse)
 
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.
      */
-    fun convert(node: Throw)
+    fun convert(node: DecoratedExpression.Match)
 
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.
      */
-    fun convert(node: IfElse)
-
-    /**
-     * [convert] converts the given [node] to target code by recording well-indented code info.
-     */
-    fun convert(node: Match)
-
-    /**
-     * [convert] converts the given [node] to target code by recording well-indented code info.
-     */
-    fun convert(node: FunctionApplication)
+    fun convert(node: DecoratedExpression.FunctionApplication)
 
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.
@@ -142,12 +99,12 @@ interface AstToCodeConverter {
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.
      */
-    fun convert(node: TryCatch)
+    fun convert(node: DecoratedExpression.TryCatch)
 
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.
      */
-    fun convert(node: Let)
+    fun convert(node: DecoratedExpression.Let)
 
 
 }

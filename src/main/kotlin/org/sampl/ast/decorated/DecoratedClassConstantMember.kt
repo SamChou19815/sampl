@@ -1,8 +1,7 @@
 package org.sampl.ast.decorated
 
 import org.sampl.ast.type.TypeExpr
-import org.sampl.codegen.IdtQueue
-import org.sampl.codegen.TranspilerVisitor
+import org.sampl.codegen.AstToCodeConverter
 
 /**
  * [DecoratedClassConstantMember] represents a constant declaration of the form:
@@ -16,18 +15,7 @@ data class DecoratedClassConstantMember(
 
     override val name: String = identifier
 
-    override fun prettyPrint(q: IdtQueue) {
-        val header = StringBuilder().apply {
-            if (!isPublic) {
-                append("private ")
-            }
-            append("let ").append(identifier).append(" =")
-        }.toString()
-        q.addLine(line = header)
-        q.indentAndApply { expr.prettyPrintOrInline(q = this) }
-    }
-
-    override fun acceptTranspilation(q: IdtQueue, visitor: TranspilerVisitor): Unit =
-            visitor.visit(q = q, constantMember = this)
+    override fun acceptConversion(converter: AstToCodeConverter): Unit =
+            converter.convert(node = this)
 
 }
