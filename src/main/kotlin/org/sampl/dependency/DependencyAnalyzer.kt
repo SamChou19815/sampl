@@ -1,4 +1,4 @@
-package org.sampl.classes
+package org.sampl.dependency
 
 import org.sampl.ast.raw.ClassMembers
 import org.sampl.ast.raw.Clazz

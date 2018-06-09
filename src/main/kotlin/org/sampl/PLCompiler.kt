@@ -1,8 +1,9 @@
 package org.sampl
 
 import org.sampl.ast.raw.Clazz
-import org.sampl.classes.ClassConstructor
 import org.sampl.codegen.ToKotlinCompiler
+import org.sampl.util.createClassFromDirectory
+import org.sampl.util.createClassFromSource
 import org.sampl.util.executeAndGetValue
 import org.sampl.util.writeToFile
 import java.io.File
@@ -36,12 +37,12 @@ object PLCompiler {
      * [compileFromSource] tries to compile all the source files in the given [code].
      */
     fun compileFromSource(code: String): Unit =
-            compile(clazz = ClassConstructor.fromSource(code = code))
+            compile(clazz = createClassFromSource(code = code))
 
     /**
      * [compileFromDirectory] tries to compile all the source files in the given [directory].
      */
     fun compileFromDirectory(directory: String): Unit =
-            compile(clazz = ClassConstructor.fromDirectory(directory = directory))
+            compile(clazz = createClassFromDirectory(directory = directory))
 
 }

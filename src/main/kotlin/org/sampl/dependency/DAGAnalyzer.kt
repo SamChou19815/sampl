@@ -1,4 +1,4 @@
-package org.sampl.classes
+package org.sampl.dependency
 
 /**
  * [DAGAnalyzer] is responsible for understanding the DAG relationship between various

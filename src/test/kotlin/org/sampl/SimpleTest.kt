@@ -1,13 +1,12 @@
 package org.sampl
 
 import junit.framework.TestCase.assertEquals
-import org.junit.Ignore
 import org.junit.Test
-import org.sampl.classes.ClassConstructor
 import org.sampl.codegen.IdtQueue
 import org.sampl.codegen.IdtStrategy
 import org.sampl.codegen.PrettyPrinter
 import org.sampl.codegen.ToKotlinCompiler
+import org.sampl.util.createClassFromSource
 import org.sampl.util.writeToFile
 
 /**
@@ -46,12 +45,10 @@ class SimpleTest {
      */
     @Test
     fun runSimpleInSteps() {
-        val firstTypeCheck = ClassConstructor
-                .fromSource(code = propositionsAreTypesProofsAreProgram)
-                .typeCheck()
+        val firstTypeCheck = createClassFromSource(propositionsAreTypesProofsAreProgram).typeCheck()
         val prettyPrintedCode = PrettyPrinter.prettyPrint(node = firstTypeCheck)
         // println(prettyPrintedCode)
-        val secondTypeCheck = ClassConstructor.fromSource(code = prettyPrintedCode).typeCheck()
+        val secondTypeCheck = createClassFromSource(prettyPrintedCode).typeCheck()
         assertEquals(firstTypeCheck, secondTypeCheck)
         val kotlinCode = IdtQueue(strategy = IdtStrategy.FOUR_SPACES)
                 .apply { ToKotlinCompiler.compile(node = secondTypeCheck) }
