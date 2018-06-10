@@ -8,7 +8,6 @@ import org.sampl.antlr.PLLexer
 import org.sampl.antlr.PLParser
 import org.sampl.ast.raw.Clazz
 import org.sampl.ast.raw.CompilationUnit
-import org.sampl.dependency.DependencyAnalyzer
 import org.sampl.parser.CompilationUnitBuilder
 import java.io.ByteArrayInputStream
 import java.io.File
@@ -48,5 +47,5 @@ internal fun createClassFromDirectory(directory: String): Clazz {
             .collect(Collectors.toMap(File::nameWithoutExtension) { file ->
                 inputStreamToCompilationUnit(FileInputStream(file))
             })
-    return DependencyAnalyzer.getCompilationSequence(map = compilationUnitMap)
+    return createCompilationSequence(map = compilationUnitMap)
 }

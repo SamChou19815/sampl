@@ -16,6 +16,7 @@ object PLCompiler {
     /**
      * [compile] tries to compile the given [clazz] node.
      */
+    @JvmStatic
     private fun compile(clazz: Clazz) {
         val decoratedProgram = clazz.typeCheck()
         val kotlinCode = ToKotlinCompiler.compile(node = decoratedProgram)
@@ -36,12 +37,14 @@ object PLCompiler {
     /**
      * [compileFromSource] tries to compile all the source files in the given [code].
      */
+    @JvmStatic
     fun compileFromSource(code: String): Unit =
             compile(clazz = createClassFromSource(code = code))
 
     /**
      * [compileFromDirectory] tries to compile all the source files in the given [directory].
      */
+    @JvmStatic
     fun compileFromDirectory(directory: String): Unit =
             compile(clazz = createClassFromDirectory(directory = directory))
 
