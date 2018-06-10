@@ -40,9 +40,7 @@ genericsSpecialization : LT typeExprInAnnotation (COMMA typeExprInAnnotation)* G
 variantConstructorDeclaration : UpperIdentifier (OF typeExprInAnnotation)?;
 typeAnnotation : COLON typeExprInAnnotation;
 annotatedVariable : LowerIdentifier typeAnnotation;
-argumentDeclarations : argumentDeclaration* lastArgumentDeclaration;
-argumentDeclaration : LPAREN annotatedVariable RPAREN;
-lastArgumentDeclaration : UNIT | argumentDeclaration;
+argumentDeclarations : UNIT | (LPAREN annotatedVariable (COMMA annotatedVariable)* RPAREN);
 patternToExpr : LOR pattern ARROW expression;
 genericsDeclaration : LT UpperIdentifier (COMMA UpperIdentifier)* GT;
 
@@ -62,7 +60,7 @@ expression
     | THROW LT typeExprInAnnotation GT expression # ThrowExpr
     | IF expression THEN expression ELSE expression # IfElseExpr
     | MATCH expression WITH patternToExpr+ # MatchExpr
-    | expression LPAREN expression+ RPAREN # FunctionApplicationExpr
+    | expression (UNIT | (LPAREN expression (COMMA expression)* RPAREN)) # FunctionApplicationExpr
     | FUNCTION argumentDeclarations ARROW expression # FunExpr
     | TRY expression CATCH LowerIdentifier expression # TryCatchExpr
     | LET LowerIdentifier ASSIGN expression SEMICOLON expression # LetExpr

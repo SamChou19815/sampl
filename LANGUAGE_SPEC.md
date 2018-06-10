@@ -20,64 +20,64 @@ below:
  */
 
 /* 
- * [printInt] prints [value] to the console without a new line.
+ * [printInt] prints [value] to the standard output without a new line.
  */
 fun printInt(value: String): Unit = print(value)
 
 /* 
- * [printFloat] prints [value] to the console without a new line.
+ * [printFloat] prints [value] to the standard output without a new line.
  */
 fun printFloat(value: Float): Unit = print(value)
 
 /* 
- * [printBool] prints [value] to the console without a new line.
+ * [printBool] prints [value] to the standard output without a new line.
  */
-fun printBool(value: Float): Unit = print(value)
+fun printBool(value: Bool): Unit = print(value)
 
 /* 
- * [printChar] prints [value] to the console without a new line.
+ * [printChar] prints [value] to the standard output without a new line.
  */
-fun printChar(value: Float): Unit = print(value)
+fun printChar(value: Char): Unit = print(value)
 
 /* 
- * [printString] prints [value] to the console without a new line.
+ * [printString] prints [value] to the standard output without a new line.
  */
-fun printString(value: Float): Unit = print(value)
+fun printString(value: String): Unit = print(value)
 
 /* 
- * [printObject] prints [value] to the console without a new line.
+ * [printObject] prints [value] to the standard output without a new line.
  */
 fun <T> printObject(value: T): Unit = print(value)
 
 /* 
- * [println] prints an empty line to the console.
+ * [println] prints an empty line to the standard output.
  */
 fun println(): Unit = println()
 
 /* 
- * [printlnInt] prints [value] to the console with a new line.
+ * [printlnInt] prints [value] to the standard output with a new line.
  */
-fun printlnInt(value: String): Unit = println(value)
+fun printlnInt(value: Int): Unit = println(value)
 
 /* 
- * [printlnFloat] prints [value] to the console with a new line.
+ * [printlnFloat] prints [value] to the standard output with a new line.
  */
 fun printlnFloat(value: Float): Unit = println(value)
 
 /* 
- * [printlnBool] prints [value] to the console with a new line.
+ * [printlnBool] prints [value] to the standard output with a new line.
  */
-fun printlnBool(value: Float): Unit = println(value)
+fun printlnBool(value: Bool): Unit = println(value)
 
 /* 
- * [printlnChar] prints [value] to the console with a new line.
+ * [printlnChar] prints [value] to the standard output with a new line.
  */
-fun printlnChar(value: Float): Unit = println(value)
+fun printlnChar(value: Char): Unit = println(value)
 
 /* 
- * [printlnString] prints [value] to the console with a new line.
+ * [printlnString] prints [value] to the standard output with a new line.
  */
-fun printlnString(value: Float): Unit = println(value)
+fun printlnString(value: String): Unit = println(value)
 
 /*
  * ------------------------------------------------------------
@@ -86,7 +86,8 @@ fun printlnString(value: Float): Unit = println(value)
  */
 
 /* 
- * Reads a line from the console. Blocks until there is a line.
+ * [readLine] reads a line from the standard input and returns the line. 
+ * Blocks until there is a line.
  */
 fun readLine(): String = readLine()!!
 
@@ -97,49 +98,49 @@ fun readLine(): String = readLine()!!
  */
 
 /* 
- * Convert [value] to int. It will always succeed, but with some precision loss.
+ * [floatToInt] converts [value] to int. It will always succeed, but with some precision loss.
  */
 fun floatToInt(value: Float): Int = value.toLong()
 
 /* 
- * Convert [value] to int. Throws "NOT_CONVERTIBLE" if failed.
+ * [stringToInt] converts [value] to int. Throws "NOT_CONVERTIBLE" if failed.
  */
 fun stringToInt(value: String): Int =
         value.toIntOrNull() ?: throw PLException("NOT_CONVERTIBLE")
 
 /* 
- * Convert [value] to float. It will always succeed, but with some precision loss.
+ * [intToFloat] converts [value] to float. It will always succeed, but with some precision loss.
  */
 fun intToFloat(value: Int): Float = value.toDouble()
 
 /* 
- * Convert [value] to float. Throws "NOT_CONVERTIBLE" if failed.
+ * [stringToFloat] converts [value] to float. Throws "NOT_CONVERTIBLE" if failed.
  */
 fun stringToFloat(value: String): Float = 
         value.toDoubleOrNull() ?: throw PLException("NOT_CONVERTIBLE")
 
 /* 
- * Convert [value] to string. It will always succeed.
+ * [intToString] converts [value] to string. It will always succeed.
  */
 fun intToString(value: Int): String = value.toString()
 
 /* 
- * Convert [value] to string. It will always succeed.
+ * [floatToString] converts [value] to string. It will always succeed.
  */
 fun floatToString(value: Float): String = value.toString()
 
 /* 
- * Convert [value] to string. It will always succeed.
+ * [boolToString] converts [value] to string. It will always succeed.
  */
 fun boolToString(value: Bool): String = value.toString()
 
 /* 
- * Convert [value] to string. It will always succeed.
+ * [charToString] converts [value] to string. It will always succeed.
  */
 fun charToString(value: Char): String = value.toString()
 
 /* 
- * Convert [value] to string. It will always succeed.
+ * [objectToString] converts [value] to string. It will always succeed.
  */
 fun <T> objectToString(value: T): String = value.toString()
 
@@ -150,7 +151,7 @@ fun <T> objectToString(value: T): String = value.toString()
  */
 
 /* 
- * Returns char at [index] of [s]. Throws "OUT_OF_BOUND" if [index] is out of bound.
+ * [getChar] returns char at [index] of [s]. Throws "OUT_OF_BOUND" if [index] is out of bound.
  */
 fun getChar (index: Int, s: String): Char = 
         try { s[index] } catch (e: IndexOutOfBoundsException) {
@@ -158,8 +159,8 @@ fun getChar (index: Int, s: String): Char =
         }
 
 /* 
- * Returns substring from [from] (inclusive) to [to] (exclusive) [s]. Throws "OUT_OF_BOUND" if 
- * [from] or [to] is an out of bound index.
+ * [getSubstring] returns substring from [from] (inclusive) to [to] (exclusive) [s]. Throws 
+ * "OUT_OF_BOUND" if [from] or [to] is an out of bound index or [from] is greater than [to].
  */
 fun getSubstring (from: Int, to: Int, s: String): Char = 
         try { s.substring(from, to) } catch (e: IndexOutOfBoundsException) {

@@ -33,7 +33,7 @@ hs_err_pid*
 *.tokens
 
 # Temp Test File
-/src/test/resources/Program.kt
+/src/test/resources/Program*.kt
 
 # Logo
 *.key

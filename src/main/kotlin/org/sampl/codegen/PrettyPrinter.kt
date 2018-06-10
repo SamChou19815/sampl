@@ -8,7 +8,6 @@ import org.sampl.ast.decorated.DecoratedExpression
 import org.sampl.ast.decorated.DecoratedPattern
 import org.sampl.ast.decorated.DecoratedProgram
 import org.sampl.ast.type.TypeDeclaration
-import org.sampl.ast.type.unitTypeExpr
 import org.sampl.util.joinToGenericsInfoString
 
 /**
@@ -123,16 +122,11 @@ class PrettyPrinter private constructor() : AstToCodeConverter {
                         separator = ", ", prefix = "<", postfix = "> "
                 ))
             }
-            append(node.identifier).append(' ')
-                    .append(node.arguments.joinToString(separator = " ") { (n, t) ->
-                        if (n == "_unit_" && t == unitTypeExpr) {
-                            "()"
-                        } else {
-                            "($n: $t)"
-                        }
-                    })
-                    .append(" : ").append(node.returnType.toString())
-                    .append(" =")
+            append(node.identifier)
+            node.arguments.joinToString(separator = ", ", prefix = "(", postfix = ")") { (n, t) ->
+                "$n: $t"
+            }.run { append(this) }
+            append(": ").append(node.returnType.toString()).append(" =")
         }.toString()
         q.addLine(line = header)
         q.indentAndApply { node.body.acceptConversion(converter = this@PrettyPrinter) }
@@ -259,21 +253,17 @@ class PrettyPrinter private constructor() : AstToCodeConverter {
     override fun convert(node: DecoratedExpression.FunctionApplication) {
         val functionCode = node.functionExpr.toOneLineCode(parent = node)
         val argumentCode = node.arguments.joinToString(
-                separator = " ", prefix = "(", postfix = ")"
+                separator = ", ", prefix = "(", postfix = ")"
         ) { it.toOneLineCode() }
-        q.addLine(line = "$functionCode $argumentCode")
+        q.addLine(line = "$functionCode$argumentCode")
     }
 
     override fun convert(node: DecoratedExpression.Function) {
-        val header = StringBuilder().append("function ").apply {
-            for ((name, t) in node.arguments) {
-                append('(')
-                if (name != "_unit_") {
-                    append(name).append(": ").append(t.toString())
-                }
-                append(") ")
-            }
-        }.append("-> (").toString()
+        val header = StringBuilder().append("function").apply {
+            node.arguments.joinToString(separator = ", ", prefix = "(", postfix = ")") { (n, t) ->
+                "$n: $t"
+            }.run { append(this) }
+        }.append(" -> (").toString()
         q.addLine(line = header)
         q.indentAndApply { node.body.acceptConversion(converter = this@PrettyPrinter) }
         q.addLine(line = ")")

@@ -87,14 +87,13 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
         val clazz = node.clazz
         convert(node = clazz)
         clazz.members.functionMembers.firstOrNull { member ->
-            member.isPublic && member.identifier == "main" && member.arguments.size == 1
-                    && member.arguments[0] == "_unit_" to unitTypeExpr
+            member.isPublic && member.identifier == "main" && member.arguments.isEmpty()
                     && member.returnType == unitTypeExpr
         } ?: return
         q.addEmptyLine()
         q.addLine(line = "fun main(args: Array<String>) {")
         q.indentAndApply {
-            addLine(line = "${clazz.identifier.name}.main(_unit_ = Unit)")
+            addLine(line = "${clazz.identifier.name}.main()")
         }
         q.addLine(line = "}")
     }
