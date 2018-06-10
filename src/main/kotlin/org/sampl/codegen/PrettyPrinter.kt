@@ -117,7 +117,7 @@ class PrettyPrinter private constructor() : AstToCodeConverter {
             if (!node.isPublic) {
                 append("private ")
             }
-            append("let ")
+            append("fun ")
             if (node.genericsDeclaration.isNotEmpty()) {
                 append(node.genericsDeclaration.joinToString(
                         separator = ", ", prefix = "<", postfix = "> "

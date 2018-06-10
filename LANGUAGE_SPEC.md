@@ -9,9 +9,10 @@ You can read the spec for grammar by reading the code at
 
 ## Runtime Specification
 
-The signature of the provided runtime functions are given below:
+The signature (in SAMPL) and implementation (in Kotlin) of the provided runtime functions are given 
+below:
 
-```
+```kotlin
 /*
  * ------------------------------------------------------------
  * Part 1: Printers
@@ -19,59 +20,64 @@ The signature of the provided runtime functions are given below:
  */
 
 /* 
- * Prints [value] to the console without a new line.
+ * [printInt] prints [value] to the console without a new line.
  */
-let printInt (value: String): Unit = <fun>
+fun printInt(value: String): Unit = print(value)
 
 /* 
- * Prints [value] to the console without a new line.
+ * [printFloat] prints [value] to the console without a new line.
  */
-let printFloat (value: Float): Unit = <fun>
+fun printFloat(value: Float): Unit = print(value)
 
 /* 
- * Prints [value] to the console without a new line.
+ * [printBool] prints [value] to the console without a new line.
  */
-let printBool (value: Float): Unit = <fun>
+fun printBool(value: Float): Unit = print(value)
 
 /* 
- * Prints [value] to the console without a new line.
+ * [printChar] prints [value] to the console without a new line.
  */
-let printChar (value: Float): Unit = <fun>
+fun printChar(value: Float): Unit = print(value)
 
 /* 
- * Prints [value] to the console without a new line.
+ * [printString] prints [value] to the console without a new line.
  */
-let printString (value: Float): Unit = <fun>
+fun printString(value: Float): Unit = print(value)
 
 /* 
- * Prints an empty line to the console.
+ * [printObject] prints [value] to the console without a new line.
  */
-let println (): Unit = <fun>
+fun <T> printObject(value: T): Unit = print(value)
 
 /* 
- * Prints [value] to the console with a new line.
+ * [println] prints an empty line to the console.
  */
-let printlnInt (value: String): Unit = <fun>
+fun println(): Unit = println()
 
 /* 
- * Prints [value] to the console with a new line.
+ * [printlnInt] prints [value] to the console with a new line.
  */
-let printlnFloat (value: Float): Unit = <fun>
+fun printlnInt(value: String): Unit = println(value)
 
 /* 
- * Prints [value] to the console with a new line.
+ * [printlnFloat] prints [value] to the console with a new line.
  */
-let printlnBool (value: Float): Unit = <fun>
+fun printlnFloat(value: Float): Unit = println(value)
 
 /* 
- * Prints [value] to the console with a new line.
+ * [printlnBool] prints [value] to the console with a new line.
  */
-let printlnChar (value: Float): Unit = <fun>
+fun printlnBool(value: Float): Unit = println(value)
 
 /* 
- * Prints [value] to the console with a new line.
+ * [printlnChar] prints [value] to the console with a new line.
  */
-let printlnString (value: Float): Unit = <fun>
+fun printlnChar(value: Float): Unit = println(value)
+
+/* 
+ * [printlnString] prints [value] to the console with a new line.
+ */
+fun printlnString(value: Float): Unit = println(value)
 
 /*
  * ------------------------------------------------------------
@@ -82,7 +88,7 @@ let printlnString (value: Float): Unit = <fun>
 /* 
  * Reads a line from the console. Blocks until there is a line.
  */
-let readLine (): String = <fun>
+fun readLine(): String = readLine()!!
 
 /*
  * ------------------------------------------------------------
@@ -93,47 +99,49 @@ let readLine (): String = <fun>
 /* 
  * Convert [value] to int. It will always succeed, but with some precision loss.
  */
-let floatToInt(value: Float): Int = <fun>
+fun floatToInt(value: Float): Int = value.toLong()
 
 /* 
  * Convert [value] to int. Throws "NOT_CONVERTIBLE" if failed.
  */
-let stringToInt(value: String): Int = <fun>
+fun stringToInt(value: String): Int =
+        value.toIntOrNull() ?: throw PLException("NOT_CONVERTIBLE")
 
 /* 
  * Convert [value] to float. It will always succeed, but with some precision loss.
  */
-let intToFloat(value: Int): Float = <fun>
+fun intToFloat(value: Int): Float = value.toDouble()
 
 /* 
  * Convert [value] to float. Throws "NOT_CONVERTIBLE" if failed.
  */
-let stringToFloat(value: String): Float = <fun>
+fun stringToFloat(value: String): Float = 
+        value.toDoubleOrNull() ?: throw PLException("NOT_CONVERTIBLE")
 
 /* 
  * Convert [value] to string. It will always succeed.
  */
-let intToString(value: Int): String = <fun>
+fun intToString(value: Int): String = value.toString()
 
 /* 
  * Convert [value] to string. It will always succeed.
  */
-let floatToString(value: Float): String = <fun>
+fun floatToString(value: Float): String = value.toString()
 
 /* 
  * Convert [value] to string. It will always succeed.
  */
-let boolToString(value: Bool): String = <fun>
+fun boolToString(value: Bool): String = value.toString()
 
 /* 
  * Convert [value] to string. It will always succeed.
  */
-let charToString(value: Char): String = <fun>
+fun charToString(value: Char): String = value.toString()
 
 /* 
  * Convert [value] to string. It will always succeed.
  */
-let <T> objectToString(value: T): String = <fun>
+fun <T> objectToString(value: T): String = value.toString()
 
 /*
  * ------------------------------------------------------------
@@ -144,13 +152,20 @@ let <T> objectToString(value: T): String = <fun>
 /* 
  * Returns char at [index] of [s]. Throws "OUT_OF_BOUND" if [index] is out of bound.
  */
-let getChar (index: Int, s: String): Char = <fun>
+fun getChar (index: Int, s: String): Char = 
+        try { s[index] } catch (e: IndexOutOfBoundsException) {
+            throw throw PLException("OUT_OF_BOUND")
+        }
 
 /* 
  * Returns substring from [from] (inclusive) to [to] (exclusive) [s]. Throws "OUT_OF_BOUND" if 
  * [from] or [to] is an out of bound index.
  */
-let getSubstring (from: Int, to: Int, s: String): Char = <fun>
+fun getSubstring (from: Int, to: Int, s: String): Char = 
+        try { s.substring(from, to) } catch (e: IndexOutOfBoundsException) {
+            throw throw PLException("OUT_OF_BOUND") 
+        }
+
 ```
 
 ## Type Checking Specification

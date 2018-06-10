@@ -20,7 +20,7 @@ classMembersDeclaration :
 classConstantDeclaration: PRIVATE? LET LowerIdentifier ASSIGN expression;
 
 classFunctionDeclaration :
-    PRIVATE? LET genericsDeclaration? LowerIdentifier
+    PRIVATE? FUN genericsDeclaration? LowerIdentifier
         argumentDeclarations typeAnnotation
     ASSIGN expression;
 

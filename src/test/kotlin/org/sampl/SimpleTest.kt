@@ -22,14 +22,14 @@ class SimpleTest {
     class TestingProgram {
         let trueVar = ()
         let implication = function (a: String) -> 5
-        let <A, B> modusPonens (f: (A) -> B) (v: A): B = f(v)
+        fun <A, B> modusPonens (f: (A) -> B) (v: A): B = f(v)
         // Function Application
-        let constant5Impl1 (v: String): Int = implication (v)
-        let constant5Impl2 (v: String): Int = modusPonens<String, Int> (implication v)
-        let applyWithString (): Int = constant5Impl2 ("hi")
-        let add (a: Int) (b: Int): Int = a + b
-        let add1 (b: Int): Int = add (1) (b)
-        let main (): Unit = ()
+        fun constant5Impl1 (v: String): Int = implication (v)
+        fun constant5Impl2 (v: String): Int = modusPonens<String, Int> (implication v)
+        fun applyWithString (): Int = constant5Impl2 ("hi")
+        fun add (a: Int) (b: Int): Int = a + b
+        fun add1 (b: Int): Int = add (1) (b)
+        fun main (): Unit = ()
         // Classes
         class And<A, B>(a: A, b: B)
         class Or<A, B>(

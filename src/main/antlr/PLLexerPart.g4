@@ -17,6 +17,7 @@ TYPE : 'type';
 OF : 'of';
 LET : 'let';
 CONST : 'const';
+FUN : 'fun';
 FUNCTION : 'function';
 
 PRIVATE : 'private';
