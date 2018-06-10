@@ -58,6 +58,7 @@ class SimpleTest {
         fun printlnBool(value: Float): Unit = ()
         fun printlnChar(value: Float): Unit = ()
         fun printlnString(value: Float): Unit = ()
+        fun <T> printlnObject(value: T): Unit = ()
         fun readLine(): String = ""
         fun floatToInt(value: Float): Int = 0
         fun stringToInt(value: String): Int = if (true) then 0 else throw<Int> "NOT_CONVERTIBLE"

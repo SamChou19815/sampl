@@ -79,6 +79,11 @@ fun printlnChar(value: Char): Unit = println(value)
  */
 fun printlnString(value: String): Unit = println(value)
 
+/* 
+ * [printlnObject] prints [value] to the standard output with a new line.
+ */
+fun <T> printlnObject(value: T): Unit = println(value)
+
 /*
  * ------------------------------------------------------------
  * Part 2: Readers
