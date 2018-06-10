@@ -259,14 +259,14 @@ class PrettyPrinter private constructor() : AstToCodeConverter {
     }
 
     override fun convert(node: DecoratedExpression.Function) {
-        val header = StringBuilder().append("function").apply {
+        val header = StringBuilder().append("{").apply {
             node.arguments.joinToString(separator = ", ", prefix = "(", postfix = ")") { (n, t) ->
                 "$n: $t"
             }.run { append(this) }
-        }.append(" -> (").toString()
+        }.append(" ->").toString()
         q.addLine(line = header)
         q.indentAndApply { node.body.acceptConversion(converter = this@PrettyPrinter) }
-        q.addLine(line = ")")
+        q.addLine(line = "}")
     }
 
     override fun convert(node: DecoratedExpression.TryCatch) {

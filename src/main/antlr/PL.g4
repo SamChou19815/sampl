@@ -61,7 +61,7 @@ expression
     | IF expression THEN expression ELSE expression # IfElseExpr
     | MATCH expression WITH patternToExpr+ # MatchExpr
     | expression (UNIT | (LPAREN expression (COMMA expression)* RPAREN)) # FunctionApplicationExpr
-    | FUNCTION argumentDeclarations ARROW expression # FunExpr
+    | LBRACE argumentDeclarations ARROW expression RBRACE # FunExpr
     | TRY expression CATCH LowerIdentifier expression # TryCatchExpr
     | LET LowerIdentifier ASSIGN expression SEMICOLON expression # LetExpr
     ;

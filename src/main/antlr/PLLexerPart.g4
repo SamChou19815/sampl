@@ -18,7 +18,6 @@ OF : 'of';
 LET : 'let';
 CONST : 'const';
 FUN : 'fun';
-FUNCTION : 'function';
 
 PRIVATE : 'private';
 
@@ -34,8 +33,10 @@ CATCH : 'catch';
 
 WILDCARD : '_';
 
-// Forbidden ones
+// Forbidden Identifiers
 PROGRAM : 'Program';
+MAIN : 'Main';
+FUNCTION : 'function';
 COPY : 'copy';
 
 /*

@@ -22,7 +22,7 @@ class SimpleTest {
     private val propositionsAreTypesProofsAreProgram: String = """
     class TestingProgram {
         let trueVar = ()
-        let implication = function(a: String) -> 5
+        let implication = { (a: String) -> 5 }
         fun <A, B> modusPonens(f: (A) -> B, v: A): B = f(v)
         // Function Application
         fun constant5Impl1(v: String): Int = implication(v)
