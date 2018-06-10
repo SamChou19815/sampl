@@ -1,5 +1,6 @@
 package org.sampl.codegen
 
+import org.sampl.ast.common.FunctionCategory.USER_DEFINED
 import org.sampl.ast.decorated.DecoratedClass
 import org.sampl.ast.decorated.DecoratedClassConstantMember
 import org.sampl.ast.decorated.DecoratedClassFunctionMember
@@ -96,7 +97,7 @@ class PrettyPrinter private constructor() : AstToCodeConverter {
             q.addEmptyLine()
         }
         node.constantMembers.forEach(action = printerAction)
-        node.functionMembers.forEach(action = printerAction)
+        node.functionMembers.filter { it.category == USER_DEFINED }.forEach(action = printerAction)
         node.nestedClassMembers.forEach(action = printerAction)
     }
 

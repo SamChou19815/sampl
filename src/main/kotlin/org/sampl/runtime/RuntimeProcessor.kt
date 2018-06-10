@@ -8,58 +8,68 @@ import org.sampl.ast.type.intTypeExpr
 import org.sampl.ast.type.stringTypeExpr
 import org.sampl.ast.type.unitTypeExpr
 import org.sampl.exceptions.DisallowedRuntimeFunctionError
-import org.sampl.util.primitiveTypeName
 import java.lang.reflect.Method
+import java.lang.reflect.Modifier
 
-class RuntimeProcessor(private val libraryInstance: RuntimeLibrary) {
+/**
+ * [RuntimeProcessor] provides functions to process the given runtime library.
+ */
+internal object RuntimeProcessor {
 
-    fun process() {
-        val runtimeFunctions: List<Method> = libraryInstance.javaClass.methods
-                .asSequence()
-                .filter { it.getAnnotation(RuntimeFunction::class.java) != null }
-                .toList()
-        for (method in runtimeFunctions) {
-            val parameterTypeStrings = method.parameterTypes
-                    .asSequence()
-                    .map { it.primitiveTypeName }
-                    .filterNotNull()
+    /**
+     * [toAnnotatedMethods] converts the library instance to a list of pairs of the form
+     * (methods name, method function type)
+     */
+    @JvmStatic
+    fun RuntimeLibrary.toAnnotatedMethods(): List<Pair<String, TypeExpr>> =
+            this::class.java.toAnnotatedMethods()
+
+    /**
+     * [toAnnotatedMethods] converts the library class to a list of pairs of the form
+     * (methods name, method function type)
+     */
+    @JvmStatic
+    fun <T : RuntimeLibrary> Class<out T>.toAnnotatedMethods(): List<Pair<String, TypeExpr>> =
+            methods.asSequence()
+                    .filter { Modifier.isStatic(it.modifiers) }
+                    .filter { it.getAnnotation(RuntimeFunction::class.java) != null }
+                    .map { it.name to it.toTypeExpr() }
                     .toList()
-            if (parameterTypeStrings.size != method.parameterTypes.size) {
-                throw DisallowedRuntimeFunctionError()
-            }
-            val returnTypeString = method.returnType.primitiveTypeName
-                    ?: throw DisallowedRuntimeFunctionError()
-            val typeExpr = stringTypesToExpr(
-                    parameters = parameterTypeStrings, returnType = returnTypeString
-            )
-            // Assume code to be correct.
-            val code = method.getAnnotation(RuntimeFunction::class.java).code
+
+    /**
+     * [Method.toTypeExpr] converts the method to an equivalent [TypeExpr] in this programming
+     * language if possible.
+     * If it is impossible due to some rules, it will throw [DisallowedRuntimeFunctionError].
+     */
+    @JvmStatic
+    private fun Method.toTypeExpr(): TypeExpr {
+        val parameterTypes = this.parameterTypes
+                .asSequence()
+                .map { it.toPredefinedTypeExpr() }
+                .filterNotNull()
+                .toList()
+        if (parameterTypes.size != this.parameterTypes.size) {
+            throw DisallowedRuntimeFunctionError()
         }
+        val returnType = this.returnType.toPredefinedTypeExpr()
+                ?: throw DisallowedRuntimeFunctionError()
+        return TypeExpr.Function(parameterTypes, returnType)
     }
 
     /**
-     * [stringTypeExpr] converts a [typeName] in string to the format in [TypeExpr.Identifier].
+     * [toPredefinedTypeExpr] returns the equivalent predefined type expression in this
+     * programming language for this class.
+     * If there is no such correspondence, `null` will be returned.
      */
-    private fun stringTypeToExpr(typeName: String): TypeExpr.Identifier {
-        return when (typeName) {
-            "void" -> unitTypeExpr
-            "int", "long" -> intTypeExpr
-            "float", "double" -> floatTypeExpr
-            "boolean" -> boolTypeExpr
-            "char" -> charTypeExpr
-            "String" -> stringTypeExpr
-            else -> error(message = "Impossible")
-        }
+    @JvmStatic
+    private fun <T : Any> Class<T>.toPredefinedTypeExpr(): TypeExpr? = when (simpleName) {
+        "void" -> unitTypeExpr
+        "long" -> intTypeExpr
+        "double" -> floatTypeExpr
+        "boolean" -> boolTypeExpr
+        "char" -> charTypeExpr
+        "String" -> stringTypeExpr
+        else -> null
     }
-
-    /**
-     * [stringTypesToExpr] converts [parameters] and a [returnType] in string to the format
-     * in function [TypeExpr.Function].
-     */
-    private fun stringTypesToExpr(parameters: List<String>, returnType: String): TypeExpr.Function =
-            TypeExpr.Function(
-                    argumentTypes = parameters.map(::stringTypeToExpr),
-                    returnType = stringTypeToExpr(returnType)
-            )
 
 }

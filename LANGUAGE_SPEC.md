@@ -10,169 +10,22 @@ You can read the spec for grammar by reading the code at
 ## Runtime Specification
 
 The signature (in SAMPL) and implementation (in Kotlin) of the provided runtime functions are given 
-below:
+in the Kotlin file 
+[PrimitiveRuntimeLibrary](./src/main/kotlin/org/sampl/runtime/PrimitiveRuntimeLibrary.kt).
 
-```kotlin
-/*
- * ------------------------------------------------------------
- * Part 1: Printers
- * ------------------------------------------------------------
- */
+Note that the primitive types are different in Kotlin and SAMPL. The correspondence is listed in
+the table below.
 
-/* 
- * [printInt] prints [value] to the standard output without a new line.
- */
-fun printInt(value: String): Unit = print(value)
+| SAMPL    | Kotlin    |
+| :------: | :-------: |
+| `Unit`   | `Unit`    |
+| `Int`    | `Long`    |
+| `Float`  | `Double`  |
+| `Bool`   | `Boolean` |
+| `Char`   | `Char`    |
+| `String` | `String`* |
 
-/* 
- * [printFloat] prints [value] to the standard output without a new line.
- */
-fun printFloat(value: Float): Unit = print(value)
-
-/* 
- * [printBool] prints [value] to the standard output without a new line.
- */
-fun printBool(value: Bool): Unit = print(value)
-
-/* 
- * [printChar] prints [value] to the standard output without a new line.
- */
-fun printChar(value: Char): Unit = print(value)
-
-/* 
- * [printString] prints [value] to the standard output without a new line.
- */
-fun printString(value: String): Unit = print(value)
-
-/* 
- * [printObject] prints [value] to the standard output without a new line.
- */
-fun <T> printObject(value: T): Unit = print(value)
-
-/* 
- * [println] prints an empty line to the standard output.
- */
-fun println(): Unit = println()
-
-/* 
- * [printlnInt] prints [value] to the standard output with a new line.
- */
-fun printlnInt(value: Int): Unit = println(value)
-
-/* 
- * [printlnFloat] prints [value] to the standard output with a new line.
- */
-fun printlnFloat(value: Float): Unit = println(value)
-
-/* 
- * [printlnBool] prints [value] to the standard output with a new line.
- */
-fun printlnBool(value: Bool): Unit = println(value)
-
-/* 
- * [printlnChar] prints [value] to the standard output with a new line.
- */
-fun printlnChar(value: Char): Unit = println(value)
-
-/* 
- * [printlnString] prints [value] to the standard output with a new line.
- */
-fun printlnString(value: String): Unit = println(value)
-
-/* 
- * [printlnObject] prints [value] to the standard output with a new line.
- */
-fun <T> printlnObject(value: T): Unit = println(value)
-
-/*
- * ------------------------------------------------------------
- * Part 2: Readers
- * ------------------------------------------------------------
- */
-
-/* 
- * [readLine] reads a line from the standard input and returns the line. 
- * Blocks until there is a line.
- */
-fun readLine(): String = readLine()!!
-
-/*
- * ------------------------------------------------------------
- * Part 3: Primitive Type Converters
- * ------------------------------------------------------------
- */
-
-/* 
- * [floatToInt] converts [value] to int. It will always succeed, but with some precision loss.
- */
-fun floatToInt(value: Float): Int = value.toLong()
-
-/* 
- * [stringToInt] converts [value] to int. Throws "NOT_CONVERTIBLE" if failed.
- */
-fun stringToInt(value: String): Int =
-        value.toIntOrNull() ?: throw PLException("NOT_CONVERTIBLE")
-
-/* 
- * [intToFloat] converts [value] to float. It will always succeed, but with some precision loss.
- */
-fun intToFloat(value: Int): Float = value.toDouble()
-
-/* 
- * [stringToFloat] converts [value] to float. Throws "NOT_CONVERTIBLE" if failed.
- */
-fun stringToFloat(value: String): Float = 
-        value.toDoubleOrNull() ?: throw PLException("NOT_CONVERTIBLE")
-
-/* 
- * [intToString] converts [value] to string. It will always succeed.
- */
-fun intToString(value: Int): String = value.toString()
-
-/* 
- * [floatToString] converts [value] to string. It will always succeed.
- */
-fun floatToString(value: Float): String = value.toString()
-
-/* 
- * [boolToString] converts [value] to string. It will always succeed.
- */
-fun boolToString(value: Bool): String = value.toString()
-
-/* 
- * [charToString] converts [value] to string. It will always succeed.
- */
-fun charToString(value: Char): String = value.toString()
-
-/* 
- * [objectToString] converts [value] to string. It will always succeed.
- */
-fun <T> objectToString(value: T): String = value.toString()
-
-/*
- * ------------------------------------------------------------
- * Part 4: String Functions
- * ------------------------------------------------------------
- */
-
-/* 
- * [getChar] returns char at [index] of [s]. Throws "OUT_OF_BOUND" if [index] is out of bound.
- */
-fun getChar (index: Int, s: String): Char = 
-        try { s[index] } catch (e: IndexOutOfBoundsException) {
-            throw throw PLException("OUT_OF_BOUND")
-        }
-
-/* 
- * [getSubstring] returns substring from [from] (inclusive) to [to] (exclusive) [s]. Throws 
- * "OUT_OF_BOUND" if [from] or [to] is an out of bound index or [from] is greater than [to].
- */
-fun getSubstring (from: Int, to: Int, s: String): Char = 
-        try { s.substring(from, to) } catch (e: IndexOutOfBoundsException) {
-            throw throw PLException("OUT_OF_BOUND") 
-        }
-
-```
+Note: `String` is not a primitive type in Kotlin.
 
 ## Type Checking Specification
 

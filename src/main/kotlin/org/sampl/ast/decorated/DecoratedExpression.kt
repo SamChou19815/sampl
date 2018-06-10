@@ -1,9 +1,9 @@
 package org.sampl.ast.decorated
 
 import org.sampl.ast.common.BinaryOperator
-import org.sampl.codegen.CodeConvertible
 import org.sampl.ast.type.TypeExpr
 import org.sampl.codegen.AstToCodeConverter
+import org.sampl.codegen.CodeConvertible
 import org.sampl.ast.common.Literal as CommonLiteral
 
 /**
@@ -27,6 +27,20 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
             } else {
                 precedenceLevel > parent.precedenceLevel
             }
+
+    /**
+     * [Dummy] represents a dummy decorated expression used as a placeholder.
+     * It should be used with primitive and provided runtime functions.
+     */
+    object Dummy : DecoratedExpression(precedenceLevel = -1) {
+
+        override val type: TypeExpr get() = throw UnsupportedOperationException()
+
+        override fun acceptConversion(converter: AstToCodeConverter) {
+            throw UnsupportedOperationException()
+        }
+
+    }
 
     /**
      * [Literal] with correct [type] represents a [literal] as an expression.

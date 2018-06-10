@@ -90,7 +90,6 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
             member.isPublic && member.identifier == "main" && member.arguments.isEmpty()
                     && member.returnType == unitTypeExpr
         } ?: return
-        q.addEmptyLine()
         q.addLine(line = "fun main(args: Array<String>) {")
         q.indentAndApply {
             addLine(line = "${clazz.identifier.name}.main()")

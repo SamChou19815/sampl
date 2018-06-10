@@ -2,8 +2,7 @@ package org.sampl
 
 import org.sampl.ast.raw.Clazz
 import org.sampl.codegen.ToKotlinCompiler
-import org.sampl.util.createClassFromDirectory
-import org.sampl.util.createClassFromSource
+import org.sampl.util.AntlrUtil
 import org.sampl.util.executeAndGetValue
 import org.sampl.util.writeToFile
 import java.io.File
@@ -39,13 +38,13 @@ object PLCompiler {
      */
     @JvmStatic
     fun compileFromSource(code: String): Unit =
-            compile(clazz = createClassFromSource(code = code))
+            compile(clazz = AntlrUtil.createClassFromSource(code = code))
 
     /**
      * [compileFromDirectory] tries to compile all the source files in the given [directory].
      */
     @JvmStatic
     fun compileFromDirectory(directory: String): Unit =
-            compile(clazz = createClassFromDirectory(directory = directory))
+            compile(clazz = AntlrUtil.createClassFromDirectory(directory = directory))
 
 }

@@ -7,7 +7,7 @@ import java.lang.annotation.Inherited
 @MustBeDocumented
 @Inherited
 /**
- * [RuntimeFunction] is the marker annotation for the interpreter to detect and validate runtime
- * functions.
+ * [RuntimeFunction] is the marker annotation for the interpreter and compiler to detect and
+ * validate runtime functions.
  */
-annotation class RuntimeFunction(val code: String)
+annotation class RuntimeFunction
