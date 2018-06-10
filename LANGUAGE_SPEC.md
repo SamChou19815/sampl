@@ -12,35 +12,144 @@ You can read the spec for grammar by reading the code at
 The signature of the provided runtime functions are given below:
 
 ```
-// Part 1: Printers
+/*
+ * ------------------------------------------------------------
+ * Part 1: Printers
+ * ------------------------------------------------------------
+ */
+
+/* 
+ * Prints [value] to the console without a new line.
+ */
 let printInt (value: String): Unit = <fun>
+
+/* 
+ * Prints [value] to the console without a new line.
+ */
 let printFloat (value: Float): Unit = <fun>
+
+/* 
+ * Prints [value] to the console without a new line.
+ */
 let printBool (value: Float): Unit = <fun>
+
+/* 
+ * Prints [value] to the console without a new line.
+ */
 let printChar (value: Float): Unit = <fun>
+
+/* 
+ * Prints [value] to the console without a new line.
+ */
 let printString (value: Float): Unit = <fun>
+
+/* 
+ * Prints an empty line to the console.
+ */
 let println (): Unit = <fun>
+
+/* 
+ * Prints [value] to the console with a new line.
+ */
 let printlnInt (value: String): Unit = <fun>
+
+/* 
+ * Prints [value] to the console with a new line.
+ */
 let printlnFloat (value: Float): Unit = <fun>
+
+/* 
+ * Prints [value] to the console with a new line.
+ */
 let printlnBool (value: Float): Unit = <fun>
+
+/* 
+ * Prints [value] to the console with a new line.
+ */
 let printlnChar (value: Float): Unit = <fun>
+
+/* 
+ * Prints [value] to the console with a new line.
+ */
 let printlnString (value: Float): Unit = <fun>
 
-// Part 2: Readers
+/*
+ * ------------------------------------------------------------
+ * Part 2: Readers
+ * ------------------------------------------------------------
+ */
+
+/* 
+ * Reads a line from the console. Blocks until there is a line.
+ */
 let readLine (): String = <fun>
 
-// Part 3: Primitive Type Converters
+/*
+ * ------------------------------------------------------------
+ * Part 3: Primitive Type Converters
+ * ------------------------------------------------------------
+ */
+
+/* 
+ * Convert [value] to int. It will always succeed, but with some precision loss.
+ */
 let floatToInt(value: Float): Int = <fun>
+
+/* 
+ * Convert [value] to int. Throws "NOT_CONVERTIBLE" if failed.
+ */
 let stringToInt(value: String): Int = <fun>
+
+/* 
+ * Convert [value] to float. It will always succeed, but with some precision loss.
+ */
 let intToFloat(value: Int): Float = <fun>
+
+/* 
+ * Convert [value] to float. Throws "NOT_CONVERTIBLE" if failed.
+ */
 let stringToFloat(value: String): Float = <fun>
+
+/* 
+ * Convert [value] to string. It will always succeed.
+ */
 let intToString(value: Int): String = <fun>
+
+/* 
+ * Convert [value] to string. It will always succeed.
+ */
 let floatToString(value: Float): String = <fun>
+
+/* 
+ * Convert [value] to string. It will always succeed.
+ */
 let boolToString(value: Bool): String = <fun>
+
+/* 
+ * Convert [value] to string. It will always succeed.
+ */
 let charToString(value: Char): String = <fun>
+
+/* 
+ * Convert [value] to string. It will always succeed.
+ */
 let <T> objectToString(value: T): String = <fun>
 
-// Part 4: String Functions
+/*
+ * ------------------------------------------------------------
+ * Part 4: String Functions
+ * ------------------------------------------------------------
+ */
+
+/* 
+ * Returns char at [index] of [s]. Throws "OUT_OF_BOUND" if [index] is out of bound.
+ */
 let getChar (index: Int, s: String): Char = <fun>
+
+/* 
+ * Returns substring from [from] (inclusive) to [to] (exclusive) [s]. Throws "OUT_OF_BOUND" if 
+ * [from] or [to] is an out of bound index.
+ */
 let getSubstring (from: Int, to: Int, s: String): Char = <fun>
 ```
 
