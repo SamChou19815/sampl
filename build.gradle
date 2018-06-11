@@ -23,11 +23,9 @@ repositories {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     antlr "org.antlr:antlr4:4.5" // use ANTLR version 4
-    testCompile 'junit:junit:4.12'
-    // Okaml-Lib
     compile 'com.github.SamChou19815:okaml-lib:0.3.2'
-    // Apache Common Lang
     compile 'org.apache.commons:commons-text:+'
+    testCompile 'junit:junit:4.12'
 }
 
 generateGrammarSource {
@@ -44,6 +42,12 @@ compileTestKotlin {
 
 compileJava.dependsOn generateGrammarSource
 compileKotlin.dependsOn generateGrammarSource
+
+test {
+    testLogging {
+        events "passed", "skipped", "failed", "standardOut", "standardError"
+    }
+}
 
 jar {
     manifest {

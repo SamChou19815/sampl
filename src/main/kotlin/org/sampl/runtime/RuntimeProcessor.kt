@@ -1,6 +1,12 @@
 package org.sampl.runtime
 
+import org.sampl.ast.common.FunctionCategory
+import org.sampl.ast.common.Literal
+import org.sampl.ast.raw.ClassFunctionMember
+import org.sampl.ast.raw.Clazz
+import org.sampl.ast.raw.LiteralExpr
 import org.sampl.ast.type.TypeExpr
+import org.sampl.ast.type.TypeInfo
 import org.sampl.ast.type.boolTypeExpr
 import org.sampl.ast.type.charTypeExpr
 import org.sampl.ast.type.floatTypeExpr
@@ -10,66 +16,97 @@ import org.sampl.ast.type.unitTypeExpr
 import org.sampl.exceptions.DisallowedRuntimeFunctionError
 import java.lang.reflect.Method
 import java.lang.reflect.Modifier
+import java.lang.reflect.Type
+import org.sampl.runtime.RuntimeLibrary as R
 
 /**
- * [RuntimeProcessor] provides functions to process the given runtime library.
+ * [toAllowedTypeExpr] returns the equivalent allowed type expression in this
+ * programming language for this class. It will also consider the generic declarations from
+ * [genericsInfo].
+ * If there is no such correspondence, `null` will be returned.
  */
-internal object RuntimeProcessor {
-
-    /**
-     * [toAnnotatedMethods] converts the library instance to a list of pairs of the form
-     * (methods name, method function type)
-     */
-    @JvmStatic
-    fun RuntimeLibrary.toAnnotatedMethods(): List<Pair<String, TypeExpr>> =
-            this::class.java.toAnnotatedMethods()
-
-    /**
-     * [toAnnotatedMethods] converts the library class to a list of pairs of the form
-     * (methods name, method function type)
-     */
-    @JvmStatic
-    fun <T : RuntimeLibrary> Class<out T>.toAnnotatedMethods(): List<Pair<String, TypeExpr>> =
-            methods.asSequence()
-                    .filter { Modifier.isStatic(it.modifiers) }
-                    .filter { it.getAnnotation(RuntimeFunction::class.java) != null }
-                    .map { it.name to it.toTypeExpr() }
-                    .toList()
-
-    /**
-     * [Method.toTypeExpr] converts the method to an equivalent [TypeExpr] in this programming
-     * language if possible.
-     * If it is impossible due to some rules, it will throw [DisallowedRuntimeFunctionError].
-     */
-    @JvmStatic
-    private fun Method.toTypeExpr(): TypeExpr {
-        val parameterTypes = this.parameterTypes
-                .asSequence()
-                .map { it.toPredefinedTypeExpr() }
-                .filterNotNull()
-                .toList()
-        if (parameterTypes.size != this.parameterTypes.size) {
-            throw DisallowedRuntimeFunctionError()
-        }
-        val returnType = this.returnType.toPredefinedTypeExpr()
-                ?: throw DisallowedRuntimeFunctionError()
-        return TypeExpr.Function(parameterTypes, returnType)
+private fun Type.toAllowedTypeExpr(genericsInfo: List<String>): TypeExpr? = when (typeName) {
+    "void" -> unitTypeExpr
+    "long" -> intTypeExpr
+    "double" -> floatTypeExpr
+    "boolean" -> boolTypeExpr
+    "char" -> charTypeExpr
+    "java.lang.String" -> stringTypeExpr
+    in genericsInfo -> TypeExpr.Identifier(type = typeName)
+    else -> {
+        println(typeName); null
     }
+}
 
-    /**
-     * [toPredefinedTypeExpr] returns the equivalent predefined type expression in this
-     * programming language for this class.
-     * If there is no such correspondence, `null` will be returned.
-     */
-    @JvmStatic
-    private fun <T : Any> Class<T>.toPredefinedTypeExpr(): TypeExpr? = when (simpleName) {
-        "void" -> unitTypeExpr
-        "long" -> intTypeExpr
-        "double" -> floatTypeExpr
-        "boolean" -> boolTypeExpr
-        "char" -> charTypeExpr
-        "String" -> stringTypeExpr
-        else -> null
+/**
+ * [Method.toTypeInfo] converts the method to an equivalent [TypeExpr] in this programming
+ * language if possible.
+ * It has a parameter [allowGenerics] which defaults to false. It can be used to control whether
+ * to allow generics in runtime library.
+ * If it is impossible due to some rules, it will throw [DisallowedRuntimeFunctionError].
+ */
+private fun Method.toTypeInfo(allowGenerics: Boolean): TypeInfo {
+    if (!allowGenerics && typeParameters.isNotEmpty()) {
+        throw DisallowedRuntimeFunctionError()
     }
+    val genericsInfo = typeParameters.map { it.typeName }
+    val parameterTypes = genericParameterTypes
+            .asSequence()
+            .map { it.toAllowedTypeExpr(genericsInfo) }
+            .filterNotNull()
+            .toList()
+    if (parameterTypes.size != genericParameterTypes.size) {
+        throw DisallowedRuntimeFunctionError()
+    }
+    val returnType = this.returnType.toAllowedTypeExpr(genericsInfo = genericsInfo)
+            ?: throw DisallowedRuntimeFunctionError()
+    val functionType = TypeExpr.Function(argumentTypes = parameterTypes, returnType = returnType)
+    return TypeInfo(typeExpr = functionType, genericsInfo = genericsInfo)
+}
 
+/**
+ * [toAnnotatedFunctionSequence] converts the library instance to a sequence of pairs of the form
+ * (methods name, method function type).
+ * It has a parameter [allowGenerics] which defaults to false. It can be used to control whether
+ * to allow generics in runtime library.
+ */
+private fun R.toAnnotatedFunctionSequence(
+        allowGenerics: Boolean = false
+): Sequence<Pair<String, TypeInfo>> =
+        this::class.java.methods.asSequence()
+                .filter { Modifier.isStatic(it.modifiers) }
+                .filter { it.getAnnotation(RuntimeFunction::class.java) != null }
+                .map { it.name to it.toTypeInfo(allowGenerics = allowGenerics) }
+
+/**
+ * [toAnnotatedFunctions] converts the library instance to a list of pairs of the form
+ * (methods name, method function type).
+ * It has a parameter [allowGenerics] which defaults to false. It can be used to control whether
+ * to allow generics in runtime library.
+ */
+internal fun R.toAnnotatedFunctions(allowGenerics: Boolean = false): List<Pair<String, TypeInfo>> =
+        toAnnotatedFunctionSequence(allowGenerics = allowGenerics).toList()
+
+private fun Pair<String, TypeInfo>.toFunctionMember(c: FunctionCategory): ClassFunctionMember {
+    val (name, typeInfo) = this
+    val functionType = typeInfo.typeExpr as TypeExpr.Function
+    val arguments = functionType.argumentTypes.mapIndexed { i, t -> "var$i" to t }
+    return ClassFunctionMember(
+            category = c, isPublic = true, identifier = name,
+            genericsDeclaration = typeInfo.genericsInfo,
+            arguments = arguments, returnType = functionType.returnType,
+            body = LiteralExpr(literal = Literal.Unit) // dummy expression
+    )
+}
+
+internal fun Clazz.withInjectedRuntime(
+        primitiveRuntimeLibrary: R, providedRuntimeLibrary: R = R.EmptyInstance
+) : Clazz {
+    val primitiveRTSeq = primitiveRuntimeLibrary
+            .toAnnotatedFunctionSequence(allowGenerics = true)
+            .map { it.toFunctionMember(c = FunctionCategory.PRIMITIVE) }
+    val providedRTSeq = providedRuntimeLibrary
+            .toAnnotatedFunctionSequence()
+            .map { it.toFunctionMember(c = FunctionCategory.PROVIDED) }
+    primitiveRTSeq.toMutableList().apply { addAll(providedRTSeq) }
 }

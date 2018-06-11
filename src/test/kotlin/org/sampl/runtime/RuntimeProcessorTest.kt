@@ -3,20 +3,25 @@ package org.sampl.runtime
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 import org.sampl.ast.type.TypeExpr
+import org.sampl.ast.type.TypeInfo
+import org.sampl.ast.type.stringTypeExpr
 import org.sampl.ast.type.unitTypeExpr
-import org.sampl.runtime.RuntimeProcessor.toAnnotatedMethods
+import org.sampl.exceptions.DisallowedRuntimeFunctionError
 
 /**
- * [RuntimeProcessorTest] tests whether the [RuntimeProcessor] works correctly.
+ * [RuntimeProcessorTest] tests whether the Runtime Processor works correctly.
  */
 class RuntimeProcessorTest {
 
     /**
      * [testCorrectness] tests whether running [RuntimeProcessor] on [lib] will produce
      * [expectedOutput].
+     * It has a parameter [allowGenerics] which defaults to false. It can be used to control whether
+     * to allow generics in runtime library.
      */
-    private fun testCorrectness(lib: RuntimeLibrary, expectedOutput: List<Pair<String, TypeExpr>>) {
-        assertEquals(expectedOutput, lib.toAnnotatedMethods())
+    private fun testCorrectness(lib: RuntimeLibrary, expectedOutput: List<Pair<String, TypeInfo>>,
+                                allowGenerics: Boolean = false) {
+        assertEquals(expectedOutput, lib.toAnnotatedFunctions(allowGenerics = allowGenerics))
     }
 
     /**
@@ -61,7 +66,7 @@ class RuntimeProcessorTest {
     @Test
     fun onePublicFunctionTest() {
         testCorrectness(lib = RuntimeLibraryWithOnePublicFunction, expectedOutput = listOf(
-                "abc" to TypeExpr.Function(emptyList(), unitTypeExpr)
+                "abc" to TypeExpr.Function(emptyList(), unitTypeExpr).asTypeInformation
         ))
     }
 
@@ -80,6 +85,50 @@ class RuntimeProcessorTest {
     @Test
     fun noAnnotationEmptyTest() {
         testCorrectness(lib = RuntimeLibraryWithNoAnnotation, expectedOutput = emptyList())
+    }
+
+    /**
+     * [SimpleLibraryWithGenerics] is a quick demo to see how generics works in the processor.
+     */
+    private object SimpleLibraryWithGenerics : RuntimeLibrary {
+        @RuntimeFunction
+        @JvmStatic
+        fun <T : Any> objectToString(obj: T): String = obj.toString()
+
+    }
+
+    /**
+     * [simpleLibraryWithGenericsDisallowedTest] tests whether the processor can correctly deal
+     * with generics information when it's not allowed.
+     */
+    @Test(expected = DisallowedRuntimeFunctionError::class)
+    fun simpleLibraryWithGenericsDisallowedTest() {
+        SimpleLibraryWithGenerics.toAnnotatedFunctions()
+    }
+
+    /**
+     * [simpleLibraryWithGenericsAllowedTest] tests whether the processor can correctly deal with
+     * simple generics information when allowed to do so.
+     */
+    @Test
+    fun simpleLibraryWithGenericsAllowedTest() {
+        testCorrectness(lib = SimpleLibraryWithGenerics, expectedOutput = listOf(
+                "objectToString" to TypeInfo(
+                        typeExpr = TypeExpr.Function(
+                                argumentTypes = listOf(TypeExpr.Identifier(type = "T")),
+                                returnType = stringTypeExpr
+                        ),
+                        genericsInfo = listOf("T")
+                )
+        ), allowGenerics = true)
+    }
+
+    /**
+     * [primitiveRuntimeLibraryIsGoodTest] ensures the primitive runtime library is good to use.
+     */
+    @Test
+    fun primitiveRuntimeLibraryIsGoodTest() {
+        PrimitiveRuntimeLibrary.toAnnotatedFunctions(allowGenerics = true).forEach { println(it) }
     }
 
 }

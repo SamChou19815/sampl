@@ -2,10 +2,9 @@ package org.sampl
 
 import org.sampl.ast.raw.Clazz
 import org.sampl.codegen.ToKotlinCompiler
+import org.sampl.runtime.PrimitiveRuntimeLibrary
+import org.sampl.runtime.toAnnotatedFunctions
 import org.sampl.util.AntlrUtil
-import org.sampl.util.executeAndGetValue
-import org.sampl.util.writeToFile
-import java.io.File
 
 /**
  * [PLCompiler] is responsible for the compilation of all the given source files.
@@ -13,38 +12,19 @@ import java.io.File
 object PLCompiler {
 
     /**
-     * [compile] tries to compile the given [clazz] node.
+     * [compile] tries to compile the given [clazz] node and returns the compiled Kotlin code.
      */
     @JvmStatic
-    private fun compile(clazz: Clazz) {
-        val decoratedProgram = clazz.typeCheck()
-        val kotlinCode = ToKotlinCompiler.compile(node = decoratedProgram)
-        // Write Kotlin code to file
-        File(KOTLIN_CODE_OUT_DIR).mkdirs()
-        val filename = "$KOTLIN_CODE_OUT_DIR$TOP_LEVEL_PROGRAM_NAME.kt"
-        writeToFile(filename = filename, content = kotlinCode)
-        // Invoke Kotlin compiler
-        File(JAR_OUT_DIR).mkdirs()
-        val command = "kotlinc-jvm $filename $KOTLIN_COMPILER_ARGS"
-        val exitValue = executeAndGetValue(command = command)
-        if (exitValue != 0) {
-            // If type checking and code generation work, we should not get error.
-            throw RuntimeException("It should return 0, but instead we got: $exitValue.")
-        }
+    private fun compile(clazz: Clazz): String {
+        return ToKotlinCompiler.compile(node = clazz.typeCheck())
     }
 
     /**
-     * [compileFromSource] tries to compile all the source files in the given [code].
+     * [compileFromSource] tries to compile all the source files in the given [code] and returns
+     * the compiled Kotlin code.
      */
     @JvmStatic
-    fun compileFromSource(code: String): Unit =
+    fun compileFromSource(code: String): String =
             compile(clazz = AntlrUtil.createClassFromSource(code = code))
-
-    /**
-     * [compileFromDirectory] tries to compile all the source files in the given [directory].
-     */
-    @JvmStatic
-    fun compileFromDirectory(directory: String): Unit =
-            compile(clazz = AntlrUtil.createClassFromDirectory(directory = directory))
 
 }

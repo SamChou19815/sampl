@@ -112,7 +112,7 @@ class SimpleTest {
      */
     @Test
     fun compileSimple() {
-        PLCompiler.compileFromSource(code = multipleFeaturesProgram)
+        FullCompiler.compile(code = multipleFeaturesProgram)
     }
 
 }

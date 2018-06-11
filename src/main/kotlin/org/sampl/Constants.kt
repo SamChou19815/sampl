@@ -39,7 +39,7 @@ const val JAR_OUT_DIR: String = "./build/$LANG_NAME/jar/"
 private const val JAR_OUT_NAME: String = "${JAR_OUT_DIR}program.jar"
 
 /**
- * [KOTLIN_COMPILER_ARGS] is a string of arguments passed to kotlin compiler.
+ * [kotlinCompilerArgs] is a array of arguments passed to kotlin compiler.
  */
-val KOTLIN_COMPILER_ARGS: String =
+val kotlinCompilerArgs: String =
         "-classpath $KOTLIN_CODE_OUT_DIR -d $JAR_OUT_NAME -include-runtime -nowarn"
