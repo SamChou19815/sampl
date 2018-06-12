@@ -41,23 +41,7 @@ internal object AntlrUtil {
     @JvmStatic
     fun createClassFromSource(code: String): Clazz {
         val input = ByteArrayInputStream(code.toByteArray(charset = Charset.defaultCharset()))
-        val rawClass = input.toCompilationUnit().clazz
-        // Inject primitive runtime library
-        val newFunctionMembers = PrimitiveRuntimeLibrary.annotatedFunctions.asSequence()
-                .map { (name, typeInfo) ->
-                    val functionType = typeInfo.typeExpr as TypeExpr.Function
-                    val arguments = functionType.argumentTypes.mapIndexed { i, t -> "var$i" to t }
-                    ClassFunctionMember(
-                            category = FunctionCategory.PRIMITIVE,
-                            isPublic = true, identifier = name,
-                            genericsDeclaration = typeInfo.genericsInfo,
-                            arguments = arguments, returnType = functionType.returnType,
-                            body = LiteralExpr(literal = Literal.Unit) // dummy expression
-                    )
-                }
-                .toMutableList()
-        newFunctionMembers.addAll(rawClass.members.functionMembers)
-        return rawClass.copy(members = rawClass.members.copy(functionMembers = newFunctionMembers))
+        return input.toCompilationUnit().clazz
     }
 
 }

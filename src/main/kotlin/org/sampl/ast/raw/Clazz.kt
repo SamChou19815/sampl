@@ -10,6 +10,8 @@ import org.sampl.ast.type.TypeInfo
 import org.sampl.environment.TypeCheckingEnv
 import org.sampl.exceptions.CompileTimeError
 import org.sampl.exceptions.IdentifierError
+import org.sampl.runtime.RuntimeLibrary
+import org.sampl.runtime.withInjectedRuntime
 
 /**
  * [Clazz] node has an type identifier with generics [identifier], a type [declaration] and a set
@@ -123,15 +125,18 @@ data class Clazz(
     }
 
     /**
-     * [typeCheck] tries to type check this top-level class.
+     * [typeCheck] tries to type check this top-level class with an optional
+     * [providedRuntimeLibrary] as the type checking context.
      * If it does not type check, it will throw an [CompileTimeError]
      *
      * @return the decorated program after type check.
      */
-    fun typeCheck(): DecoratedProgram {
+    fun typeCheck(providedRuntimeLibrary: RuntimeLibrary? = null): DecoratedProgram {
         noNameShadowingValidation(set = hashSetOf())
-        val clazz = typeCheck(e = TypeCheckingEnv.initial).first
-        return DecoratedProgram(clazz = clazz)
+        val clazz = withInjectedRuntime(providedRuntimeLibrary = providedRuntimeLibrary)
+                .typeCheck(e = TypeCheckingEnv.initial)
+                .first
+        return DecoratedProgram(clazz = clazz, providedRuntimeLibrary = providedRuntimeLibrary)
     }
 
 }

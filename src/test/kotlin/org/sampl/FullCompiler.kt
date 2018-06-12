@@ -1,5 +1,7 @@
 package org.sampl
 
+import org.sampl.runtime.RuntimeLibrary
+import org.sampl.util.currentClassPath
 import org.sampl.util.executeAndGetValue
 import org.sampl.util.writeToFile
 import java.io.File
@@ -11,17 +13,22 @@ import java.io.File
 object FullCompiler {
 
     /**
-     * [compile] tries to compile the given [code] to JVM bytecode directly.
+     * [compile] tries to compile the given [code] to JVM bytecode directly, with an optional
+     * [providedRuntimeLibrary].
      */
     @JvmStatic
-    fun compile(code: String) {
-        val kotlinCode = PLCompiler.compileFromSource(code = code)
+    fun compile(code: String, providedRuntimeLibrary: RuntimeLibrary? = null) {
+        val kotlinCode = PLCompiler.compileFromSource(
+                code = code, providedRuntimeLibrary = providedRuntimeLibrary
+        )
         // Write Kotlin code to file
         File(KOTLIN_CODE_OUT_DIR).mkdirs()
         val filename = "$KOTLIN_CODE_OUT_DIR$TOP_LEVEL_PROGRAM_NAME.kt"
         writeToFile(filename = filename, content = kotlinCode)
         // Invoke Kotlin compiler
-        val command = "kotlinc-jvm $filename $kotlinCompilerArgs"
+        val classPath = "$KOTLIN_CODE_OUT_DIR:$currentClassPath"
+        println(classPath)
+        val command = "kotlinc-jvm $filename -classpath $classPath $kotlinCompilerFixedArgs"
         val exitValue = executeAndGetValue(command = command)
         if (exitValue != 0) {
             // If type checking and code generation work, we should not get error.

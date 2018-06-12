@@ -18,7 +18,7 @@ import org.sampl.exceptions.UnexpectedTypeError
  * generation.
  */
 data class ClassFunctionMember(
-        private val category: FunctionCategory = USER_DEFINED,
+        val category: FunctionCategory = USER_DEFINED,
         override val isPublic: Boolean, val identifier: String,
         val genericsDeclaration: List<String>,
         val arguments: List<Pair<String, TypeExpr>>,

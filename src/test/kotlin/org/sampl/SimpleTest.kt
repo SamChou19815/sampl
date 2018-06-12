@@ -4,6 +4,7 @@ import junit.framework.TestCase.assertEquals
 import org.junit.Test
 import org.sampl.codegen.PrettyPrinter
 import org.sampl.codegen.ToKotlinCompiler
+import org.sampl.runtime.RuntimeLibrary
 import org.sampl.util.AntlrUtil
 import org.sampl.util.writeToFile
 
@@ -112,7 +113,10 @@ class SimpleTest {
      */
     @Test
     fun compileSimple() {
-        FullCompiler.compile(code = multipleFeaturesProgram)
+        FullCompiler.compile(
+                code = multipleFeaturesProgram,
+                providedRuntimeLibrary = RuntimeLibrary.EmptyInstance
+        )
     }
 
 }

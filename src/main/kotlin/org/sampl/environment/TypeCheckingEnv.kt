@@ -1,6 +1,8 @@
 package org.sampl.environment
 
 import com.developersam.fp.FpMap
+import org.sampl.ast.common.FunctionCategory
+import org.sampl.ast.raw.ClassFunctionMember
 import org.sampl.ast.raw.ClassMember
 import org.sampl.ast.raw.Clazz
 import org.sampl.ast.type.TypeDeclaration
@@ -79,12 +81,16 @@ data class TypeCheckingEnv(
                 }
         // remove private members
         val removeAndChangeMember = { env: FpMap<String, TypeInfo>, member: ClassMember ->
-            val name = member.name
-            if (member.isPublic) {
-                val v = env[name] ?: error(message = "Impossible")
-                env.remove(key = name).put(key = "${clazz.name}.$name", value = v)
+            if (member is ClassFunctionMember && member.category != FunctionCategory.USER_DEFINED) {
+                env
             } else {
-                env.remove(key = name)
+                val name = member.name
+                if (member.isPublic) {
+                    val v = env[name] ?: error(message = "Impossible. Name: $name")
+                    env.remove(key = name).put(key = "${clazz.name}.$name", value = v)
+                } else {
+                    env.remove(key = name)
+                }
             }
         }
         val newTypeEnv = typeEnv

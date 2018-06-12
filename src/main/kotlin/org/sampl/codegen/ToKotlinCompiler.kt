@@ -1,8 +1,10 @@
 package org.sampl.codegen
 
+import jdk.nashorn.internal.objects.NativeArray.forEach
 import org.sampl.EASTER_EGG
 import org.sampl.TOP_LEVEL_PROGRAM_NAME
 import org.sampl.ast.common.BinaryOperator
+import org.sampl.ast.common.FunctionCategory
 import org.sampl.ast.common.Literal
 import org.sampl.ast.decorated.DecoratedClass
 import org.sampl.ast.decorated.DecoratedClassConstantMember
@@ -21,6 +23,8 @@ import org.sampl.ast.type.intTypeExpr
 import org.sampl.ast.type.stringTypeExpr
 import org.sampl.ast.type.unitTypeExpr
 import org.sampl.util.joinToGenericsInfoString
+import java.io.BufferedReader
+import java.io.InputStreamReader
 
 /**
  * [ToKotlinCompiler] is responsible for compiling the given AST node to valid Kotlin Code.
@@ -82,7 +86,16 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
         q.addLine(line = " * $EASTER_EGG")
         q.addLine(line = " */")
         q.addEmptyLine()
-        q.addLine(line = "class PLException(val m: String): RuntimeException(m)")
+        // Include provided library, if exists
+        node.providedRuntimeLibrary?.let { providedLibrary ->
+            q.addLine(line = "import ${providedLibrary::class.java.canonicalName}")
+            q.addEmptyLine()
+        }
+        // Include primitive library
+        this::class.java.getResourceAsStream("/PrimitiveRuntimeLibrary.kt")
+                .let { BufferedReader(InputStreamReader(it)) }
+                .lineSequence()
+                .forEach { q.addLine(line = it) }
         q.addEmptyLine()
         val clazz = node.clazz
         convert(node = clazz)
@@ -211,7 +224,9 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
         q.addLine(line = "companion object {")
         q.indentAndApply {
             node.constantMembers.forEach(compilerAction)
-            node.functionMembers.forEach(compilerAction)
+            node.functionMembers.asSequence()
+                    .filter { it.category == FunctionCategory.USER_DEFINED }
+                    .forEach(compilerAction)
         }
         q.addLine(line = "}")
         node.nestedClassMembers.forEach(compilerAction)

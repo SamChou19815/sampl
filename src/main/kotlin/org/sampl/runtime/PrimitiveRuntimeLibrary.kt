@@ -1,25 +1,11 @@
 package org.sampl.runtime
 
-import org.sampl.ast.type.TypeInfo
 import org.sampl.exceptions.PLException
 
 /**
  * [PrimitiveRuntimeLibrary] contains a collection of methods for primitive runtime functions.
  */
 object PrimitiveRuntimeLibrary : RuntimeLibrary {
-
-    /*
-     * ------------------------------------------------------------
-     * Part 0: Information about itself (not part of primitive lib)
-     * ------------------------------------------------------------
-     */
-
-    /**
-     * [annotatedFunctions] contains a list of annotated functions.
-     */
-    @JvmField
-    val annotatedFunctions: List<Pair<String, TypeInfo>> =
-            toAnnotatedFunctions(allowGenerics = true)
 
     /*
      * ------------------------------------------------------------
@@ -211,6 +197,13 @@ object PrimitiveRuntimeLibrary : RuntimeLibrary {
      */
 
     /**
+     * [getLength] returns the length of the string [s].
+     */
+    @RuntimeFunction
+    @JvmStatic
+    fun getLength(s: String): Long = s.length.toLong()
+
+    /**
      * [getChar] returns char at [index] of [s]. Throws "OUT_OF_BOUND" if [index] is out of bound.
      */
     @RuntimeFunction
@@ -234,5 +227,26 @@ object PrimitiveRuntimeLibrary : RuntimeLibrary {
             } catch (e: IndexOutOfBoundsException) {
                 throw throw PLException("OUT_OF_BOUND")
             }
+
+    /**
+     * [trimString] returns the trimmed version of [s].
+     */
+    @RuntimeFunction
+    @JvmStatic
+    fun trimString(s: String): String = s.trim()
+
+    /**
+     * [containsSubstring] returns whether [sub] is contained in [s].
+     */
+    @RuntimeFunction
+    @JvmStatic
+    fun containsSubstring(sub: String, s: String): Boolean = s.contains(other = sub)
+
+    /**
+     * [indexOf] returns the index of [sub] in [s]. Returns -1 if [sub] is not in [s].
+     */
+    @RuntimeFunction
+    @JvmStatic
+    fun indexOf(sub: String, s: String): Long = s.indexOf(string = sub).toLong()
 
 }
