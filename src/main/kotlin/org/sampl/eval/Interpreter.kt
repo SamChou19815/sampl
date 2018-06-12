@@ -35,6 +35,7 @@ import org.sampl.ast.decorated.DecoratedExpression
 import org.sampl.ast.decorated.DecoratedPattern
 import org.sampl.ast.decorated.DecoratedProgram
 import org.sampl.environment.EvalEnv
+import org.sampl.environment.exitClass
 import org.sampl.exceptions.PLException
 
 /**
@@ -56,29 +57,32 @@ class Interpreter(private val program: DecoratedProgram) {
     /**
      * [eval] evaluates the given [node] to a value under the given [env].
      */
-    private fun eval(env: EvalEnv, node: DecoratedClass): EvalEnv {
-        TODO()
-    }
+    private fun eval(env: EvalEnv, node: DecoratedClass): EvalEnv =
+            eval(env = env, node = node.members).exitClass(clazz = node)
 
     /**
      * [eval] evaluates the given [node] to a value under the given [env].
      */
-    private fun eval(env: EvalEnv, node: DecoratedClassMembers): EvalEnv {
-        TODO()
-    }
+    private fun eval(env: EvalEnv, node: DecoratedClassMembers): EvalEnv = env
+            .let { node.constantMembers.fold(initial = it, operation = ::eval) }
+            .let { node.functionMembers.fold(initial = it, operation = ::eval) /* TODO */ }
+            .let { node.nestedClassMembers.fold(initial = it, operation = ::eval) }
 
     /**
      * [eval] evaluates the given [node] to a value under the given [env].
      */
-    private fun eval(env: EvalEnv, node: DecoratedClassConstantMember): EvalEnv {
-        TODO()
-    }
+    private fun eval(env: EvalEnv, node: DecoratedClassConstantMember): EvalEnv =
+            env.put(key = node.identifier, value = node.expr.eval(env = env))
 
     /**
      * [eval] evaluates the given [node] to a value under the given [env].
      */
     private fun eval(env: EvalEnv, node: DecoratedClassFunctionMember): EvalEnv {
-        TODO()
+        val closure = ClosureValue(
+                category = node.category, name = node.identifier, environment = env,
+                arguments = node.arguments.map { it.first }, code = node.body
+        )
+        return env.put(key = node.identifier, value = closure)
     }
 
     /**
