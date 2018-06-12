@@ -87,6 +87,10 @@ private fun R.toAnnotatedFunctionSequence(
 internal fun R.toAnnotatedFunctions(allowGenerics: Boolean = false): List<Pair<String, TypeInfo>> =
         toAnnotatedFunctionSequence(allowGenerics = allowGenerics).toList()
 
+/**
+ * [toFunctionMember] converts a pair of function name and type info to a class function member
+ * with the specified function category [c].
+ */
 private fun Pair<String, TypeInfo>.toFunctionMember(c: FunctionCategory): ClassFunctionMember {
     val (name, typeInfo) = this
     val functionType = typeInfo.typeExpr as TypeExpr.Function
@@ -99,14 +103,21 @@ private fun Pair<String, TypeInfo>.toFunctionMember(c: FunctionCategory): ClassF
     )
 }
 
-internal fun Clazz.withInjectedRuntime(
-        primitiveRuntimeLibrary: R, providedRuntimeLibrary: R = R.EmptyInstance
-) : Clazz {
-    val primitiveRTSeq = primitiveRuntimeLibrary
+/**
+ * [Clazz.withInjectedRuntime] returns a copy of itself but with [PrimitiveRuntimeLibrary]
+ * and an optional [providedRuntimeLibrary] injected to itself.
+ */
+internal fun Clazz.withInjectedRuntime(providedRuntimeLibrary: R? = null): Clazz {
+    val primitiveRTSeq = PrimitiveRuntimeLibrary
             .toAnnotatedFunctionSequence(allowGenerics = true)
             .map { it.toFunctionMember(c = FunctionCategory.PRIMITIVE) }
     val providedRTSeq = providedRuntimeLibrary
-            .toAnnotatedFunctionSequence()
-            .map { it.toFunctionMember(c = FunctionCategory.PROVIDED) }
-    primitiveRTSeq.toMutableList().apply { addAll(providedRTSeq) }
+            ?.toAnnotatedFunctionSequence()
+            ?.map { it.toFunctionMember(c = FunctionCategory.PROVIDED) }
+            ?: emptySequence()
+    val newFunctionMembers = primitiveRTSeq.toMutableList()
+            .apply { addAll(elements = providedRTSeq) }
+            .apply { addAll(elements = members.functionMembers) }
+            .toList()
+    return copy(members = members.copy(functionMembers = newFunctionMembers))
 }
