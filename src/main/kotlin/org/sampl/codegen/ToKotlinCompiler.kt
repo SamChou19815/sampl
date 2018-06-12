@@ -20,6 +20,7 @@ import org.sampl.ast.type.boolTypeExpr
 import org.sampl.ast.type.charTypeExpr
 import org.sampl.ast.type.floatTypeExpr
 import org.sampl.ast.type.intTypeExpr
+import org.sampl.ast.type.stringArrayTypeExpr
 import org.sampl.ast.type.stringTypeExpr
 import org.sampl.ast.type.unitTypeExpr
 import org.sampl.util.joinToGenericsInfoString
@@ -66,6 +67,7 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
             this == boolTypeExpr -> "Boolean"
             this == charTypeExpr -> "Char"
             this == stringTypeExpr -> "String"
+            this == stringArrayTypeExpr -> "Array<String>"
             genericsInfo.isEmpty() -> type
             else -> type + genericsInfo.joinToGenericsInfoString()
         }
@@ -312,6 +314,8 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
      * [BinaryOperator.toKotlinForm] maps the binary operator to its form in Kotlin
      */
     private fun BinaryOperator.toKotlinForm(): String = when (this) {
+        BinaryOperator.AND -> "and"
+        BinaryOperator.LOR -> "or"
         BinaryOperator.F_MUL -> "*"
         BinaryOperator.F_DIV -> "/"
         BinaryOperator.F_PLUS -> "+"
@@ -336,7 +340,7 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
 
     override fun convert(node: DecoratedExpression.Match) {
         val matchedStr = node.exprToMatch.toOneLineCode()
-        q.addLine(line = "with($matchedStr){ when(it) {")
+        q.addLine(line = "with($matchedStr){ when(this) {")
         q.indentAndApply {
             for ((pattern, expr) in node.matchingList) {
                 when (pattern) {

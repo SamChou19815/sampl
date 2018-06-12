@@ -37,6 +37,7 @@ import org.sampl.ast.type.charTypeExpr
 import org.sampl.ast.type.floatTypeExpr
 import org.sampl.ast.type.intTypeExpr
 import org.sampl.ast.type.stringTypeExpr
+import org.sampl.ast.type.unitTypeExpr
 import org.sampl.environment.TypeCheckingEnv
 import org.sampl.exceptions.GenericsError
 import org.sampl.exceptions.IdentifierError
@@ -353,7 +354,8 @@ data class BinaryExpr(
             LT, LE, GT, GE -> {
                 // comparison type operator
                 when (leftType) {
-                    intTypeExpr, floatTypeExpr, charTypeExpr, stringTypeExpr -> {
+                    unitTypeExpr, intTypeExpr, floatTypeExpr, boolTypeExpr,
+                    charTypeExpr, stringTypeExpr -> {
                         if (leftType == rightType) boolTypeExpr else {
                             throw UnexpectedTypeError(
                                     expectedType = leftType, actualType = rightType

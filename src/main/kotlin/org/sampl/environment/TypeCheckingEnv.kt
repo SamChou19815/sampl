@@ -11,6 +11,7 @@ import org.sampl.ast.type.boolTypeId
 import org.sampl.ast.type.charTypeId
 import org.sampl.ast.type.floatTypeId
 import org.sampl.ast.type.intTypeId
+import org.sampl.ast.type.stringArrayTypeId
 import org.sampl.ast.type.stringTypeId
 import org.sampl.ast.type.unitTypeId
 
@@ -113,7 +114,8 @@ data class TypeCheckingEnv(
                         floatTypeId.name to floatTypeId.genericsInfo,
                         boolTypeId.name to boolTypeId.genericsInfo,
                         charTypeId.name to charTypeId.genericsInfo,
-                        stringTypeId.name to stringTypeId.genericsInfo
+                        stringTypeId.name to stringTypeId.genericsInfo,
+                        stringArrayTypeId.name to stringArrayTypeId.genericsInfo
                 )
         )
     }

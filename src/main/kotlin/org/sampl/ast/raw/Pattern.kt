@@ -15,8 +15,9 @@ sealed class Pattern {
      * [DecoratedPattern] and a new TypeCheckingEnv after type checking this pattern.
      * It should also removed used types in [variantTypeDefs].
      */
-    abstract fun typeCheck(typeToMatch: T, environment: E,
-                           variantTypeDefs: MutableMap<String, T?>): Pair<DecoratedPattern, E>
+    abstract fun typeCheck(
+            typeToMatch: T, environment: E, variantTypeDefs: MutableMap<String, T?>
+    ): Pair<DecoratedPattern, E>
 
     /**
      * [Variant] represents the variant pattern with [variantIdentifier] and potentially an
@@ -24,8 +25,9 @@ sealed class Pattern {
      */
     data class Variant(val variantIdentifier: String, val associatedVariable: String?) : Pattern() {
 
-        override fun typeCheck(typeToMatch: T, environment: E,
-                               variantTypeDefs: MutableMap<String, T?>): Pair<DecoratedPattern, E> {
+        override fun typeCheck(
+                typeToMatch: T, environment: E, variantTypeDefs: MutableMap<String, T?>
+        ): Pair<DecoratedPattern, E> {
             if (variantIdentifier !in variantTypeDefs) {
                 throw PatternMatchingError.WrongPattern(patternId = variantIdentifier)
             }
@@ -57,8 +59,9 @@ sealed class Pattern {
      */
     data class Variable(val identifier: String) : Pattern() {
 
-        override fun typeCheck(typeToMatch: T, environment: E,
-                               variantTypeDefs: MutableMap<String, T?>): Pair<DecoratedPattern, E> {
+        override fun typeCheck(
+                typeToMatch: T, environment: E, variantTypeDefs: MutableMap<String, T?>
+        ): Pair<DecoratedPattern, E> {
             variantTypeDefs.clear()
             val p = DecoratedPattern.Variable(
                     identifier = identifier, type = typeToMatch
@@ -75,8 +78,9 @@ sealed class Pattern {
      * [WildCard] represents a wildcard but does not bound to anything.
      */
     object WildCard : Pattern() {
-        override fun typeCheck(typeToMatch: T, environment: E,
-                               variantTypeDefs: MutableMap<String, T?>): Pair<DecoratedPattern, E> {
+        override fun typeCheck(
+                typeToMatch: T, environment: E, variantTypeDefs: MutableMap<String, T?>
+        ): Pair<DecoratedPattern, E> {
             variantTypeDefs.clear()
             return DecoratedPattern.WildCard to environment
         }

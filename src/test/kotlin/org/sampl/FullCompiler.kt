@@ -27,7 +27,6 @@ object FullCompiler {
         writeToFile(filename = filename, content = kotlinCode)
         // Invoke Kotlin compiler
         val classPath = "$KOTLIN_CODE_OUT_DIR:$currentClassPath"
-        println(classPath)
         val command = "kotlinc-jvm $filename -classpath $classPath $kotlinCompilerFixedArgs"
         val exitValue = executeAndGetValue(command = command)
         if (exitValue != 0) {

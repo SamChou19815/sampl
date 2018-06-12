@@ -96,7 +96,7 @@ factorOperator : MUL | DIV | MOD | F_MUL | F_DIV;
 
 termOperator : PLUS | MINUS | F_PLUS | F_MINUS | STR_CONCAT;
 
-comparisonOperator : REF_EQ | STRUCT_EQ | LT | LE | GT | GE | REF_NE | STRUCT_NE;
+comparisonOperator : LT | LE | GT | GE | STRUCT_EQ | STRUCT_NE;
 
 // Literal collections
 

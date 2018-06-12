@@ -40,3 +40,4 @@ fun getSubstring(from: Long, to: Long, s: String): String =
 fun trimString(s: String): String = s.trim()
 fun containsSubstring(sub: String, s: String): Boolean = s.contains(other = sub)
 fun indexOf(sub: String, s: String): Long = s.indexOf(string = sub).toLong()
+fun split(delimiter: String, s: String): Array<String> = s.split(delimiter).toTypedArray()

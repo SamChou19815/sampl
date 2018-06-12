@@ -249,4 +249,11 @@ object PrimitiveRuntimeLibrary : RuntimeLibrary {
     @JvmStatic
     fun indexOf(sub: String, s: String): Long = s.indexOf(string = sub).toLong()
 
+    /**
+     * [split] returns an array of split strings fro [s] with [delimiter].
+     */
+    @RuntimeFunction
+    @JvmStatic
+    fun split(delimiter: String, s: String): Array<String> = s.split(delimiter).toTypedArray()
+
 }

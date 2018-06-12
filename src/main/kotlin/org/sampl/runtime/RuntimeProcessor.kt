@@ -11,6 +11,7 @@ import org.sampl.ast.type.boolTypeExpr
 import org.sampl.ast.type.charTypeExpr
 import org.sampl.ast.type.floatTypeExpr
 import org.sampl.ast.type.intTypeExpr
+import org.sampl.ast.type.stringArrayTypeExpr
 import org.sampl.ast.type.stringTypeExpr
 import org.sampl.ast.type.unitTypeExpr
 import org.sampl.exceptions.DisallowedRuntimeFunctionError
@@ -32,6 +33,7 @@ private fun Type.toAllowedTypeExpr(genericsInfo: List<String>): TypeExpr? = when
     "boolean" -> boolTypeExpr
     "char" -> charTypeExpr
     "java.lang.String" -> stringTypeExpr
+    "java.lang.String[]" -> stringArrayTypeExpr
     in genericsInfo -> TypeExpr.Identifier(type = typeName)
     else -> {
         println(typeName); null

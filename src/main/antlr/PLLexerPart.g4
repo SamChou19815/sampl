@@ -92,13 +92,11 @@ F_PLUS : '+.';
 F_MINUS : '-.';
 STR_CONCAT : '^';
 
-REF_EQ : '===';
 STRUCT_EQ : '==';
 LT : '<';
 LE : '<=';
 GT : '>';
 GE : '>=';
-REF_NE : '!==';
 STRUCT_NE : '!=';
 
 AND : '&&';

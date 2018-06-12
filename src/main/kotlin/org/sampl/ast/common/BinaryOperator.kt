@@ -91,17 +91,9 @@ enum class BinaryOperator(val symbol: String, val precedenceLevel: Int) {
      */
     GE(symbol = ">=", precedenceLevel = 3),
     /**
-     * Referential equality.
-     */
-    REF_EQ(symbol = "===", precedenceLevel = 4),
-    /**
      * Structural equality.
      */
     STRUCT_EQ(symbol = "==", precedenceLevel = 4),
-    /**
-     * Referential NOT equality.
-     */
-    REF_NE(symbol = "!==", precedenceLevel = 4),
     /**
      * Structural NOT equality.
      */
