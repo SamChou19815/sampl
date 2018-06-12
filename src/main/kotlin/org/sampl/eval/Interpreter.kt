@@ -37,6 +37,7 @@ import org.sampl.ast.decorated.DecoratedProgram
 import org.sampl.environment.EvalEnv
 import org.sampl.environment.exitClass
 import org.sampl.exceptions.PLException
+import org.sampl.runtime.PrimitiveRuntimeLibrary
 
 /**
  * [Interpreter] is responsible for evaluating the program ASTs and give a value.
@@ -368,7 +369,6 @@ class Interpreter(private val program: DecoratedProgram) {
     /**
      * [eval] evaluates the given [node] to a value under the given [env].
      */
-    @Suppress(names = ["UNCHECKED_CAST"])
     private fun eval(env: EvalEnv, node: DecoratedExpression.FunctionApplication): Value {
         val closure = node.functionExpr.eval(env = env) as ClosureValue
         val argumentValues = node.arguments.map { it.eval(env = env) }
@@ -378,33 +378,23 @@ class Interpreter(private val program: DecoratedProgram) {
                     .fold(initial = closure.environment) { e, (name, value) -> e.put(name, value) }
             return when (closure.category) {
                 FunctionCategory.PRIMITIVE -> {
-                    TODO()
+                    // Improve performance later
+                    PrimitiveRuntimeLibrary.invokeFunction(
+                            name = closure.name!!, arguments = argumentValues
+                    )
                 }
                 FunctionCategory.PROVIDED -> {
                     if (program.providedRuntimeLibrary == null) {
                         error(message = "Impossible")
                     }
-                    val method = program.providedRuntimeLibrary.javaClass.methods
-                            .first { it.name == closure.name }
-                    val result = method.invoke(null,
-                            *argumentValues.map(Value::asAny).toTypedArray())
-                    when (result) {
-                        is Void, is Unit -> UnitValue
-                        is Long -> IntValue(value = result)
-                        is Double -> FloatValue(value = result)
-                        is Boolean -> BoolValue(value = result)
-                        is Char -> CharValue(value = result)
-                        is String -> StringValue(value = result)
-                        result.javaClass.isArray -> StringArrayValue(
-                                value = result as Array<String>
-                        )
-                        else -> error(message = "Impossible")
-                    }
+                    program.providedRuntimeLibrary.invokeFunction(
+                            name = closure.name!!, arguments = argumentValues
+                    )
                 }
                 FunctionCategory.USER_DEFINED -> closure.code.eval(env = newEnv)
             }
         } else {
-            // Need curring
+            // Need curring, don't care it's category.
             TODO()
         }
     }
