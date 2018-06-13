@@ -1,9 +1,13 @@
 package org.sampl
 
 import junit.framework.TestCase.assertEquals
+import org.junit.Ignore
 import org.junit.Test
 import org.sampl.codegen.PrettyPrinter
 import org.sampl.codegen.ToKotlinCompiler
+import org.sampl.eval.IntValue
+import org.sampl.eval.StringValue
+import org.sampl.eval.UnitValue
 import org.sampl.runtime.RuntimeLibrary
 import org.sampl.util.AntlrUtil
 import org.sampl.util.writeToFile
@@ -47,7 +51,7 @@ class SimpleTest {
         fun add(a: Int, b: Int): Int = a + b
         fun add1(b: Int): Int = add(1)(b)
         // Main
-        fun main(): Unit = ()
+        fun main(): Int = add1(41)
     }
     """.trimIndent()
 
@@ -83,6 +87,33 @@ class SimpleTest {
     """.trimIndent()
 
     /**
+     * [standardHelloWorldProgram] is the standard hello world program.
+     */
+    private val standardHelloWorldProgram: String = """
+    class MainClass {
+        fun main(): Unit = printlnString("Hello World, " ^ "Sam!")
+    }
+    """.trimIndent()
+
+    /**
+     * [stringHelloWorldProgram] is the hello world program but returns a string.
+     */
+    private val stringHelloWorldProgram: String = """
+    class MainClass {
+        fun main(): String = "Hello World, " ^ "Sam!"
+    }
+    """.trimIndent()
+
+    /**
+     * [intHelloWorldProgram] is the hello world program but returns an int.
+     */
+    private val intHelloWorldProgram: String = """
+    class MainClass {
+        fun main(): Int = 32 + 10
+    }
+    """.trimIndent()
+
+    /**
      * [runInSteps] simply runs some code in [program] in compiler's steps to show that the system
      * kinds of works in each step.
      * The output is written in Program + outputId.kt
@@ -106,6 +137,9 @@ class SimpleTest {
         runInSteps(program = propositionsAreTypesProofsAreProgram, outputId = 1)
         runInSteps(program = multipleFeaturesProgram, outputId = 2)
         runInSteps(program = standardRuntimeSignatureProgram, outputId = 3)
+        runInSteps(program = standardHelloWorldProgram, outputId = 4)
+        runInSteps(program = stringHelloWorldProgram, outputId = 5)
+        runInSteps(program = intHelloWorldProgram, outputId = 6)
     }
 
     /**
@@ -117,6 +151,19 @@ class SimpleTest {
                 code = multipleFeaturesProgram,
                 providedRuntimeLibrary = RuntimeLibrary.EmptyInstance
         )
+    }
+
+    /**
+     * [interpretSimple] tests the interpreter pipe line as a whole on a simple program.
+     */
+    @Test
+    fun interpretSimple() {
+        assertEquals(UnitValue, PLInterpreter.interpret(propositionsAreTypesProofsAreProgram))
+        assertEquals(IntValue(value = 42), PLInterpreter.interpret(multipleFeaturesProgram))
+        assertEquals(UnitValue, PLInterpreter.interpret(standardHelloWorldProgram))
+        assertEquals(StringValue(value = "Hello World, Sam!"),
+                PLInterpreter.interpret(stringHelloWorldProgram))
+        assertEquals(IntValue(value = 42), PLInterpreter.interpret(intHelloWorldProgram))
     }
 
 }

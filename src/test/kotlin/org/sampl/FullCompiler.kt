@@ -18,7 +18,7 @@ object FullCompiler {
      */
     @JvmStatic
     fun compile(code: String, providedRuntimeLibrary: RuntimeLibrary? = null) {
-        val kotlinCode = PLCompiler.compileFromSource(
+        val kotlinCode = PLCompiler.compile(
                 code = code, providedRuntimeLibrary = providedRuntimeLibrary
         )
         // Write Kotlin code to file

@@ -2,6 +2,8 @@ package org.sampl.eval
 
 import org.sampl.ast.common.FunctionCategory
 import org.sampl.ast.decorated.DecoratedExpression
+import org.sampl.ast.type.TypeExpr
+import org.sampl.codegen.PrettyPrinter
 import org.sampl.environment.EvalEnv
 import java.util.Arrays
 
@@ -14,6 +16,8 @@ sealed class Value {
      * [Value] turns the value into an [Any] object.
      */
     abstract val asAny: Any
+
+    override fun toString(): String = "UnitValue"
 
 }
 
@@ -115,7 +119,7 @@ data class VariantValue(val variantIdentifier: String, val associatedValue: Valu
  */
 data class StructValue(val nameValueMap: Map<String, Value>) : Value() {
 
-    override val asAny: Any get() = this
+    override val asAny: Any get() = nameValueMap
 
 }
 
@@ -131,10 +135,12 @@ data class StructValue(val nameValueMap: Map<String, Value>) : Value() {
  * non-user-defined functions).
  */
 data class ClosureValue(
-        val category: FunctionCategory, val name: String? = null, val environment: EvalEnv,
+        val category: FunctionCategory, val name: String? = null, var environment: EvalEnv,
         val arguments: List<String>, val code: DecoratedExpression
 ) : Value() {
 
     override val asAny: Any get() = this
+
+    override fun toString(): String = "<fun>($arguments, ${PrettyPrinter.prettyPrint(node = code)})"
 
 }

@@ -18,8 +18,6 @@ import org.sampl.ast.common.BinaryOperator.MOD
 import org.sampl.ast.common.BinaryOperator.MUL
 import org.sampl.ast.common.BinaryOperator.OR
 import org.sampl.ast.common.BinaryOperator.PLUS
-import org.sampl.ast.common.BinaryOperator.REF_EQ
-import org.sampl.ast.common.BinaryOperator.REF_NE
 import org.sampl.ast.common.BinaryOperator.SHL
 import org.sampl.ast.common.BinaryOperator.SHR
 import org.sampl.ast.common.BinaryOperator.STRUCT_EQ
@@ -367,7 +365,7 @@ data class BinaryExpr(
                     )
                 }
             }
-            REF_EQ, STRUCT_EQ, REF_NE, STRUCT_NE -> {
+            STRUCT_EQ, STRUCT_NE -> {
                 // equality operator
                 if (leftType == rightType) boolTypeExpr else {
                     throw UnexpectedTypeError(

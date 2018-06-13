@@ -24,15 +24,13 @@ interface RuntimeLibrary {
                 .first { it.name == name }
         val result = method.invoke(null, *arguments.map(Value::asAny).toTypedArray())
         return when (result) {
-            is Void, is Unit -> UnitValue
+            is Void, is Unit, null -> UnitValue
             is Long -> IntValue(value = result)
             is Double -> FloatValue(value = result)
             is Boolean -> BoolValue(value = result)
             is Char -> CharValue(value = result)
             is String -> StringValue(value = result)
-            result.javaClass.isArray -> StringArrayValue(
-                    value = result as Array<String>
-            )
+            result.javaClass.isArray -> StringArrayValue(value = result as Array<String>)
             else -> error(message = "Impossible")
         }
     }

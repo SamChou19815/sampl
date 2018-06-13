@@ -29,11 +29,11 @@ import org.sampl.ast.common.FunctionCategory
 import org.sampl.ast.common.Literal
 import org.sampl.ast.decorated.DecoratedClass
 import org.sampl.ast.decorated.DecoratedClassConstantMember
-import org.sampl.ast.decorated.DecoratedClassFunctionMember
 import org.sampl.ast.decorated.DecoratedClassMembers
 import org.sampl.ast.decorated.DecoratedExpression
 import org.sampl.ast.decorated.DecoratedPattern
 import org.sampl.ast.decorated.DecoratedProgram
+import org.sampl.ast.type.TypeExpr
 import org.sampl.environment.EvalEnv
 import org.sampl.environment.exitClass
 import org.sampl.exceptions.PLException
@@ -48,26 +48,46 @@ import org.sampl.runtime.PrimitiveRuntimeLibrary
 class Interpreter(private val program: DecoratedProgram) {
 
     /**
-     * [eval] evaluates the given [node] to a value under the given [env].
+     * [eval] evaluates the given program given in the constructor.
      */
-    fun eval() {
+    fun eval(): Value {
         val completeEnv = eval(env = FpMap.empty(), node = program.clazz)
-        // TODO call main
+        val mainFunction = program.clazz.members.functionMembers.firstOrNull { member ->
+            member.isPublic && member.identifier == "main" && member.arguments.isEmpty()
+        } ?: return UnitValue
+        return mainFunction.body.eval(env = completeEnv)
     }
 
     /**
      * [eval] evaluates the given [node] to a value under the given [env].
      */
     private fun eval(env: EvalEnv, node: DecoratedClass): EvalEnv =
-            eval(env = env, node = node.members).exitClass(clazz = node)
+            eval(env = env, node = node.members)
 
     /**
      * [eval] evaluates the given [node] to a value under the given [env].
      */
     private fun eval(env: EvalEnv, node: DecoratedClassMembers): EvalEnv = env
             .let { node.constantMembers.fold(initial = it, operation = ::eval) }
-            .let { node.functionMembers.fold(initial = it, operation = ::eval) /* TODO */ }
-            .let { node.nestedClassMembers.fold(initial = it, operation = ::eval) }
+            .let { currentEnv ->
+                var e = currentEnv
+                val closures = ArrayList<ClosureValue>(node.functionMembers.size)
+                for (f in node.functionMembers) {
+                    val closure = ClosureValue(
+                            category = f.category, name = f.identifier, environment = e,
+                            arguments = f.arguments.map { it.first }, code = f.body
+                    )
+                    closures.add(element = closure)
+                    e = e.put(key = f.identifier, value = closure)
+                }
+                closures.forEach { it.environment = e }
+                e
+            }
+            .let { currentEnv ->
+                node.nestedClassMembers.fold(initial = currentEnv) { e, clazz ->
+                    eval(e, clazz).exitClass(clazz = clazz)
+                }
+            }
 
     /**
      * [eval] evaluates the given [node] to a value under the given [env].
@@ -76,22 +96,11 @@ class Interpreter(private val program: DecoratedProgram) {
             env.put(key = node.identifier, value = node.expr.eval(env = env))
 
     /**
-     * [eval] evaluates the given [node] to a value under the given [env].
-     */
-    private fun eval(env: EvalEnv, node: DecoratedClassFunctionMember): EvalEnv {
-        val closure = ClosureValue(
-                category = node.category, name = node.identifier, environment = env,
-                arguments = node.arguments.map { it.first }, code = node.body
-        )
-        return env.put(key = node.identifier, value = closure)
-    }
-
-    /**
      * [eval] evaluates this node to a value under the given [env].
      */
     private fun DecoratedExpression.eval(env: EvalEnv): Value = when (this) {
         is DecoratedExpression.Dummy -> error(message = "Must be a programmer error!")
-        is DecoratedExpression.Literal -> eval(env = env, node = this)
+        is DecoratedExpression.Literal -> eval(node = this)
         is DecoratedExpression.VariableIdentifier -> eval(env = env, node = this)
         is DecoratedExpression.Constructor -> eval(env = env, node = this)
         is DecoratedExpression.StructMemberAccess -> eval(env = env, node = this)
@@ -107,9 +116,9 @@ class Interpreter(private val program: DecoratedProgram) {
     }
 
     /**
-     * [eval] evaluates the given [node] to a value under the given [env].
+     * [eval] evaluates the given [node] to a value.
      */
-    private fun eval(env: EvalEnv, node: DecoratedExpression.Literal): Value =
+    private fun eval(node: DecoratedExpression.Literal): Value =
             when (node.literal) {
                 is Literal.Unit -> UnitValue
                 is Literal.Int -> IntValue(value = node.literal.value)
@@ -123,7 +132,7 @@ class Interpreter(private val program: DecoratedProgram) {
      * [eval] evaluates the given [node] to a value under the given [env].
      */
     private fun eval(env: EvalEnv, node: DecoratedExpression.VariableIdentifier): Value =
-            env[node.variable]!!
+            env[node.variable] ?: error(message = "Variable ${node.variable} not found!")
 
     /**
      * [eval] evaluates the given [node] to a value under the given [env].
@@ -372,30 +381,55 @@ class Interpreter(private val program: DecoratedProgram) {
     private fun eval(env: EvalEnv, node: DecoratedExpression.FunctionApplication): Value {
         val closure = node.functionExpr.eval(env = env) as ClosureValue
         val argumentValues = node.arguments.map { it.eval(env = env) }
-        if (closure.arguments.size == argumentValues.size) {
-            // Exact application
-            val newEnv = closure.arguments.zip(argumentValues)
-                    .fold(initial = closure.environment) { e, (name, value) -> e.put(name, value) }
-            return when (closure.category) {
-                FunctionCategory.PRIMITIVE -> {
-                    // Improve performance later
-                    PrimitiveRuntimeLibrary.invokeFunction(
-                            name = closure.name!!, arguments = argumentValues
-                    )
-                }
-                FunctionCategory.PROVIDED -> {
-                    if (program.providedRuntimeLibrary == null) {
-                        error(message = "Impossible")
+        val namesToValues = closure.arguments.zip(argumentValues)
+        val argumentsSize = closure.arguments.size
+        val valuesSize = argumentValues.size
+        return when {
+            argumentsSize == valuesSize -> {
+                // Exact application
+                val newEnv = namesToValues.fold(closure.environment) { e, (n, v) -> e.put(n, v) }
+                when (closure.category) {
+                    FunctionCategory.PRIMITIVE -> {
+                        // Improve performance later
+                        PrimitiveRuntimeLibrary.invokeFunction(
+                                name = closure.name!!, arguments = argumentValues
+                        )
                     }
-                    program.providedRuntimeLibrary.invokeFunction(
-                            name = closure.name!!, arguments = argumentValues
-                    )
+                    FunctionCategory.PROVIDED -> {
+                        if (program.providedRuntimeLibrary == null) {
+                            error(message = "Impossible")
+                        }
+                        program.providedRuntimeLibrary.invokeFunction(
+                                name = closure.name!!, arguments = argumentValues
+                        )
+                    }
+                    FunctionCategory.USER_DEFINED -> closure.code.eval(env = newEnv)
                 }
-                FunctionCategory.USER_DEFINED -> closure.code.eval(env = newEnv)
             }
-        } else {
-            // Need curring, don't care it's category.
-            TODO()
+            argumentsSize > valuesSize -> {
+                // Need curring, don't care its category.
+                val newFunctionArguments = closure.arguments
+                        .subList(fromIndex = valuesSize, toIndex = argumentsSize)
+                val newFunctionArgTypes = (node.functionExpr.type as TypeExpr.Function)
+                        .argumentTypes.subList(fromIndex = valuesSize, toIndex = argumentsSize)
+                val newFunctionsAnnotatedArgs = newFunctionArguments.zip(newFunctionArgTypes)
+                        .map { (name, type) ->
+                            DecoratedExpression.VariableIdentifier(
+                                    variable = name, genericInfo = emptyList(), type = type
+                            )
+                        }
+                val functionApplicationExpr = DecoratedExpression.FunctionApplication(
+                        functionExpr = node.functionExpr,
+                        arguments = node.arguments + newFunctionsAnnotatedArgs,
+                        type = node.type
+                )
+                ClosureValue(
+                        category = FunctionCategory.USER_DEFINED, environment = env,
+                        arguments = newFunctionArguments,
+                        code = functionApplicationExpr
+                )
+            }
+            else -> error(message = "Bad case. There must be an error in the type checker.")
         }
     }
 
