@@ -106,7 +106,7 @@ class PrettyPrinter private constructor() : AstToCodeConverter {
             if (!node.isPublic) {
                 append("private ")
             }
-            append("let ").append(node.identifier).append(" =")
+            append("val ").append(node.identifier).append(" =")
         }.toString()
         q.addLine(line = header)
         q.indentAndApply { node.expr.acceptConversion(converter = this@PrettyPrinter) }

@@ -17,7 +17,7 @@ classMembersDeclaration :
     classDeclaration* // finally nested class definitions
     ;
 
-classConstantDeclaration: PRIVATE? LET LowerIdentifier ASSIGN expression;
+classConstantDeclaration: PRIVATE? VAL LowerIdentifier ASSIGN expression;
 
 classFunctionDeclaration :
     PRIVATE? FUN genericsDeclaration? LowerIdentifier

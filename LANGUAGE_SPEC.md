@@ -47,16 +47,16 @@ As stated before, nested classes cannot be mutually recursive.
 To refer to a member in the current class, you simply use the name. If you are not in the class, 
 then you need to use qualified name. For example:
 
-```
+```kotlin
 class Foo {
 
   class Bar {
-    let a = 1
+    val a = 1
   }
   
   class HelloWorld {
-    let b = a // WRONG :(
-    let c = Bar.a // Correct :)
+    val b = a // WRONG :(
+    val c = Bar.a // Correct :)
   }
 
 }

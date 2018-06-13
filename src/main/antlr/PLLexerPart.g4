@@ -16,6 +16,7 @@ CLASS : 'class';
 TYPE : 'type';
 OF : 'of';
 LET : 'let';
+VAL : 'val';
 CONST : 'const';
 FUN : 'fun';
 
