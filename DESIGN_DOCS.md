@@ -20,7 +20,11 @@ ANTLR.
 program will convert the parse tree to AST (declared in `ast` package), which is mostly done by the 
 `parser` package.
 3. Runtime-Injection: It will inject some runtime functions into the program definitions to allow
-some useful operations (e.g. I/O). *Currently, this part is not implemented yet.*
+some useful operations (e.g. I/O). The primitive and provided runtime can both be injected. 
+Primitive runtime library contains basic functions for the language that is impossible to implement
+in this language (e.g. I/O). This runtime will always be injected. The user can also choose to
+inject a provided runtime which is responsible for the interaction between this language and another
+JVM language. This step is mostly done in the `runtime` package.
 4. Type-Checking: It will check whether the program is well-formed according to the 
 [language spec](./LANGUAGE_SPEC.md). It is mostly done inside the `ast` packages's node classes.
 In particular, it transforms the raw AST into type-decorated AST, where each expression is decorated
@@ -60,9 +64,24 @@ variation of topological sort, we will start the overview at the runtime-injecti
 
 ### Runtime Injection
 
-*Currently, this part is not implemented yet.*
+Runtime injection is implemented by reflection. The functions needed to be injected will be
+marked by the `@RuntimeFunction` annotation. These functions must be static and contains only
+primitive or simple generics parameters. One exception is string array. The library class must
+implement the `RuntimeLibrary` marker interface.
 
-`TODO`
+In Kotlin, it can be done like this:
+
+```kotlin
+class ProvidedLibrary : RuntimeLibrary {
+
+    @RuntimeFunction
+    @JvmStatic
+    fun test(a: Long): Double = a.toDouble()
+}
+```
+
+Currently in the interpreter both primitive and provided library functions are called by reflection.
+More efficient implementation will be used in the future.
 
 ### Type Checking
 
@@ -77,9 +96,10 @@ have no *visible* side effects.
 
 ### Interpretation
 
-*Currently, this part is not implemented yet.*
+Interpretation is also implemented by the environment model. Interpretation itself does not need
+the type information, so type is not recorded in the environment. 
 
-`TODO`
+Currently, the mutually recursive functions environment is dynamically patched.
 
 ### Compilation
 
@@ -115,5 +135,5 @@ However, we do prefer immutable data structures over mutable ones.
 
 - The error messages are very bad. In the AST construction process, line info is not added to the 
 AST for the convenience of rapid prototyping. It will be improved later.
-- Type checking and code generation has not been thoroughly tested. They are expected to have at 
-least 10 bugs or some undefined behavior.
+- Type checking, interpretation, and code generation has not been thoroughly tested. They are 
+expected to have at least 20 bugs or some undefined behavior.

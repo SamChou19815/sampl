@@ -1,6 +1,7 @@
 package org.sampl.runtime
 
 import org.sampl.exceptions.PLException
+import org.sampl.runtime.PrimitiveRuntimeLibrary.split
 
 /**
  * [PrimitiveRuntimeLibrary] contains a collection of methods for primitive runtime functions.
@@ -212,7 +213,7 @@ object PrimitiveRuntimeLibrary : RuntimeLibrary {
             try {
                 s[index.toInt()]
             } catch (e: IndexOutOfBoundsException) {
-                throw throw PLException("OUT_OF_BOUND")
+                throw PLException("OUT_OF_BOUND")
             }
 
     /**
@@ -225,7 +226,7 @@ object PrimitiveRuntimeLibrary : RuntimeLibrary {
             try {
                 s.substring(from.toInt(), to.toInt())
             } catch (e: IndexOutOfBoundsException) {
-                throw throw PLException("OUT_OF_BOUND")
+                throw PLException("OUT_OF_BOUND")
             }
 
     /**
@@ -255,5 +256,18 @@ object PrimitiveRuntimeLibrary : RuntimeLibrary {
     @RuntimeFunction
     @JvmStatic
     fun split(delimiter: String, s: String): Array<String> = s.split(delimiter).toTypedArray()
+
+    /**
+     * [getString] returns the string at [index] of string array [a]. Throws "OUT_OF_BOUND" if
+     * [index] is out of bound.
+     */
+    @RuntimeFunction
+    @JvmStatic
+    fun getString(index: Long, a: Array<String>): String =
+            try {
+                a[index.toInt()]
+            } catch (e: ArrayIndexOutOfBoundsException) {
+                throw PLException("OUT_OF_BOUND")
+            }
 
 }
