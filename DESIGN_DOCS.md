@@ -9,8 +9,6 @@ stable.
 
 This section explains the multi-stage interpretation and compilation.
 
-### Common Stages
-
 The interpreter and the compiler both shares these stages:
 
 1. Lexing/Tokenizing: It converts the string format of the code to a stream of tokens. The tokens
@@ -32,30 +30,22 @@ with a type. The raw AST is in the `ast.raw` package and the decorated ones are 
 package. Some common elements are declared in `ast.common`, and the common type expression are in
 package `ast.type`. 
 
-### Interpreter Specific Stages
-
 After the common stages described above, the interpreter will directly interpret the decorated AST.
 
-*Currently, this part is not implemented yet.*
-
-### Compiler Specific Stages
-
-Before the common stages, the compiler will first perform an dependency analysis. The interpreter
+~~Before the common stages, the compiler will first perform an dependency analysis. The interpreter
 only supports a single file as the source code, while the compiler supports multiple files in the
 same directory. However, only single-file mode is supported in the later stages, and under the hood
 the multi-file support is only a structural sugar for the single-file support. The compiler will 
 build a dependency graph from the imports declarations, and use them to resolve dependencies. The
 compiler will reject cyclic dependencies because they are bad. The output of this stage is a list of
 files that represent the compilation sequence, which is then converted to nested classes in a single
-class.
+class.~~ (Not supported yet.)
 
 After the common stages, the compiler will directly translate the decorated AST to Kotlin code. 
 Since there is a close correspondence between the code in this language and Kotlin code (thanks to
 FP support in Kotlin), we do not need various IR lowering. This is done mostly in the packages
-`ast.decorated` and `codegen`. 
-
-Finally, we will write the translated code to file and invoke the Kotlin compiler. This step is
-trivial.
+`ast.decorated` and `codegen`. Finally, we will write the translated code to file and invoke the 
+Kotlin compiler. This step is trivial. (This is done in the test, not the main code.)
 
 ## High-Level Overview
 

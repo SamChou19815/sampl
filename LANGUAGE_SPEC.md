@@ -27,7 +27,7 @@ the table below.
 
 Note: `String` is not a primitive type in Kotlin.
 
-## Type Checking Specification
+## Namespace Specification
 
 ### Scope and Mutually Recursive Problem
 
@@ -41,6 +41,28 @@ mutually recursive with any other member in the entire program. All functions wi
 treated as they are all mutually recursive.
 
 As stated before, nested classes cannot be mutually recursive.
+
+### Member Reference
+
+To refer to a member in the current class, you simply use the name. If you are not in the class, 
+then you need to use qualified name. For example:
+
+```
+class Foo {
+
+  class Bar {
+    let a = 1
+  }
+  
+  class HelloWorld {
+    let b = a // WRONG :(
+    let c = Bar.a // Correct :)
+  }
+
+}
+```
+
+## Type Checking Specification
 
 ### Type Inference and Its Current Limitation
 
