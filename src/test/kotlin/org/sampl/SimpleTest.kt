@@ -1,7 +1,6 @@
 package org.sampl
 
 import junit.framework.TestCase.assertEquals
-import org.junit.Ignore
 import org.junit.Test
 import org.sampl.codegen.PrettyPrinter
 import org.sampl.codegen.ToKotlinCompiler
