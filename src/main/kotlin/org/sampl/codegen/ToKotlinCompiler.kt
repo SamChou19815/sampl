@@ -171,7 +171,7 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
                 } else {
                     // Single Arg
                     val dataType = associatedType.toKotlinType()
-                    addLine(line = "class $name$genericsInfoStr(val data: $dataType)")
+                    addLine(line = "data class $name$genericsInfoStr(val data: $dataType)")
                 }
             }
             convert(node = members)
@@ -185,33 +185,30 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
      */
     private fun convertClass(identifier: TypeIdentifier, members: DecoratedClassMembers,
                              declaration: TypeDeclaration.Struct) {
-        q.addLine(line = "class $identifier (")
-        q.indentAndApply {
-            val map = declaration.map
-            val l = map.size
-            var i = 1
-            for ((name, expr) in map) {
-                if (i == l) {
-                    q.addLine(line = "val $name: ${expr.toKotlinType()}")
-                } else {
-                    q.addLine(line = "val $name: ${expr.toKotlinType()},")
+        if (declaration.map.isEmpty()) {
+            q.addLine(line = "class $identifier {")
+        } else {
+            q.addLine(line = "data class $identifier (")
+            q.indentAndApply {
+                val map = declaration.map
+                val l = map.size
+                var i = 1
+                for ((name, expr) in map) {
+                    if (i == l) {
+                        q.addLine(line = "val $name: ${expr.toKotlinType()}")
+                    } else {
+                        q.addLine(line = "val $name: ${expr.toKotlinType()},")
+                    }
+                    i++
                 }
-                i++
             }
+            q.addLine(line = ") {")
         }
-        q.addLine(line = ") {")
         q.indentAndApply {
-            val args = declaration.map.asSequence().joinToString(separator = ", ") { (n, e) ->
-                "$n: ${e.toKotlinType()} = this.$n"
+            if (declaration.map.isEmpty()) {
+                q.addLine(line = "fun copy(): $identifier = this")
+                q.addEmptyLine()
             }
-            val values = declaration.map.asSequence().joinToString(separator = ", ") { (n, _) ->
-                "$n = $n"
-            }
-            addLine(line = "fun copy($args): $identifier =")
-            indentAndApply {
-                addLine(line = "${identifier.name}($values)")
-            }
-            addEmptyLine()
             convert(node = members)
 
         }
@@ -314,7 +311,7 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
      * [BinaryOperator.toKotlinForm] maps the binary operator to its form in Kotlin
      */
     private fun BinaryOperator.toKotlinForm(): String = when (this) {
-        BinaryOperator.AND -> "and"
+        BinaryOperator.LAND -> "and"
         BinaryOperator.LOR -> "or"
         BinaryOperator.F_MUL -> "*"
         BinaryOperator.F_DIV -> "/"

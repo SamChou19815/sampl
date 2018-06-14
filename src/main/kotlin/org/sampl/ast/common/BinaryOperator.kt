@@ -13,15 +13,15 @@ enum class BinaryOperator(val symbol: String, val precedenceLevel: Int) {
     /**
      * Shift left.
      */
-    SHL(symbol = "<<", precedenceLevel = 0),
+    SHL(symbol = "shl", precedenceLevel = 0),
     /**
      * Shift right.
      */
-    SHR(symbol = ">>", precedenceLevel = 0),
+    SHR(symbol = "shr", precedenceLevel = 0),
     /**
      * Unsigned shift right.
      */
-    USHR(symbol = ">>>", precedenceLevel = 0),
+    USHR(symbol = "ushr", precedenceLevel = 0),
     /**
      * Xor.
      */
