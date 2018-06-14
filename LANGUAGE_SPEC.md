@@ -9,8 +9,7 @@ You can read the spec for grammar by reading the code at
 
 ## Runtime Specification
 
-The signature (in SAMPL) and implementation (in Kotlin) of the provided runtime functions are given 
-in the Kotlin file 
+The signature and implementation of the provided runtime functions are given in the Kotlin file 
 [PrimitiveRuntimeLibrary](./src/main/kotlin/org/sampl/runtime/PrimitiveRuntimeLibrary.kt).
 
 SAMPL has a set of predefined types, which (somewhat) corresponds to the primitive types in Kotlin
@@ -107,7 +106,7 @@ all other functions type will be stored in the environment during type checking.
 
 ##### Literal
 
-(e.g. `()`, `1`, `2.0`, `true`, `'e'` `"Hello World"`)
+e.g. `()`, `1`, `2.0`, `true`, `'e'` `"Hello World"`
 
 Type is simply the type of the literal, which can be one of `Unit`, `Int`, `Float`, `Bool`, `Char`
 or `String`.
@@ -247,7 +246,7 @@ functions defined in the class that this function is in.
 
 ##### Literal
 
-(e.g. `()`, `1`, `2.0`, `true`, `'e'` `"Hello World"`)
+e.g. `()`, `1`, `2.0`, `true`, `'e'` `"Hello World"`
 
 Value is simply the value of the literal.
 
