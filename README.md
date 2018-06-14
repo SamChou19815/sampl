@@ -55,11 +55,71 @@ class CurryingDemo {
 }
 ```
 
+### Purely Functional
+
+Since SAMPL is a pure functional language, it can be used to illustrate the concept of 
+"Propositions are types and proofs are programs".
+
+#### Propositions are SAMPL types
+
+A type parameter in generics info (e.g. `A` in `Or<A, B>`) is an atomic proposition.
+
+The `Unit` type represents `TRUE`.
+
+```kotlin
+// The [And] class below represents logical conjunction.
+class And<A, B>(a: A, b: B)
+```
+
+```
+// The [Or] class below represents logical disjunction.
+class Or<A, B>(
+  First of A | Second of B
+)
+```
+
+```kotlin
+// This function has type (A) -> B. This is logical implication.
+fun <A, B> implication(a: A): B = b
+```
+
+#### Proofs are SAMPL programs
+
+```kotlin
+// This well-typed function is an elegant proof for Modus Ponens.
+fun <A, B> modusPonens(f: (A) -> B, v: A): B = f(v)
+```
+
+```kotlin
+// This well-typed function is an elegant proof for both A and B are true.
+fun <A, B> both(a: A, b: B): And<A, B> = And(a, b)
+```
+
+```
+// This well-typed function is an elegant proof for either A or B implies C.
+fun <A, B, C> eitherOneImplies(o: Or<A, B>): C = 
+  match o with
+  | First a -> aToC(a)
+  | Second b -> bToC(b)
+```
+
+```
+// This well-typed function shows everything proves true.
+fun <A> everythingProvesTrue(a: A): Unit = () 
+```
+
+## Getting Started
+
+Pass `-interpret [filename]` to the jar to interpret the program in `filename`. Currently, it will
+prints the result to standard out.
+
+Pass `-compile [filename]` to the jar to compile the program in `filename`. Currently, it will 
+prints the equivalent code in Kotlin to standard out.
+
 ## Documentations
 
-**Note: Currently, the documentations listed below are very incomplete.**
-
-- Read the [language spec](./LANGUAGE_SPEC.md) for a precise definition of the language features.
+- Read the [language spec](./LANGUAGE_SPEC.md) for the definition of the language features. 
+*Currently, the language is not very precise.*
 
 - Read the [design document](./DESIGN_DOCS.md) to understand the overall design and architecture.
 

@@ -18,7 +18,7 @@ import org.sampl.util.writeToFile
 class SimpleTest {
 
     /**
-     * [propositionsAreTypesProofsAreProgram] is a program that illustrates the concept of
+     * [propositionsAreTypesProofsArePrograms] is a program that illustrates the concept of
      * 'Propositions Are Types, Proofs Are Programs'.
      */
     private val propositionsAreTypesProofsArePrograms: String = """

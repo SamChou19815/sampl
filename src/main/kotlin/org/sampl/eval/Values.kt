@@ -16,7 +16,7 @@ sealed class Value {
      */
     abstract val asAny: Any
 
-    override fun toString(): String = "UnitValue"
+    override fun toString(): String = "()"
 
 }
 

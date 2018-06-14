@@ -139,10 +139,16 @@ to `T2`, etc will be added to the environment.
 - Try Catch Expression `try tryExpr catch e catchExpr`: `tryExpr` and `catchExpr` must have the 
 same type and this expression has the same type as `tryExpr`/`catchExpr`. When type checking 
 `catchExpr`, `e` to `String` will be added to the environment.
-- Let Expression `let a = e1; e2`: If `e1` has type `T` then `a` to `T` will be added to the 
+- Let Expression `val a = e1; e2`: If `e1` has type `T` then `a` to `T` will be added to the 
 environment when type checking `e2`. This expression has the same type as `e2`.
 
 ## Evaluation Specification
+
+The program will evaluate to a value according to these two rules:
+
+1. If there is a no-arg main function in the top-level class, the value of the function is the 
+return value of that function
+2. Otherwise, the value is Unit.
 
 ### Types of Values
 
@@ -199,5 +205,5 @@ according to function currying rule.
 throwing an exception, then the value of the expression is `v1`. Else, the binding `e` to the 
 exception message will be added to the environment, and `catchExpr` will be evaluated to get `v2`
 in the new environment and the value of the expression is `v2`.
-- Let Expression `let a = e1; e2`: If `e1` evaluates to `v1` then `a` to `b2` will be added to the 
+- Let Expression `val a = e1; e2`: If `e1` evaluates to `v1` then `a` to `b2` will be added to the 
 environment when evaluating `e2`. This expression has the value of the value of `e2`.

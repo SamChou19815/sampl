@@ -15,7 +15,7 @@ const val EASTER_EGG: String = "$LANG_NAME is created and maintained by Develope
 /**
  * [EXTENSION] is the expected extension name for the source code.
  */
-const val EXTENSION: String = "pl"
+const val EXTENSION: String = "sampl"
 
 /**
  * [TOP_LEVEL_PROGRAM_NAME] is the pre-defined name for the compiled top-level program name.
