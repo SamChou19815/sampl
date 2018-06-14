@@ -105,42 +105,105 @@ all other functions type will be stored in the environment during type checking.
 
 #### Expressions
 
-- Literal (e.g. `()`, `1`, `2.0`, `true`, `'e'` `"Hello World"`): type is simply the type of the 
-literal, which can be `Unit`, `Int`, `Float`, `Bool`, `Char` or `String`.
-- Variable: type is the type of the variable in the environment. If generics info is available, the
-variable will have the specific type specified by the generics information.
-- Constructor: type is the type of the class that defines the constructor.
-- Struct Member Access `a.b`: type is the type of the member `b` of struct `a`. `a` must be a struct
-and has member `b`.
-- Not Expression `!expr`: `expr` must have type `Bool` and this expression has type `Bool`.
-- Binary Expression `a op b`: `a` and `b` must have the same type and `op` is a legal binary 
-operator.
-  - If `op` is `shl`, `shr`, `ushr`, `xor`, `land`, `lor`, `*`, `/`, `%`, `+`, or `-`, `a` and `b`
-  must both have type `Int`, and the expression has type `Int`.
-  - If `op` is `*.`, `/.`, `+.`, or `-.`, `a` and `b` must both have type `Float`, and the 
-  expression has type `Float`.
-  - If `op` is `^`, `a` and `b` must both have type `String`, and the expression has type `String`.
-  - If `op` is `<`, `<=`, `>`, or `>=`, `a` and `b` must both be a predefined type (but not 
-  `StringArray`), and the expression has type `Bool`.
-  - If `op` is `==` or `!=`, `a` and `b` must have the same type and the expression has type `Bool`.
-  - If `op` is `&&` or `||`, `a` and `b` must have type `Bool` and the expression has type `Bool`.
-- Throw Expression `throw<T> expr`: `expr` must have type `String` and the expression has type `T`.
-- If Expression `if c then e1 else e2`: `c` must have type `Bool`. `e1` and `e2` must have the same
-type, and the expression's type is the type of `e1`/`e2`.
-- Match Expression `match expr with | pattern1 -> e1 | pattern2 -> e2 ...`: `expr` must be a variant
-and all the patterns must be related to the type of variant. `e1`, `e2`, etc must have the same type
-and the expression has the same type as `e1`/`e2`/...
-- Function Application `funExpr (arg1, arg2, ...)`: `funExpr` must be a function expression, whose
-number of available arguments must be greater than or equal to the given arguments. The type of
-the expression is determined according to function currying rule.
-- Function `{ (arg1: T1, arg2: T2, ...) -> expr }`: If the type of `expr` is `RT`, then this 
-expression has type `(T1, T2, ...) -> RT`. During type checking for `expr`, `args1` to `T1`, `args2.
-to `T2`, etc will be added to the environment.
-- Try Catch Expression `try tryExpr catch e catchExpr`: `tryExpr` and `catchExpr` must have the 
-same type and this expression has the same type as `tryExpr`/`catchExpr`. When type checking 
-`catchExpr`, `e` to `String` will be added to the environment.
-- Let Expression `val a = e1; e2`: If `e1` has type `T` then `a` to `T` will be added to the 
-environment when type checking `e2`. This expression has the same type as `e2`.
+##### Literal
+
+(e.g. `()`, `1`, `2.0`, `true`, `'e'` `"Hello World"`)
+
+Type is simply the type of the literal, which can be one of `Unit`, `Int`, `Float`, `Bool`, `Char`
+or `String`.
+
+##### Variable
+
+Type is the type of the variable in the environment. If generics info is available, the variable
+will have the specific type specified by the generics information.
+
+##### Constructor
+
+Type is the type of the class that defines the constructor.
+
+##### Struct Member Access
+
+Syntax: `a.b`.
+
+Type is the type of the member `b` of struct `a`. `a` must be a struct and has member `b`.
+
+##### Not Expression
+
+Syntax: `!expr`.
+
+`expr` must have type `Bool` and this expression has type `Bool`.
+
+##### Binary Expression
+
+Syntax: `a op b`.
+
+`a` and `b` must have the same type and `op` is a legal binary operator.
+
+- If `op` is `shl`, `shr`, `ushr`, `xor`, `land`, `lor`, `*`, `/`, `%`, `+`, or `-`, `a` and `b`
+must both have type `Int`, and the expression has type `Int`.
+- If `op` is `*.`, `/.`, `+.`, or `-.`, `a` and `b` must both have type `Float`, and the expression
+has type `Float`.
+- If `op` is `^`, `a` and `b` must both have type `String`, and the expression has type `String`.
+- If `op` is `<`, `<=`, `>`, or `>=`, `a` and `b` must both be a predefined type (but not
+`StringArray`), and the expression has type `Bool`.
+- If `op` is `==` or `!=`, `a` and `b` must have the same type and the expression has type `Bool`.
+- If `op` is `&&` or `||`, `a` and `b` must have type `Bool` and the expression has type `Bool`.
+
+##### Throw Expression
+
+Syntax: `throw<T> expr`.
+
+`expr` must have type `String` and the expression has type `T`.
+
+##### If Expression
+
+Syntax: `if c then e1 else e2`.
+
+`c` must have type `Bool`. `e1` and `e2` must have the same type, and the expression's type is the
+type of `e1`/`e2`.
+
+##### Match Expression
+
+Syntax: 
+```
+match expr with 
+| pattern1 -> e1 
+| pattern2 -> e2 
+| ...
+```
+
+`expr` must be a variant and all the patterns must be related to the type of variant. `e1`, `e2`,
+etc must have the same type and the expression has the same type as `e1`/`e2`/...
+
+##### Function Application
+
+Syntax: `funExpr (arg1, arg2, ...)`.
+
+`funExpr` must be a function expression, whose number of available arguments must be greater than or
+equal to the given arguments. The type of the expression is determined according to function
+currying rule.
+
+##### Function
+
+Syntax: `{ (arg1: T1, arg2: T2, ...) -> expr }`.
+
+If the type of `expr` is `RT`, then this  expression has type `(T1, T2, ...) -> RT`. During type
+checking for `expr`, `args1` to `T1`, `args2` to `T2`, etc will be added to the environment.
+
+##### Try Catch Expression
+
+Syntax: `try tryExpr catch e catchExpr`.
+
+`tryExpr` and `catchExpr` must have the same type and this expression has the same type as
+`tryExpr`/`catchExpr`. When type checking `catchExpr`, `e` to `String` will be added to the
+environment.
+
+##### Let Expression
+
+Syntax: `val a = e1; e2`.
+
+If `e1` has type `T` then `a` to `T` will be added to the environment when type checking `e2`. This
+expression has the same type as `e2`.
 
 ## Evaluation Specification
 
@@ -166,44 +229,109 @@ return value of that function
 
 #### Definitions
 
-- Class Constant Member `val identifier = expr`: If `expr` has value `v`, then the environment `e`
-will gain an additional mapping from `identifier` to `v`.
-- Class Function Member `fun (<A, B, ...>)? identifier(arg1: T1, arg2: T2, ...): RT = expr`: The
-environment will be added a closure with this function and a environment that contains all the
+##### Class Constant Member
+
+Syntax: `val identifier = expr`
+
+If `expr` has value `v`, then the environment `e` will gain an additional mapping from `identifier`
+to `v`.
+
+##### Class Function Member
+
+Syntax: `fun (<A, B, ...>)? identifier(arg1: T1, arg2: T2, ...): RT = expr`
+
+The environment will be added a closure with this function and a environment that contains all the
 functions defined in the class that this function is in.
 
 #### Expressions
 
-- Literal (e.g. `()`, `1`, `2.0`, `true`, `'e'` `"Hello World"`): value is simply the value of 
-the literal.
-- Variable: value is the value of the variable in the environment.
-- Constructor: value is the value of the struct or variant with associated data defined in class.
-- Struct Member Access `a.b`: value is the value of the member `b` of struct `a`. `a` must be a 
-struct and has member `b`.
-- Not Expression `!expr`: If `expr` evaluates to `b`, then this expression has value as the 
-inversion of `b`.
-- Binary Expression `a op b`: `a` and `b` must have the same type and `op` is a legal binary 
-operator.
-  - If `op` is `shl`, `shr`, `ushr`, `xor`, `&`, `|`, `*`, `/`, `%`, `+`, `-`, `<`, `<=`, `>`, `>=`,
-  `==`,`!=`, `&&` or `||`, `a op b`'s behavior is same in SAMPL and Kotlin.
-  - If `op` is `*.`, `/.`, `+.`, or `-.`, without the dot, `a op b`'s behavior is same in SAMPL and
-  Kotlin.
-  - If `op` is `^`, `a ^ b` is the string concat of `a` and `b`.
-- Throw Expression `throw<T> expr`: If `expr` evaluates to `v`, an exception with message `v` will
-be thrown.
-- If Expression `if c then e1 else e2`: If `c` evaluates to `true` and `e1` evaluates to `v1`, then
-the expression has value `v1`. If `c` evaluates to `false` and `e2` evaluates to `v2`, then the
-expression has value `v2`.
-- Match Expression `match expr with | pattern1 -> e1 | pattern2 -> e2 ...`: It will goes to the 
-pattern that fits `expr`, then puts the identifiers and associated data into the environment if
-there exists associated data. Then the expression associated to the pattern's value will be the
-value of this expression.
-- Function Application `funExpr (arg1, arg2, ...)`: The value of the expression is determined 
-according to function currying rule.
-- Function `{ (arg1: T1, arg2: T2, ...) -> expr }`: It will be evaluate to a closure.
-- Try Catch Expression `try tryExpr catch e catchExpr`: If `tryExpr` evaluates to `v1` without
-throwing an exception, then the value of the expression is `v1`. Else, the binding `e` to the 
-exception message will be added to the environment, and `catchExpr` will be evaluated to get `v2`
-in the new environment and the value of the expression is `v2`.
-- Let Expression `val a = e1; e2`: If `e1` evaluates to `v1` then `a` to `b2` will be added to the 
-environment when evaluating `e2`. This expression has the value of the value of `e2`.
+##### Literal
+
+(e.g. `()`, `1`, `2.0`, `true`, `'e'` `"Hello World"`)
+
+Value is simply the value of the literal.
+
+##### Variable
+
+Value is the value of the variable in the environment.
+
+##### Constructor
+
+Value is the value of the struct or variant with associated data defined in class.
+
+##### Struct Member Access
+
+Syntax: `a.b`.
+
+Value is the value of the member `b` of struct `a`. `a` must be a struct and has member `b`.
+
+##### Not Expression
+
+Syntax: `!expr`.
+
+If `expr` evaluates to `b`, then this expression has value as the inversion of `b`.
+
+##### Binary Expression
+
+Syntax: `a op b`.
+
+- If `op` is `shl`, `shr`, `ushr`, `xor`, `&`, `|`, `*`, `/`, `%`, `+`, `-`, `<`, `<=`, `>`, `>=`,
+`==`,`!=`, `&&` or `||`, `a op b`'s behavior is same in SAMPL and Kotlin.
+- If `op` is `*.`, `/.`, `+.`, or `-.`, without the dot, `a op b`'s behavior is same in SAMPL and
+Kotlin.
+- If `op` is `^`, `a ^ b` is the string concat of `a` and `b`.
+
+##### Throw Expression
+
+Syntax: `throw<T> expr`.
+
+If `expr` evaluates to `v`, an exception with message `v` will be thrown.
+
+##### If Expression
+
+Syntax: `if c then e1 else e2`.
+
+If `c` evaluates to `true` and `e1` evaluates to `v1`, then the expression has value `v1`. If `c`
+evaluates to `false` and `e2` evaluates to `v2`, then the expression has value `v2`.
+
+##### Match Expression
+
+Syntax: 
+```
+match expr with 
+| pattern1 -> e1 
+| pattern2 -> e2 
+| ...
+```
+
+It will goes to the pattern that fits `expr`, then puts the identifiers and associated data into the
+environment if there exists associated data. Then the expression associated to the pattern's value
+will be the value of this expression.
+
+##### Function Application
+
+Syntax: `funExpr (arg1, arg2, ...)`.
+
+The value of the expression is determined according to function currying rule.
+
+##### Function
+
+Syntax: `{ (arg1: T1, arg2: T2, ...) -> expr }`.
+
+It will be evaluate to a closure.
+
+##### Try Catch Expression
+
+Syntax: `try tryExpr catch e catchExpr`.
+
+If `tryExpr` evaluates to `v1` without throwing an exception, then the value of the expression is
+`v1`. Else, the binding `e` to the exception message will be added to the environment, and 
+`catchExpr` will be evaluated to get `v2` in the new environment and the value of the expression is
+`v2`.
+
+##### Let Expression
+
+Syntax: `val a = e1; e2`.
+
+If `e1` evaluates to `v1` then `a` to `b2` will be added to the environment when evaluating `e2`.
+This expression has the value of the value of `e2`.
