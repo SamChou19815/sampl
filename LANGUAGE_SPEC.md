@@ -95,10 +95,18 @@ expression.
 
 #### Definitions
 
-- Class Constant Member `val identifier = expr`: If `expr` has type `t`, then the environment `e`
-will gain an additional mapping from `identifier` to `t`.
-- Class Function Member `fun (<A, B, ...>)? identifier(arg1: T1, arg2: T2, ...): RT = expr`: The
-function has type `(T1, T2, ...) -> RT`. The `<expr>` must also have type `expr`. During type
+##### Class Constant Member
+
+Syntax: `val identifier = expr`
+
+If `expr` has type `t`, then the environment `e` will gain an additional mapping from `identifier`
+to `t`.
+
+##### Class Function Member
+
+Syntax: `fun (<A, B, ...>)? identifier(arg1: T1, arg2: T2, ...): RT = expr`.
+
+The function has type `(T1, T2, ...) -> RT`. The `<expr>` must also have type `expr`. During type
 checking, generics info `A, B, ...` will be added to the known types and `args1` to `T1`, `args2` to
 `T2`, etc will be added to the environment when type checking `expr`. In addition, this function and
 all other functions type will be stored in the environment during type checking.
