@@ -18,6 +18,7 @@ interface RuntimeLibrary {
     /**
      * [invokeFunction] invokes function with [name] and [arguments] and returns the result.
      */
+    @JvmDefault
     @Suppress(names = ["UNCHECKED_CAST"])
     fun invokeFunction(name: String, arguments: List<Value>): Value {
         val method = this.javaClass.methods

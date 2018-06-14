@@ -1,7 +1,5 @@
 package org.sampl.codegen
 
-import org.sampl.codegen.AstToCodeConverter
-
 /**
  * [CodeConvertible] defines a set of methods that will help the conversion from this AST node to
  * the target code.

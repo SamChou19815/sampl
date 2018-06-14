@@ -2,7 +2,6 @@ package org.sampl.eval
 
 import org.sampl.ast.common.FunctionCategory
 import org.sampl.ast.decorated.DecoratedExpression
-import org.sampl.ast.type.TypeExpr
 import org.sampl.codegen.PrettyPrinter
 import org.sampl.environment.EvalEnv
 import java.util.Arrays
@@ -34,6 +33,8 @@ object UnitValue : Value() {
 
     override val asAny: Any get() = Unit
 
+    override fun toString(): String = "Unit"
+
 }
 
 /**
@@ -42,6 +43,8 @@ object UnitValue : Value() {
 data class IntValue(val value: Long) : Value() {
 
     override val asAny: Any get() = value
+
+    override fun toString(): String = value.toString()
 
 }
 
@@ -52,6 +55,8 @@ data class FloatValue(val value: Double) : Value() {
 
     override val asAny: Any get() = value
 
+    override fun toString(): String = value.toString()
+
 }
 
 /**
@@ -60,6 +65,8 @@ data class FloatValue(val value: Double) : Value() {
 data class BoolValue(val value: Boolean) : Value() {
 
     override val asAny: Any get() = value
+
+    override fun toString(): String = value.toString()
 
 }
 
@@ -70,6 +77,8 @@ data class CharValue(val value: Char) : Value() {
 
     override val asAny: Any get() = value
 
+    override fun toString(): String = "'$value'"
+
 }
 
 /**
@@ -79,6 +88,8 @@ data class StringValue(val value: String) : Value() {
 
     override val asAny: Any get() = value
 
+    override fun toString(): String = "\"$value\""
+
 }
 
 /**
@@ -87,6 +98,8 @@ data class StringValue(val value: String) : Value() {
 data class StringArrayValue(val value: Array<String>) : Value() {
 
     override val asAny: Any get() = Arrays.toString(value)
+
+    override fun toString(): String = Arrays.toString(value)
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -112,6 +125,13 @@ data class VariantValue(val variantIdentifier: String, val associatedValue: Valu
 
     override val asAny: Any get() = this
 
+    override fun toString(): String =
+            "<Variant: " + if (associatedValue == null) {
+                variantIdentifier
+            } else {
+                "$variantIdentifier($associatedValue)"
+            } + ">"
+
 }
 
 /**
@@ -120,6 +140,8 @@ data class VariantValue(val variantIdentifier: String, val associatedValue: Valu
 data class StructValue(val nameValueMap: Map<String, Value>) : Value() {
 
     override val asAny: Any get() = nameValueMap
+
+    override fun toString(): String = nameValueMap.toString()
 
 }
 
@@ -141,6 +163,7 @@ data class ClosureValue(
 
     override val asAny: Any get() = this
 
-    override fun toString(): String = "<fun>($arguments, ${PrettyPrinter.prettyPrint(node = code)})"
+    override fun toString(): String =
+            "<fun>($arguments) :=\n${PrettyPrinter.prettyPrint(node = code)}"
 
 }
