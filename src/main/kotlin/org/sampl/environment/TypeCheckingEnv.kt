@@ -76,7 +76,10 @@ data class TypeCheckingEnv(
         // remove and change declared types
         val newDeclaredTypes = declaredTypes.asSequence()
                 // when exiting, we need to use fully qualified name.
-                .filter { (name, _) -> name != clazz.name && !name.contains(other = ".") }
+                .filter { (name, _) ->
+                    val names = m.nestedClassMembers.map(Clazz::name)
+                    name in names
+                }
                 .fold(initial = declaredTypes) { dec, (name, genericsInfo) ->
                     dec.remove(key = name).put(key = "${clazz.name}.$name", value = genericsInfo)
                 }

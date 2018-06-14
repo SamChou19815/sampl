@@ -63,7 +63,7 @@ expression
     | expression (UNIT | (LPAREN expression (COMMA expression)* RPAREN)) # FunctionApplicationExpr
     | LBRACE argumentDeclarations ARROW expression RBRACE # FunExpr
     | TRY expression CATCH LowerIdentifier expression # TryCatchExpr
-    | LET LowerIdentifier ASSIGN expression SEMICOLON expression # LetExpr
+    | VAL LowerIdentifier ASSIGN expression SEMICOLON expression # LetExpr
     ;
 
 constructor
@@ -83,7 +83,7 @@ constructor
 structConstructorValueDeclaration : LowerIdentifier ASSIGN expression;
 
 pattern
-    : UpperIdentifier LowerIdentifier # VariantPattern
+    : UpperIdentifier (LowerIdentifier | WILDCARD)? # VariantPattern
     | LowerIdentifier # VariablePattern
     | WILDCARD # WildcardPattern
     ;

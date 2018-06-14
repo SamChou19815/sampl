@@ -243,7 +243,8 @@ class PrettyPrinter private constructor() : AstToCodeConverter {
             StringBuilder().apply {
                 append(variantIdentifier)
                 if (associatedVariable != null) {
-                    append(' ').append(associatedVariable)
+                    val v = if (associatedVariable == "_ignore") "_" else associatedVariable
+                    append(' ').append(v)
                 }
             }.toString()
         }
@@ -280,7 +281,7 @@ class PrettyPrinter private constructor() : AstToCodeConverter {
 
     override fun convert(node: DecoratedExpression.Let) {
         val e1Code = node.e1.toOneLineCode(parent = node)
-        q.addLine(line = "let ${node.identifier} = $e1Code;")
+        q.addLine(line = "val ${node.identifier} = $e1Code;")
         node.e2.acceptConversion(converter = this)
     }
 

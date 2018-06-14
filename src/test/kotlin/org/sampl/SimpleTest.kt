@@ -1,6 +1,7 @@
 package org.sampl
 
 import junit.framework.TestCase.assertEquals
+import org.junit.Ignore
 import org.junit.Test
 import org.sampl.codegen.PrettyPrinter
 import org.sampl.codegen.ToKotlinCompiler
@@ -20,16 +21,20 @@ class SimpleTest {
      * [propositionsAreTypesProofsAreProgram] is a program that illustrates the concept of
      * 'Propositions Are Types, Proofs Are Programs'.
      */
-    private val propositionsAreTypesProofsAreProgram: String = """
-    class TestingProgram {
+    private val propositionsAreTypesProofsArePrograms: String = """
+    class PropositionsAreTypesProofsArePrograms {
         val trueVar = ()
         val implication = { (a: String) -> 5 }
         fun <A, B> modusPonens(f: (A) -> B, v: A): B = f(v)
         // Classes
         class And<A, B>(a: A, b: B)
-        class Or<A, B>(
-          First of A | Second of B
-        )
+        class Or<A, B>(First of A | Second of B)
+        class Optional<T>(None | Some of T) {
+           fun <T> hasValue(v: Optional<T>): Bool =
+             match v with
+             | None -> false
+             | Some _ -> true
+        }
         class Empty
     }
     """.trimIndent()
@@ -108,7 +113,9 @@ class SimpleTest {
      */
     private val intHelloWorldProgram: String = """
     class MainClass {
-        fun main(): Int = 32 + 10
+        fun main(): Int =
+          val a = 32;
+          a + 10
     }
     """.trimIndent()
 
@@ -133,7 +140,7 @@ class SimpleTest {
      */
     @Test
     fun runInSteps() {
-        runInSteps(program = propositionsAreTypesProofsAreProgram, outputId = 1)
+        runInSteps(program = propositionsAreTypesProofsArePrograms, outputId = 1)
         runInSteps(program = multipleFeaturesProgram, outputId = 2)
         runInSteps(program = standardRuntimeSignatureProgram, outputId = 3)
         runInSteps(program = standardHelloWorldProgram, outputId = 4)
@@ -157,7 +164,7 @@ class SimpleTest {
      */
     @Test
     fun interpretSimple() {
-        assertEquals(UnitValue, PLInterpreter.interpret(propositionsAreTypesProofsAreProgram))
+        assertEquals(UnitValue, PLInterpreter.interpret(propositionsAreTypesProofsArePrograms))
         assertEquals(IntValue(value = 42), PLInterpreter.interpret(multipleFeaturesProgram))
         assertEquals(UnitValue, PLInterpreter.interpret(standardHelloWorldProgram))
         assertEquals(StringValue(value = "Hello World, Sam!"),

@@ -31,18 +31,20 @@ sealed class Pattern {
             if (variantIdentifier !in variantTypeDefs) {
                 throw PatternMatchingError.WrongPattern(patternId = variantIdentifier)
             }
-            variantTypeDefs.remove(key = variantIdentifier)
             val associatedVarType = variantTypeDefs[variantIdentifier]
+            variantTypeDefs.remove(key = variantIdentifier)
             return if (associatedVariable == null && associatedVarType == null) {
                 val p = DecoratedPattern.Variant(variantIdentifier = variantIdentifier)
                 p to environment
             } else if (associatedVariable != null && associatedVarType != null) {
                 val p = DecoratedPattern.Variant(
                         variantIdentifier = variantIdentifier,
-                        associatedVariable = associatedVariable,
+                        associatedVariable = if (associatedVariable == "_") "_ignore" else {
+                            associatedVariable
+                        },
                         associatedVariableType = associatedVarType
                 )
-                val newE = environment.put(
+                val newE = if (associatedVariable == "_") environment else environment.put(
                         variable = associatedVariable,
                         typeInfo = associatedVarType.asTypeInformation
                 )

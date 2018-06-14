@@ -1,6 +1,5 @@
 package org.sampl.codegen
 
-import jdk.nashorn.internal.objects.NativeArray.forEach
 import org.sampl.EASTER_EGG
 import org.sampl.TOP_LEVEL_PROGRAM_NAME
 import org.sampl.ast.common.BinaryOperator
@@ -139,39 +138,49 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
             val map = declaration.map
             val genericsInfo = identifier.genericsInfo
             for ((name, associatedType) in map) {
-                val genericsInfoStr = when {
-                    genericsInfo.isEmpty() -> ""
+                val (genericsInfoStr, genericsInfoForVariant) = when {
+                    genericsInfo.isEmpty() -> "" to ""
                     associatedType == null -> {
-                        val temp = arrayListOf<TypeExpr>()
+                        val all = arrayListOf<TypeExpr>()
                         repeat(times = genericsInfo.size) {
-                            temp.add(TypeExpr.Identifier(type = "Nothing"))
+                            all.add(TypeExpr.Identifier(type = "Nothing"))
                         }
-                        temp.joinToString(separator = ",", prefix = "<", postfix = ">") { t ->
+                        all.joinToString(separator = ",", prefix = "<", postfix = ">") { t ->
                             t.toKotlinType()
-                        }
+                        } to ""
                     }
                     else -> {
-                        val temp = arrayListOf<TypeExpr>()
+                        val all = arrayListOf<TypeExpr>()
+                        val forVariant = arrayListOf<TypeExpr>()
                         for (genericPlaceholder in genericsInfo) {
                             if (associatedType.containsIdentifier(genericPlaceholder)) {
-                                genericPlaceholder
+                                all.add(TypeExpr.Identifier(type = genericPlaceholder))
+                                forVariant.add(TypeExpr.Identifier(type = genericPlaceholder))
                             } else {
-                                "Nothing"
-                            }.run { temp.add(TypeExpr.Identifier(type = this)) }
+                                all.add(TypeExpr.Identifier(type = "Nothing"))
+                            }
                         }
-                        temp.joinToString(separator = ",", prefix = "<", postfix = ">") { t ->
-                            t.toKotlinType()
-                        }
+                        val allString = all
+                                .joinToString(separator = ",", prefix = "<", postfix = ">") { t ->
+                                    t.toKotlinType()
+                                }
+                        val forVariantString = forVariant
+                                .joinToString(separator = ",", prefix = "<", postfix = ">") { t ->
+                                    t.toKotlinType()
+                                }
+                        allString to forVariantString
                     }
                 }
                 if (associatedType == null) {
                     // No Args
-                    addLine(line = "object $name$genericsInfoStr: $identifier()")
+                    addLine(line = "object $name: ${identifier.name}$genericsInfoStr()")
                     addEmptyLine()
                 } else {
                     // Single Arg
                     val dataType = associatedType.toKotlinType()
-                    addLine(line = "data class $name$genericsInfoStr(val data: $dataType)")
+                    val nameCode = name + genericsInfoForVariant
+                    val inheritanceCode = identifier.name + genericsInfoStr
+                    addLine(line = "data class $nameCode(val data: $dataType): $inheritanceCode()")
                 }
             }
             convert(node = members)
@@ -210,7 +219,6 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
                 q.addEmptyLine()
             }
             convert(node = members)
-
         }
         q.addLine(line = "}")
     }
@@ -345,7 +353,7 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
                         addLine(line = "is ${pattern.variantIdentifier} -> {")
                         indentAndApply {
                             pattern.associatedVariable?.let { v ->
-                                addLine(line = "val $v = it.data;")
+                                addLine(line = "val $v = data;")
                             }
                             expr.acceptConversion(converter = this@ToKotlinCompiler)
                         }
@@ -353,7 +361,7 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
                     is DecoratedPattern.Variable -> {
                         addLine(line = "else -> {")
                         indentAndApply {
-                            addLine(line = "val ${pattern.identifier} = it.data;")
+                            addLine(line = "val ${pattern.identifier} = data;")
                             expr.acceptConversion(converter = this@ToKotlinCompiler)
                         }
                     }

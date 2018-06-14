@@ -14,7 +14,9 @@ internal object PatternBuilder : PLBaseVisitor<Pattern>() {
     override fun visitVariantPattern(ctx: VariantPatternContext): Pattern =
             Pattern.Variant(
                     variantIdentifier = ctx.UpperIdentifier().text,
-                    associatedVariable = ctx.LowerIdentifier()?.text
+                    associatedVariable = if (ctx.WILDCARD() != null) "_" else {
+                        ctx.LowerIdentifier()?.text
+                    }
             )
 
     override fun visitVariablePattern(ctx: VariablePatternContext): Pattern =
