@@ -13,19 +13,22 @@ The signature (in SAMPL) and implementation (in Kotlin) of the provided runtime 
 in the Kotlin file 
 [PrimitiveRuntimeLibrary](./src/main/kotlin/org/sampl/runtime/PrimitiveRuntimeLibrary.kt).
 
-Note that the primitive types are different in Kotlin and SAMPL. The correspondence is listed in
-the table below.
+SAMPL has a set of predefined types, which (somewhat) corresponds to the primitive types in Kotlin
+and JVM. The correspondence is listed in the table below.
 
-| SAMPL    | Kotlin    |
-| :------: | :-------: |
-| `Unit`   | `Unit`    |
-| `Int`    | `Long`    |
-| `Float`  | `Double`  |
-| `Bool`   | `Boolean` |
-| `Char`   | `Char`    |
-| `String` | `String`* |
+Note that the primitive types are different in Kotlin and SAMPL. 
 
-Note: `String` is not a primitive type in Kotlin.
+| SAMPL         | Kotlin           |
+| :-----------: | :--------------: |
+| `Unit`        | `Unit`           |
+| `Int`         | `Long`           |
+| `Float`       | `Double`         |
+| `Bool`        | `Boolean`        |
+| `Char`        | `Char`           |
+| `String`      | `String`*        |
+| `StringArray` | `Array<String>`* |
+
+Note: `String` and `Array<String>` are not primitive types in Kotlin and JVM.
 
 ## Namespace Specification
 
