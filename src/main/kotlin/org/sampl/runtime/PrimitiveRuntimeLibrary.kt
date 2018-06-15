@@ -258,6 +258,13 @@ object PrimitiveRuntimeLibrary : RuntimeLibrary {
     fun split(delimiter: String, s: String): Array<String> = s.split(delimiter).toTypedArray()
 
     /**
+     * [getStringArrayLength] returns the length of the given string array [s].
+     */
+    @RuntimeFunction
+    @JvmStatic
+    fun getStringArrayLength(a: Array<String>): Long = a.size.toLong()
+
+    /**
      * [getString] returns the string at [index] of string array [a]. Throws "OUT_OF_BOUND" if
      * [index] is out of bound.
      */

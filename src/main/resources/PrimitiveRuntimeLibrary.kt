@@ -29,15 +29,22 @@ fun getChar(index: Long, s: String): Char =
         try {
             s[index.toInt()]
         } catch (e: IndexOutOfBoundsException) {
-            throw throw PLException("OUT_OF_BOUND")
+            throw PLException("OUT_OF_BOUND")
         }
 fun getSubstring(from: Long, to: Long, s: String): String =
         try {
             s.substring(from.toInt(), to.toInt())
         } catch (e: IndexOutOfBoundsException) {
-            throw throw PLException("OUT_OF_BOUND")
+            throw PLException("OUT_OF_BOUND")
         }
 fun trimString(s: String): String = s.trim()
 fun containsSubstring(sub: String, s: String): Boolean = s.contains(other = sub)
 fun indexOf(sub: String, s: String): Long = s.indexOf(string = sub).toLong()
 fun split(delimiter: String, s: String): Array<String> = s.split(delimiter).toTypedArray()
+fun getStringArrayLength(a: Array<String>): Long = a.size.toLong()
+fun getString(index: Long, a: Array<String>): String =
+        try {
+            a[index.toInt()]
+        } catch (e: ArrayIndexOutOfBoundsException) {
+            throw PLException("OUT_OF_BOUND")
+        }
