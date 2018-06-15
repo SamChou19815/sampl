@@ -4,6 +4,7 @@ package org.sampl.util
 
 import org.sampl.EXTENSION
 import java.io.File
+import java.io.IOException
 
 /**
  * [getAllSourceFiles] returns all the source files in the given [directory].
@@ -20,6 +21,16 @@ internal fun getAllSourceFiles(directory: String): List<File> {
     }
     return files
 }
+
+/**
+ * [readFromFile] returns the content in [filename] or `null` if there is no such file.
+ */
+internal fun readFromFile(filename: String): String? =
+        try {
+            File(filename).useLines { it.joinToString(separator = "\n") }
+        } catch (e: IOException) {
+            null
+        }
 
 /**
  * [writeToFile] writes the [content] into a file with [filename].

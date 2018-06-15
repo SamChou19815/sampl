@@ -1,6 +1,7 @@
 package org.sampl
 
 import junit.framework.TestCase.assertEquals
+import org.junit.Ignore
 import org.junit.Test
 import org.sampl.codegen.PrettyPrinter
 import org.sampl.codegen.ToKotlinCompiler
@@ -9,6 +10,7 @@ import org.sampl.eval.StringValue
 import org.sampl.eval.UnitValue
 import org.sampl.runtime.RuntimeLibrary
 import org.sampl.util.AntlrUtil
+import org.sampl.util.readFromFile
 import org.sampl.util.writeToFile
 
 /**
@@ -119,6 +121,12 @@ class SimpleTest {
     """.trimIndent()
 
     /**
+     * [turingMachineSimulatorProgram] is the program to simulate Turing machines.
+     */
+    private val turingMachineSimulatorProgram: String =
+            readFromFile(filename = "./src/main/resources/TuringMachineSimulator.sampl")!!
+
+    /**
      * [runInSteps] simply runs some code in [program] in compiler's steps to show that the system
      * kinds of works in each step.
      * The output is written in Program + outputId.kt
@@ -151,6 +159,7 @@ class SimpleTest {
      * [compileSimple] tests the compiler pipe line as a whole on a simple program.
      */
     @Test
+    @Ignore
     fun compileSimple() {
         FullCompiler.compile(
                 code = multipleFeaturesProgram,
@@ -169,6 +178,7 @@ class SimpleTest {
         assertEquals(StringValue(value = "Hello World, Sam!"),
                 PLInterpreter.interpret(stringHelloWorldProgram))
         assertEquals(IntValue(value = 42), PLInterpreter.interpret(intHelloWorldProgram))
+        assertEquals(UnitValue, PLInterpreter.interpret(turingMachineSimulatorProgram))
     }
 
 }
