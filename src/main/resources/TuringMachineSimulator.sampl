@@ -1,13 +1,17 @@
 class TuringMachineSimulator {
 
-  class Pair<A, B>(a: A, b: B)
+  class Pair<A, B>(a: A, b: B) {
+    fun <A, B> getA(p: Pair<A, B>): A = Pair.getA(p)
+    fun <A, B> getB(p: Pair<A, B>): A = Pair.getB(p)
+    fun <A, B> create(a: A, b: B): Pair<A, B> = Pair(a, b)
+  }
 
   class Lst<T>(Nil | Cons of Pair<T, Lst<T>>) {
 
     private fun fromArrayHelper(index: Int, acc: Lst<String>, arr: StringArray): Lst<String> =
       if index == -1 then acc
       else
-        val newAcc = Lst.Cons(Pair(getString(index, arr), acc));
+        val newAcc = Lst.Cons(Pair.create(getString(index, arr), acc));
         fromArrayHelper(index - 1, newAcc, arr)
 
     fun fromArray(arr: StringArray): Lst<String> =
@@ -16,7 +20,7 @@ class TuringMachineSimulator {
     fun stringToCharListHelper(index: Int, acc: Lst<Char>, s: String): Lst<Char> =
       if index == -1  then acc
       else
-        val newAcc = Lst.Cons(Pair(getChar(index, s), acc));
+        val newAcc = Lst.Cons(Pair.create(getChar(index, s), acc));
         stringToCharListHelper(index - 1, newAcc, s)
 
     fun stringToCharList(s: String): Lst<Char> =
@@ -26,42 +30,44 @@ class TuringMachineSimulator {
       | Nil -> throw<T> "error"
       | Cons p ->
         if index < 0 then throw<T> "error"
-        else if index = 0 then p.a
-        else itemAtIndex(p.b, index - 1)
+        else if index = 0 then Pair.getA(p)
+        else itemAtIndex(Pair.getB(p), index - 1)
 
     fun <T> replaceItemAtIndex(l: Lst<T>, index: Int, replacement: T): Lst<T> = match l with
       | Nil -> throw<T> "error"
       | Cons p ->
         if index < 0 then throw<T> "error"
-        else if index = 0 then Lst.Cons(Pair(replacement, p.b))
-        else Lst.Cons(Pair(p.a, replaceItemAtIndex(p.b, index - 1, replacement)))
+        else if index = 0 then Lst.Cons(Pair.create(replacement, Pair.getB(p)))
+        else Lst.Cons(Pair.create(
+          Pair.getA(p), replaceItemAtIndex(Pair.getB(p), index - 1, replacement)
+        ))
 
     fun <T> find(l: Lst<T>: f: (T) -> Bool): T = match l with
       | Nil -> throw<T> "error"
-      | Cons of p -> if f(p.a) then p.a else find(p.b, f)
+      | Cons of p -> if f(Pair.getA(p)) then Pair.getA(p) else find(Pair.getB(p), f)
 
     fun <T, R> map(l: Lst<T>, f: (T) -> R)): Lst<R> = match l with
       | Nil -> Nil
       | Cons of p ->
-        val newValue = f(p.a);
-        val rest = map(p.b, f);
-        Lst.Cons(Pair(newValue, rest))
+        val newValue = f(Pair.getA(p));
+        val rest = map(Pair.getB(p), f);
+        Lst.Cons(Pair.create(newValue, rest))
 
     fun <T, R> foldLeft(l: Lst<T>, acc: R, f: (R, T) -> R): R = match l with
       | Nil -> acc
       | Cons of p ->
-        val newAcc = f(acc, p.a);
-        foldLeft(p.b, newAcc, f)
+        val newAcc = f(acc, Pair.getA(p));
+        foldLeft(Pair.getB(p), newAcc, f)
 
     fun <T, R> foldRight(l: Lst<T>, init: R, f: (T, R) -> R): R = match l with
       | Nil -> init
-      | Cons of p -> f(p.a, foldRight(p.b, init, f))
+      | Cons of p -> f(Pair.getA(p), foldRight(Pair.getB(p), init, f))
 
     fun <T> forEach(l: Lst<T>, action: (T) -> Unit): Unit = match l with
       | Nil -> Unit
       | Cons of p ->
-        val ignore = action(p.a);
-        forEach(p.b, action)
+        val ignore = action(Pair.getA(p));
+        forEach(Pair.getB(p), action)
   }
 
   class Direction(Left | Right | Stay) {
@@ -160,10 +166,10 @@ class TuringMachineSimulator {
         m with
         tape = newTape; currentState = newState; currentPosition = newPosition
       }
-    
+
     fun simulate(m: TuringMachine): Pair<TuringMachine, Result> =
       val p = transit(m);
-      if p.b == Result.stillRunning() then simulate(p.a) else p
+      if Pair.getB(p) == Result.stillRunning() then simulate(Pair.getA(p)) else p
   }
 
 }
