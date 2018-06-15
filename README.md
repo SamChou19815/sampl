@@ -47,11 +47,9 @@ class Optional<T>(None | Some of T) {
 
 ```kotlin
 class CurryingDemo {
-  fun add(a: Int, b: Int): Int = a + b
-  class Nested {
-     val add1 = add(1)
-     fun main(): Int = add1(2)
-  }
+  val add = { (a: Int, b: Int) -> a + b }
+  val add1 = add(1)
+  fun main(): Int = add1(2)
 }
 ```
 
