@@ -74,7 +74,7 @@ class TuringMachineSimulator {
     tape: Lst<Char>,
     currentPosition = Int
   ) {
-  
+
     fun fromString(s: String): TuringMachine = TODO()
 
     private fun transit(m: TuringMachine): Pair<TuringMachine, Result> = TODO()
