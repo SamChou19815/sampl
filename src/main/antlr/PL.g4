@@ -9,11 +9,11 @@ importDeclaration : IMPORT LBRACE UpperIdentifier (COMMA UpperIdentifier)* RBRAC
 classDeclaration :
     CLASS UpperIdentifier genericsDeclaration?
     (LPAREN typeExprInDeclaration RPAREN)?
-    (LBRACE classMembersDeclaration RBRACE)?;
+    (LBRACE classMembersDeclaration* RBRACE)?;
 
 classMembersDeclaration :
     classConstantDeclaration* // first constant definitions
-    classFunctionDeclaration* // then function definitions
+    classFunctionDeclaration+ // then function definitions
     classDeclaration* // finally nested class definitions
     ;
 

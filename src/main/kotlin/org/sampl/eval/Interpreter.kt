@@ -29,6 +29,7 @@ import org.sampl.ast.common.FunctionCategory
 import org.sampl.ast.common.Literal
 import org.sampl.ast.decorated.DecoratedClass
 import org.sampl.ast.decorated.DecoratedClassConstantMember
+import org.sampl.ast.decorated.DecoratedClassFunctionMember
 import org.sampl.ast.decorated.DecoratedClassMembers
 import org.sampl.ast.decorated.DecoratedExpression
 import org.sampl.ast.decorated.DecoratedPattern
@@ -52,48 +53,56 @@ class Interpreter(private val program: DecoratedProgram) {
      */
     fun eval(): Value {
         val completeEnv = eval(env = FpMap.empty(), node = program.clazz)
-        val mainFunction = program.clazz.members.functionMembers.firstOrNull { member ->
-            member.isPublic && member.identifier == "main" && member.arguments.isEmpty()
-        } ?: return UnitValue
+        val mainFunction = program.clazz.members.map { it.functionMembers }.flatten()
+                .firstOrNull { member ->
+                    member.isPublic && member.identifier == "main" && member.arguments.isEmpty()
+                } ?: return UnitValue
         return mainFunction.body.eval(env = completeEnv)
     }
 
     /**
-     * [eval] evaluates the given [node] to a value under the given [env].
+     * [eval] evaluates the given [node] to a new environment under the given [env].
      */
     private fun eval(env: EvalEnv, node: DecoratedClass): EvalEnv =
-            eval(env = env, node = node.members)
+            node.members.fold(initial = env) { e, m -> eval(env = e, node = m) }
 
     /**
-     * [eval] evaluates the given [node] to a value under the given [env].
+     * [eval] evaluates the given [node] to a new environment under the given [env].
      */
     private fun eval(env: EvalEnv, node: DecoratedClassMembers): EvalEnv = env
             .let { node.constantMembers.fold(initial = it, operation = ::eval) }
-            .let { currentEnv ->
-                var e = currentEnv
-                val closures = ArrayList<ClosureValue>(node.functionMembers.size)
-                for (f in node.functionMembers) {
-                    val closure = ClosureValue(
-                            category = f.category, name = f.identifier, environment = e,
-                            arguments = f.arguments.map { it.first }, code = f.body
-                    )
-                    closures.add(element = closure)
-                    e = e.put(key = f.identifier, value = closure)
-                }
-                closures.forEach { it.environment = e }
-                e
-            }
-            .let { currentEnv ->
-                node.nestedClassMembers.fold(initial = currentEnv) { e, clazz ->
-                    eval(e, clazz).exitClass(clazz = clazz)
-                }
-            }
+            .let { evalFunctions(env = it, nodes = node.functionMembers) }
+            .let { evalClasses(env = it, nodes = node.nestedClassMembers) }
 
     /**
-     * [eval] evaluates the given [node] to a value under the given [env].
+     * [eval] evaluates the given [node] to a new environment under the given [env].
      */
     private fun eval(env: EvalEnv, node: DecoratedClassConstantMember): EvalEnv =
             env.put(key = node.identifier, value = node.expr.eval(env = env))
+
+    /**
+     * [eval] evaluates the given [nodes] to a new environment under the given [env].
+     */
+    private fun evalFunctions(env: EvalEnv, nodes: List<DecoratedClassFunctionMember>): EvalEnv {
+        var e = env
+        val closures = ArrayList<ClosureValue>(nodes.size)
+        for (f in nodes) {
+            val closure = ClosureValue(
+                    category = f.category, name = f.identifier, environment = e,
+                    arguments = f.arguments.map { it.first }, code = f.body
+            )
+            closures.add(element = closure)
+            e = e.put(key = f.identifier, value = closure)
+        }
+        closures.forEach { it.environment = e }
+        return e
+    }
+
+    /**
+     * [eval] evaluates the given [nodes] to a new environment under the given [env].
+     */
+    private fun evalClasses(env: EvalEnv, nodes: List<DecoratedClass>): EvalEnv =
+            nodes.fold(initial = env) { e, clazz -> eval(e, clazz).exitClass(clazz = clazz) }
 
     /**
      * [eval] evaluates this node to a value under the given [env].

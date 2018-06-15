@@ -25,8 +25,8 @@ internal object ClassBuilder : PLBaseVisitor<Clazz>() {
                 ?.accept(TypeExprInDeclarationBuilder)
                 ?: TypeDeclaration.Struct(map = emptyMap())
         val members = ctx.classMembersDeclaration()
-                ?.accept(ClassMembersBuilder)
-                ?: ClassMembers.empty
+                ?.map { it.accept(ClassMembersBuilder) }
+                ?: emptyList()
         return Clazz(identifier = identifier, declaration = declaration, members = members)
     }
 

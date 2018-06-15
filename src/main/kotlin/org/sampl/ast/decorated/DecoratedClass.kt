@@ -13,7 +13,7 @@ import org.sampl.codegen.AstToCodeConverter
 data class DecoratedClass(
         val identifier: TypeIdentifier,
         val declaration: TypeDeclaration,
-        val members: DecoratedClassMembers
+        val members: List<DecoratedClassMembers>
 ) : CodeConvertible {
 
     override fun acceptConversion(converter: AstToCodeConverter): Unit =

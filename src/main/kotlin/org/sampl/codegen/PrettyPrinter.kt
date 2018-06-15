@@ -41,16 +41,16 @@ class PrettyPrinter private constructor() : AstToCodeConverter {
     override fun convert(node: DecoratedProgram): Unit = convert(node = node.clazz)
 
     override fun convert(node: DecoratedClass) {
-        if (node.declaration.isEmpty && node.members.isEmpty) {
+        if (node.declaration.isEmpty && node.members.isEmpty()) {
             q.addLine(line = "class ${node.identifier}")
             return
         } else if (node.declaration.isEmpty) {
             q.addLine(line = "class ${node.identifier} {")
             q.addEmptyLine()
-            q.indentAndApply { convert(node = node.members) }
+            q.indentAndApply { node.members.forEach { convert(node = it) } }
             q.addLine(line = "}")
             return
-        } else if (node.members.isEmpty) {
+        } else if (node.members.isEmpty()) {
             q.addLine(line = "class ${node.identifier} (")
             q.indentAndApply { convert(node = node.declaration) }
             q.addLine(line = ")")
@@ -59,7 +59,7 @@ class PrettyPrinter private constructor() : AstToCodeConverter {
             q.indentAndApply { convert(node = node.declaration) }
             q.addLine(line = ") {")
             q.addEmptyLine()
-            q.indentAndApply { convert(node = node.members) }
+            q.indentAndApply { node.members.forEach { convert(node = it) } }
             q.addLine(line = "}")
         }
     }

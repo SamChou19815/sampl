@@ -70,40 +70,44 @@ data class TypeCheckingEnv(
      * make the access of current class elements prefixed with class name.
      */
     fun exitClass(clazz: Clazz): TypeCheckingEnv {
-        val m = clazz.members
         // remove added type definitions
         val removedTypeDefinitions = typeDefinitions.remove(key = clazz.name)
-        // remove and change declared types
-        val newDeclaredTypes = declaredTypes.asSequence()
-                // when exiting, we need to use fully qualified name.
-                .filter { (name, _) ->
-                    val names = m.nestedClassMembers.map(Clazz::name)
-                    name in names
-                }
-                .fold(initial = declaredTypes) { dec, (name, genericsInfo) ->
-                    dec.remove(key = name).put(key = "${clazz.name}.$name", value = genericsInfo)
-                }
-        // remove private members
-        val removeAndChangeMember = { env: FpMap<String, TypeInfo>, member: ClassMember ->
-            if (member is ClassFunctionMember && member.category != FunctionCategory.USER_DEFINED) {
-                env
-            } else {
-                val name = member.name
-                if (member.isPublic) {
-                    val v = env[name] ?: error(message = "Impossible. Name: $name")
-                    env.remove(key = name).put(key = "${clazz.name}.$name", value = v)
+        var currentEnv = this
+        for (m in clazz.members) {
+            // remove and change declared types
+            val newDeclaredTypes = declaredTypes.asSequence()
+                    // when exiting, we need to use fully qualified name.
+                    .filter { (name, _) ->
+                        val names = m.nestedClassMembers.map(Clazz::name)
+                        name in names
+                    }
+                    .fold(initial = declaredTypes) { dec, (name, genericsInfo) ->
+                        dec.remove(key = name).put("${clazz.name}.$name", genericsInfo)
+                    }
+            // remove private members
+            val removeAndChangeMember = { env: FpMap<String, TypeInfo>, member: ClassMember ->
+                if (member is ClassFunctionMember &&
+                        member.category != FunctionCategory.USER_DEFINED) {
+                    env
                 } else {
-                    env.remove(key = name)
+                    val name = member.name
+                    if (member.isPublic) {
+                        val v = env[name] ?: error(message = "Impossible. Name: $name")
+                        env.remove(key = name).put(key = "${clazz.name}.$name", value = v)
+                    } else {
+                        env.remove(key = name)
+                    }
                 }
             }
+            val newTypeEnv = typeEnv
+                    .let { m.constantMembers.fold(initial = it, operation = removeAndChangeMember) }
+                    .let { m.functionMembers.fold(initial = it, operation = removeAndChangeMember) }
+            currentEnv = TypeCheckingEnv(
+                    typeDefinitions = removedTypeDefinitions,
+                    declaredTypes = newDeclaredTypes, typeEnv = newTypeEnv
+            )
         }
-        val newTypeEnv = typeEnv
-                .let { m.constantMembers.fold(initial = it, operation = removeAndChangeMember) }
-                .let { m.functionMembers.fold(initial = it, operation = removeAndChangeMember) }
-        return TypeCheckingEnv(
-                typeDefinitions = removedTypeDefinitions,
-                declaredTypes = newDeclaredTypes, typeEnv = newTypeEnv
-        )
+        return currentEnv
     }
 
     companion object {

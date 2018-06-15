@@ -117,10 +117,10 @@ internal fun createCompilationSequence(map: Map<String, CompilationUnit>): Clazz
     return Clazz(
             identifier = TypeIdentifier(name = "Main"),
             declaration = TypeDeclaration.Struct(map = emptyMap()),
-            members = ClassMembers(
+            members = listOf(ClassMembers(
                     constantMembers = emptyList(),
                     functionMembers = emptyList(),
                     nestedClassMembers = sequence.map { (_, unit) -> unit.clazz }
-            )
+            ))
     )
 }

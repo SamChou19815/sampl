@@ -3,6 +3,7 @@ package org.sampl.runtime
 import org.sampl.ast.common.FunctionCategory
 import org.sampl.ast.common.Literal
 import org.sampl.ast.raw.ClassFunctionMember
+import org.sampl.ast.raw.ClassMembers
 import org.sampl.ast.raw.Clazz
 import org.sampl.ast.raw.LiteralExpr
 import org.sampl.ast.type.TypeExpr
@@ -119,7 +120,13 @@ internal fun Clazz.withInjectedRuntime(providedRuntimeLibrary: R? = null): Clazz
             ?: emptySequence()
     val newFunctionMembers = primitiveRTSeq.toMutableList()
             .apply { addAll(elements = providedRTSeq) }
-            .apply { addAll(elements = members.functionMembers) }
-            .toList()
-    return copy(members = members.copy(functionMembers = newFunctionMembers))
+            .toList();
+    val newMemberGroup = ClassMembers(
+            constantMembers = emptyList(),
+            functionMembers = newFunctionMembers,
+            nestedClassMembers = emptyList()
+    )
+    val oldMemberGroups = members
+    val newMemberGroups = arrayListOf(newMemberGroup).apply { addAll(oldMemberGroups) }
+    return copy(members = newMemberGroups)
 }

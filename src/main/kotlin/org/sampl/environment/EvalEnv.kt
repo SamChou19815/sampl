@@ -5,7 +5,6 @@ import org.sampl.ast.common.FunctionCategory
 import org.sampl.ast.decorated.DecoratedClass
 import org.sampl.ast.raw.ClassFunctionMember
 import org.sampl.ast.raw.ClassMember
-import org.sampl.ast.raw.Clazz
 import org.sampl.eval.Value
 
 /**
@@ -34,7 +33,10 @@ fun EvalEnv.exitClass(clazz: DecoratedClass): EvalEnv {
             }
         }
     }
-    return this.let { m.constantMembers.fold(initial = it, operation = removeAndChangeMember) }
-            .let { m.functionMembers.fold(initial = it, operation = removeAndChangeMember) }
+    return m.fold(initial = this) { e, oneMemberGroup ->
+        e.let { oneMemberGroup.constantMembers.fold(it, removeAndChangeMember) }
+                .let { oneMemberGroup.functionMembers.fold(it, removeAndChangeMember) }
+    }
+
 }
 

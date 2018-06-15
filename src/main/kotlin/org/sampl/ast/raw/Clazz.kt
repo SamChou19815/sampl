@@ -21,7 +21,7 @@ import org.sampl.runtime.withInjectedRuntime
 data class Clazz(
         val identifier: TypeIdentifier,
         val declaration: TypeDeclaration,
-        val members: ClassMembers
+        val members: List<ClassMembers>
 ) : ClassMember {
 
     override val name: String get() = identifier.name
@@ -39,24 +39,25 @@ data class Clazz(
         if (!set.add(name)) {
             throw IdentifierError.ShadowedName(shadowedName = name)
         }
-        members.nestedClassMembers.forEach { it.noNameShadowingValidation(set = set) }
-        set.remove(name)
-        val memberSet = hashSetOf<String>()
-        val memberNameValidator: (ClassMember) -> Unit = { member ->
-            val name = member.name
-            if (!memberSet.add(name)) {
-                throw IdentifierError.ShadowedName(shadowedName = name)
+        for (m in members) {
+            m.nestedClassMembers.forEach { it.noNameShadowingValidation(set = set) }
+            set.remove(name)
+            val memberSet = hashSetOf<String>()
+            val memberNameValidator: (ClassMember) -> Unit = { member ->
+                val name = member.name
+                if (!memberSet.add(name)) {
+                    throw IdentifierError.ShadowedName(shadowedName = name)
+                }
             }
+            m.constantMembers.forEach(memberNameValidator)
+            m.functionMembers.forEach(memberNameValidator)
         }
-        members.constantMembers.forEach(memberNameValidator)
-        members.functionMembers.forEach(memberNameValidator)
     }
 
     /**
      * [typeCheckTypeDeclaration] uses the given [e] to type check the type declaration.
      *
-     * Requires: [e] must already put all the type members inside to allow
-     * recursive types.
+     * Requires: [e] must already put all the type members inside to allow recursive types.
      */
     private fun typeCheckTypeDeclaration(e: TypeCheckingEnv) {
         val newDeclaredTypes = identifier.genericsInfo
@@ -72,11 +73,9 @@ data class Clazz(
         }
     }
 
-    /**
-     * [typeCheck] tries to type check this class under the given [TypeCheckingEnv] [e].
-     * It returns a decorated class and a new environment after type check.
-     */
-    private fun typeCheck(e: TypeCheckingEnv): Pair<DecoratedClass, TypeCheckingEnv> {
+    private fun typeCheckMembersGroup(
+            e: TypeCheckingEnv, members: ClassMembers
+    ): Pair<DecoratedClassMembers, TypeCheckingEnv> {
         // Part 0: Members Declaration (for easier access only)
         val constantMembers = members.constantMembers
         val functionMembers = members.functionMembers
@@ -110,17 +109,33 @@ data class Clazz(
             decoratedClasses.add(element = decoratedModule)
             newEnv
         }
-        // Part 5: Exit Current Module and Return
+        // Part 5: Return Members
+        return DecoratedClassMembers(
+                constantMembers = decoratedConstants,
+                functionMembers = decoratedFunctions,
+                nestedClassMembers = decoratedClasses
+        ) to eWithClasses
+    }
+
+    /**
+     * [typeCheck] tries to type check this class under the given [TypeCheckingEnv] [e].
+     * It returns a decorated class and a new environment after type check.
+     */
+    private fun typeCheck(e: TypeCheckingEnv): Pair<DecoratedClass, TypeCheckingEnv> {
+        var currentEnv = e
+        val typeCheckedMemberGroups = ArrayList<DecoratedClassMembers>(members.size)
+        for (m in members) {
+            val (typeCheckedMembers, newE) = typeCheckMembersGroup(e = currentEnv, members = m)
+            typeCheckedMemberGroups.add(element = typeCheckedMembers)
+            currentEnv = newE
+        }
+        // Part 6: Exit Current Module and Return
         val decoratedClass = DecoratedClass(
                 identifier = identifier,
                 declaration = declaration,
-                members = DecoratedClassMembers(
-                        constantMembers = decoratedConstants,
-                        functionMembers = decoratedFunctions,
-                        nestedClassMembers = decoratedClasses
-                )
+                members = typeCheckedMemberGroups
         )
-        val eFinal = eWithClasses.exitClass(clazz = this)
+        val eFinal = currentEnv.exitClass(clazz = this)
         return decoratedClass to eFinal
     }
 

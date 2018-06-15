@@ -100,7 +100,7 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
         q.addEmptyLine()
         val clazz = node.clazz
         convert(node = clazz)
-        clazz.members.functionMembers.firstOrNull { member ->
+        clazz.members.map { it.functionMembers }.flatten().firstOrNull { member ->
             member.isPublic && member.identifier == "main" && member.arguments.isEmpty()
                     && member.returnType == unitTypeExpr
         } ?: return
@@ -126,7 +126,7 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
      * [convertClass] converts a class with [identifier] [members] and [declaration] to well
      * formatted Kotlin code.
      */
-    private fun convertClass(identifier: TypeIdentifier, members: DecoratedClassMembers,
+    private fun convertClass(identifier: TypeIdentifier, members: List<DecoratedClassMembers>,
                              declaration: TypeDeclaration.Variant) {
         val classRawName = identifier.name
         val classType = if (identifier.genericsInfo.isEmpty()) classRawName else {
@@ -183,7 +183,7 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
                     addLine(line = "data class $nameCode(val data: $dataType): $inheritanceCode()")
                 }
             }
-            convert(node = members)
+            convert(node = members.flatten())
         }
         q.addLine(line = "}")
     }
@@ -192,7 +192,7 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
      * [convertClass] converts a class with [identifier] [members] and [declaration] to well
      * formatted Kotlin code.
      */
-    private fun convertClass(identifier: TypeIdentifier, members: DecoratedClassMembers,
+    private fun convertClass(identifier: TypeIdentifier, members: List<DecoratedClassMembers>,
                              declaration: TypeDeclaration.Struct) {
         if (declaration.map.isEmpty()) {
             q.addLine(line = "class $identifier {")
@@ -218,9 +218,29 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
                 q.addLine(line = "fun copy(): $identifier = this")
                 q.addEmptyLine()
             }
-            convert(node = members)
+            convert(node = members.flatten())
         }
         q.addLine(line = "}")
+    }
+
+    /**
+     * [flatten] can flatten a list of [DecoratedClassMembers] into one [DecoratedClassMembers].
+     * This is OK since Kotlin does not care about cyclic dependency.
+     */
+    private fun List<DecoratedClassMembers>.flatten(): DecoratedClassMembers {
+        val constants = arrayListOf<DecoratedClassConstantMember>()
+        val functions = arrayListOf<DecoratedClassFunctionMember>()
+        val classes = arrayListOf<DecoratedClass>()
+        for (m in this) {
+            constants.addAll(m.constantMembers)
+            functions.addAll(m.functionMembers)
+            classes.addAll(m.nestedClassMembers)
+        }
+        return DecoratedClassMembers(
+                constantMembers = constants,
+                functionMembers = functions,
+                nestedClassMembers = classes
+        )
     }
 
     override fun convert(node: DecoratedClassMembers) {
