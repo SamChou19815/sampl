@@ -1,0 +1,84 @@
+class TuringMachineSimulator {
+
+  class Pair<A, B>(a: A, b: B)
+
+  class Lst<T>(Nil | Cons of Pair<T, Lst<T>>) {
+
+    fun <T, R> map(l: Lst<T>, f: (T) -> R)): Lst<R> = match l with
+      | Nil -> Nil
+      | Cons of p ->
+        val newValue = f(p.a);
+        val rest = map(p.b, f);
+        Cons(Pair(newValue, rest))
+
+    fun <T, R> foldLeft(l: Lst<T>, acc: R, f: (R, T) -> R): R = match l with
+      | Nil -> acc
+      | Cons of p ->
+        val newAcc = f(acc, p.a);
+        foldLeft(p.b, newAcc, f)
+
+    fun <T, R> foldRight(l: Lst<T>, init: R, f: (T, R) -> R): R = match l with
+      | Nil -> init
+      | Cons of p -> f(p.a, foldRight(p.b, init, f))
+
+    fun <T> forEach(l: Lst<T>, action: (T) -> Unit): Unit = match l with
+      | Nil -> Unit
+      | Cons of p ->
+        val ignore = action(p.a);
+        forEach(p.b, action)
+  }
+
+  class Direction(Left | Right | Stay) {
+
+    fun left(): Direction = Left
+
+    fun right(): Direction = Right
+
+    fun stay(): Direction = Stay
+
+    fun directionInt(d: Direction): Int = match d with | Left -> -1 | Right -> 1 | Stay -> 0
+
+  }
+
+  class TransitionRule(
+    fromState: String, seeChar: Char,
+    toState: String, direction: Direction, overrideChar: Char
+  ) {
+
+    fun create(
+      fromState: String, seeChar: Char, toState: String, direction: Direction, overrideChar: Char
+    ): TransitionRule = TransitionRule(fromState, seeChar, toState, direction, overrideChar)
+
+    fun canApply(rule: TransitionRule, fromState: String, seeChar: Char): Bool =
+      rule.fromState == fromState && rule.seeChar == seeChar
+
+    fun getToState(rule: TransitionRule): String = rule.toState
+
+    fun getDirection(rule: TransitionRule): Direction = rule.direction
+
+    fun getOverrideChar(rule: TransitionRule): String = rule.overrideChar
+
+  }
+
+  class Result(Yes | No | Halt | StillRunning) {
+    fun yes(): Result = Yes
+    fun no(): Result = No
+    fun halt(): Result = Halt
+    fun stillRunning(): Result = StillRunning
+  }
+
+  class TuringMachine(
+    alphabet: Lst<Char>,
+    states: Lst<String>,
+    transitions: Lst<TransitionRule>,
+    tape: Lst<Char>,
+    currentPosition = Int
+  ) {
+  
+    fun fromString(s: String): TuringMachine = TODO()
+
+    private fun transit(m: TuringMachine): Pair<TuringMachine, Result> = TODO()
+
+  }
+
+}
