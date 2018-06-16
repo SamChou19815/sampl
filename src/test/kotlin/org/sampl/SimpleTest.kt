@@ -7,7 +7,6 @@ import org.sampl.codegen.ToKotlinCompiler
 import org.sampl.eval.IntValue
 import org.sampl.eval.StringValue
 import org.sampl.eval.UnitValue
-import org.sampl.runtime.RuntimeLibrary
 import org.sampl.util.AntlrUtil
 import org.sampl.util.readFromFile
 import org.sampl.util.writeToFile
@@ -158,12 +157,7 @@ class SimpleTest {
      * [compileSimple] tests the compiler pipe line as a whole on a simple program.
      */
     @Test
-    fun compileSimple() {
-        FullCompiler.compile(
-                code = turingMachineSimulatorProgram,
-                providedRuntimeLibrary = RuntimeLibrary.EmptyInstance
-        )
-    }
+    fun compileSimple(): Unit = FullCompiler.compile(code = turingMachineSimulatorProgram)
 
     /**
      * [interpretSimple] tests the interpreter pipe line as a whole on a simple program.

@@ -148,8 +148,6 @@ class TuringMachineSimulator {
   }
 
   class TuringMachine(
-    alphabet: Lst<Char>,
-    states: Lst<String>,
     transitions: Lst<TransitionRule>,
     tape: Lst<Char>,
     currentState: String,
@@ -161,11 +159,9 @@ class TuringMachineSimulator {
      * - Following chars are never in the alphabet: ';', ',', '_', '-', '<', '>'.
      * - "YES", "NO", "HALT" are three special states.
      * - The format is these items separated by ';':
-     *   1. COMMA Separated AlphaBet
-     *   2. COMMA Separated States
-     *   3. COMMA Separated Transition Rules
-     *   4. Start State
-     *   5. Initial Tape Content
+     *   1. COMMA Separated Transition Rules
+     *   2. Start State
+     *   3. Initial Tape Content
      * , where each transition rule has these items separated by '_':
      *   1. Current state
      *   2. Character seen on this state
@@ -175,21 +171,15 @@ class TuringMachineSimulator {
      */
     fun fromString(s: String): TuringMachine =
       val parts = split(";", s);
-      val alphabet = Lst.map<String, Char>(
-        Lst.fromArray(split(",", getString(0, parts))), { (ss: String) ->
-          getChar(0, ss)
-        }
-      );
-      val states = Lst.fromArray(split(",", getString(1, parts)));
-      val transitionRuleRawList = Lst.fromArray(split(",", getString(2, parts)));
+      val transitionRuleRawList = Lst.fromArray(split(",", getString(0, parts)));
       val transitionRules = Lst.map<String, TransitionRule>(
         transitionRuleRawList, { (ruleString: String) -> TransitionRule.fromString(ruleString) }
       );
-      val startState = getString(3, parts);
-      val initialTapeContent = Lst.stringToCharList(getString(4, parts));
+      val startState = getString(1, parts);
+      val initialTapeContent = Lst.stringToCharList(getString(2, parts));
       TuringMachine{
-        alphabet = alphabet; states = states; transitions = transitionRules;
-        tape = initialTapeContent; currentState = startState; currentPosition = 0;
+        transitions = transitionRules; tape = initialTapeContent;
+        currentState = startState; currentPosition = 0;
       }
 
     private fun transit(m: TuringMachine): Pair<TuringMachine, Result> =
