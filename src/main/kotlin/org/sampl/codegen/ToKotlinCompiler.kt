@@ -10,6 +10,7 @@ import org.sampl.ast.decorated.DecoratedClassConstantMember
 import org.sampl.ast.decorated.DecoratedClassFunctionMember
 import org.sampl.ast.decorated.DecoratedClassMembers
 import org.sampl.ast.decorated.DecoratedExpression
+import org.sampl.ast.decorated.DecoratedExpression.Dummy.type
 import org.sampl.ast.decorated.DecoratedPattern
 import org.sampl.ast.decorated.DecoratedProgram
 import org.sampl.ast.type.TypeDeclaration
@@ -42,7 +43,8 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
      * [CodeConvertible.toOneLineCode] returns the one-liner form of the [CodeConvertible].
      */
     private fun CodeConvertible.toOneLineCode(): String =
-            ToKotlinCompiler().apply { acceptConversion(converter = this) }.q.toOneLineCode()
+            ToKotlinCompiler().apply { acceptConversion(converter = this) }
+                    .q.toOneLineCode()
 
     /**
      * [DecoratedExpression.toOneLineCode] returns the one-liner form of [DecoratedExpression].
@@ -261,8 +263,9 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
 
     override fun convert(node: DecoratedClassConstantMember) {
         val public = if (node.isPublic) "" else "private "
-        q.addLine(line = "${public}val ${node.identifier}: ${node.type.toKotlinType()} =")
+        q.addLine(line = "${public}val ${node.identifier}: ${node.type.toKotlinType()} = run {")
         q.indentAndApply { node.expr.acceptConversion(converter = this@ToKotlinCompiler) }
+        q.addLine(line = "}")
     }
 
     override fun convert(node: DecoratedClassFunctionMember) {
@@ -276,13 +279,15 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
         val argumentsString = node.arguments
                 .joinToString(separator = ", ") { (i, t) -> "$i: ${t.toKotlinType()}" }
         val r = node.returnType.toKotlinType()
-        q.addLine(line = "${public}fun$generics $id($argumentsString): $r =")
+        q.addLine(line = "${public}fun$generics $id($argumentsString): $r = run {")
         q.indentAndApply { node.body.acceptConversion(converter = this@ToKotlinCompiler) }
+        q.addLine(line = "}")
     }
 
     override fun convert(node: DecoratedExpression.Literal) {
         q.addLine(line = when (node.literal) {
             Literal.Unit -> "Unit"
+            is Literal.Int -> node.literal.toString() + "L"
             else -> node.literal.toString()
         })
     }
@@ -302,18 +307,18 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
             )
             is DecoratedExpression.Constructor.OneArgVariant -> {
                 val dataStr = node.data.toOneLineCode()
-                q.addLine(line = "${node.typeName}($dataStr)")
+                q.addLine(line = "${node.typeName}.${node.variantName}(run { $dataStr })")
             }
             is DecoratedExpression.Constructor.Struct -> {
                 val args = node.declarations.map { (n, e) ->
-                    "$n = ${e.toOneLineCode()}"
+                    "$n = run { ${e.toOneLineCode()} }"
                 }.joinToString(separator = ", ")
                 q.addLine(line = "${node.typeName}($args)")
             }
             is DecoratedExpression.Constructor.StructWithCopy -> {
                 val oldStr = node.old.toOneLineCode()
                 val args = node.newDeclarations.map { (n, e) ->
-                    "$n = ${e.toOneLineCode()}"
+                    "$n = run { ${e.toOneLineCode()} }"
                 }.joinToString(separator = ", ")
                 q.addLine(line = "($oldStr).copy($args)")
             }
@@ -453,7 +458,7 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
     }
 
     override fun convert(node: DecoratedExpression.Let) {
-        q.addLine(line = "val ${node.identifier}: ${node.type.toKotlinType()} = run {")
+        q.addLine(line = "val ${node.identifier}: ${node.e1.type.toKotlinType()} = run {")
         q.indentAndApply { node.e1.acceptConversion(converter = this@ToKotlinCompiler) }
         q.addLine(line = "};")
         node.e2.acceptConversion(converter = this)

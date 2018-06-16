@@ -1,7 +1,6 @@
 package org.sampl
 
 import junit.framework.TestCase.assertEquals
-import org.junit.Ignore
 import org.junit.Test
 import org.sampl.codegen.PrettyPrinter
 import org.sampl.codegen.ToKotlinCompiler
@@ -159,10 +158,9 @@ class SimpleTest {
      * [compileSimple] tests the compiler pipe line as a whole on a simple program.
      */
     @Test
-    @Ignore
     fun compileSimple() {
         FullCompiler.compile(
-                code = multipleFeaturesProgram,
+                code = turingMachineSimulatorProgram,
                 providedRuntimeLibrary = RuntimeLibrary.EmptyInstance
         )
     }

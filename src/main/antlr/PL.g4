@@ -68,7 +68,7 @@ expression
 
 constructor
     : (UpperIdentifier DOT)+ UpperIdentifier genericsSpecialization? # NoArgVariantConstructor
-    | (UpperIdentifier DOT)+ UpperIdentifier LPAREN expression RPAREN # OneArgVariantConstructor
+    | (UpperIdentifier DOT)+ UpperIdentifier OF LPAREN expression RPAREN # OneArgVariantConstructor
     | (UpperIdentifier DOT)* UpperIdentifier LBRACE
           structConstructorValueDeclaration (SEMICOLON structConstructorValueDeclaration)*
           SEMICOLON?

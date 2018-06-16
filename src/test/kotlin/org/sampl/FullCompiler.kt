@@ -28,6 +28,7 @@ object FullCompiler {
         // Invoke Kotlin compiler
         val classPath = "$KOTLIN_CODE_OUT_DIR:$currentClassPath"
         val command = "kotlinc-jvm $filename -classpath $classPath $kotlinCompilerFixedArgs"
+        println(command)
         val exitValue = executeAndGetValue(command = command)
         if (exitValue != 0) {
             // If type checking and code generation work, we should not get error.

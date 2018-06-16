@@ -13,63 +13,72 @@ class TuringMachineSimulator {
     private fun fromArrayHelper(index: Int, acc: Lst<String>, arr: StringArray): Lst<String> =
       if index == 0 - 1 then acc
       else
-        val newAcc = Lst.Cons(Pair.create(getString(index, arr), acc));
+        val newAcc = Lst.Cons of (Pair.create<String, Lst<String>>(getString(index, arr), acc));
         fromArrayHelper(index - 1, newAcc, arr)
 
     fun fromArray(arr: StringArray): Lst<String> =
-      fromArrayHelper(getStringArrayLength(arr) - 1, Lst.Nil, arr)
+      fromArrayHelper(getStringArrayLength(arr) - 1, Lst.Nil<String>, arr)
 
     fun stringToCharListHelper(index: Int, acc: Lst<Char>, s: String): Lst<Char> =
       if index == 0 - 1 then acc
       else
-        val newAcc = Lst.Cons(Pair.create(getChar(index, s), acc));
+        val newAcc = Lst.Cons of (Pair.create<Char, Lst<Char>>(getChar(index, s), acc));
         stringToCharListHelper(index - 1, newAcc, s)
 
     fun stringToCharList(s: String): Lst<Char> =
-      stringToCharListHelper(getLength(arr) - 1, Lst.Nil, s)
+      stringToCharListHelper(getLength(s) - 1, Lst.Nil<Char>, s)
 
     fun <T> itemAtIndex(l: Lst<T>, index: Int): T = match l with
       | Nil -> throw<T> "error"
       | Cons p ->
         if index < 0 then throw<T> "error"
-        else if index == 0 then Pair.getA(p)
-        else itemAtIndex(Pair.getB(p), index - 1)
+        else if index == 0 then Pair.getA<T, Lst<T>>(p)
+        else itemAtIndex<T>(Pair.getB<T, Lst<T>>(p), index - 1)
 
     fun <T> replaceItemAtIndex(l: Lst<T>, index: Int, replacement: T): Lst<T> = match l with
-      | Nil -> throw<T> "error"
+      | Nil -> throw<Lst<T>> "error"
       | Cons p ->
-        if index < 0 then throw<T> "error"
-        else if index == 0 then Lst.Cons(Pair.create(replacement, Pair.getB(p)))
-        else Lst.Cons(Pair.create(
-          Pair.getA(p), replaceItemAtIndex(Pair.getB(p), index - 1, replacement)
-        ))
+        if index < 0 then throw<Lst<T>> "error"
+        else if index == 0 then Lst.Cons of (
+          val rest = Pair.getB<T, Lst<T>>(p);
+          Pair.create<T, Lst<T>>(replacement, rest)
+        )
+        else
+          val currentItem = Pair.getA<T, Lst<T>>(p);
+          val rest = Pair.getB<T, Lst<T>>(p);
+          Lst.Cons of (Pair.create<T, Lst<T>>(
+            currentItem, replaceItemAtIndex<T>(rest, index - 1, replacement)
+          ))
 
     fun <T> find(l: Lst<T>, f: (T) -> Bool): T = match l with
       | Nil -> throw<T> "error"
-      | Cons p -> if f(Pair.getA(p)) then Pair.getA(p) else find(Pair.getB(p), f)
+      | Cons p ->
+        val currentItem = Pair.getA<T, Lst<T>>(p);
+        val rest = Pair.getB<T, Lst<T>>(p);
+        if f(currentItem) then currentItem else find<T>(rest, f)
 
     fun <T, R> map(l: Lst<T>, f: (T) -> R): Lst<R> = match l with
-      | Nil -> Lst.Nil
+      | Nil -> Lst.Nil<R>
       | Cons p ->
-        val newValue = f(Pair.getA(p));
-        val rest = map(Pair.getB(p), f);
-        Lst.Cons(Pair.create(newValue, rest))
+        val newValue = f(Pair.getA<T, Lst<T>>(p));
+        val rest = map<T, R>(Pair.getB<T, Lst<T>>(p), f);
+        Lst.Cons of (Pair.create<R, Lst<R>>(newValue, rest))
 
     fun <T, R> foldLeft(l: Lst<T>, acc: R, f: (R, T) -> R): R = match l with
       | Nil -> acc
       | Cons p ->
-        val newAcc = f(acc, Pair.getA(p));
-        foldLeft(Pair.getB(p), newAcc, f)
+        val newAcc = f(acc, Pair.getA<T, Lst<T>>(p));
+        foldLeft<T, R>(Pair.getB<T, Lst<T>>(p), newAcc, f)
 
     fun <T, R> foldRight(l: Lst<T>, init: R, f: (T, R) -> R): R = match l with
       | Nil -> init
-      | Cons p -> f(Pair.getA(p), foldRight(Pair.getB(p), init, f))
+      | Cons p -> f(Pair.getA<T, Lst<T>>(p), foldRight<T, R>(Pair.getB<T, Lst<T>>(p), init, f))
 
     fun <T> forEach(l: Lst<T>, action: (T) -> Unit): Unit = match l with
       | Nil -> ()
       | Cons p ->
-        val ignore = action(Pair.getA(p));
-        forEach(Pair.getB(p), action)
+        val ignore = action(Pair.getA<T, Lst<T>>(p));
+        forEach<T>(Pair.getB<T, Lst<T>>(p), action)
   }
 
   class Direction(Left | Right | Stay) {
@@ -84,6 +93,11 @@ class TuringMachineSimulator {
       else if c == '-' then Direction.Stay
       else throw<Direction> "error"
 
+    fun toOffset(d: Direction): Int = match d with
+      | Left -> 0 - 1
+      | Right -> 1
+      | Stay -> 0
+
   }
 
   class TransitionRule(
@@ -92,7 +106,7 @@ class TuringMachineSimulator {
   ) {
 
     fun fromString(s: String): TransitionRule =
-      val parts = s.split("_", s);
+      val parts = split("_", s);
       val fromState = getString(0, parts);
       val seeChar = getChar(0, getString(1, parts));
       val toState = getString(2, parts);
@@ -110,7 +124,7 @@ class TuringMachineSimulator {
 
     fun getDirection(rule: TransitionRule): Direction = rule.direction
 
-    fun getOverrideChar(rule: TransitionRule): String = rule.overrideChar
+    fun getOverrideChar(rule: TransitionRule): Char = rule.overrideChar
 
   }
 
@@ -119,6 +133,18 @@ class TuringMachineSimulator {
     fun no(): Result = Result.No
     fun halt(): Result = Result.Halt
     fun stillRunning(): Result = Result.StillRunning
+
+    fun toString(r: Result): String = match r with
+      | Yes -> "YES"
+      | No -> "NO"
+      | Halt -> "HALT"
+      | StillRunning -> "STILL_RUNNING"
+
+    fun isHaltingResult(r: Result): Bool = match r with
+      | Yes -> true
+      | No -> true
+      | Halt -> true
+      | StillRunning -> false
   }
 
   class TuringMachine(
@@ -133,6 +159,7 @@ class TuringMachineSimulator {
     /**
      * Assumption:
      * - Following chars are never in the alphabet: ';', ',', '_', '-', '<', '>'.
+     * - "YES", "NO", "HALT" are three special states.
      * - The format is these items separated by ';':
      *   1. COMMA Separated AlphaBet
      *   2. COMMA Separated States
@@ -148,10 +175,16 @@ class TuringMachineSimulator {
      */
     fun fromString(s: String): TuringMachine =
       val parts = split(";", s);
-      val alphabet = Lst.fromArray(split(",", getString(0, parts)));
+      val alphabet = Lst.map<String, Char>(
+        Lst.fromArray(split(",", getString(0, parts))), { (ss: String) ->
+          getChar(0, ss)
+        }
+      );
       val states = Lst.fromArray(split(",", getString(1, parts)));
       val transitionRuleRawList = Lst.fromArray(split(",", getString(2, parts)));
-      val transitionRules = Lst.map(transitionRuleRawList, TransitionRule.fromString);
+      val transitionRules = Lst.map<String, TransitionRule>(
+        transitionRuleRawList, { (ruleString: String) -> TransitionRule.fromString(ruleString) }
+      );
       val startState = getString(3, parts);
       val initialTapeContent = Lst.stringToCharList(getString(4, parts));
       TuringMachine{
@@ -160,24 +193,41 @@ class TuringMachineSimulator {
       }
 
     private fun transit(m: TuringMachine): Pair<TuringMachine, Result> =
-      val currentChar = Lst.itemAtIndex(m.tape, m.currentPosition);
+      val currentChar = Lst.itemAtIndex<Char>(m.tape, m.currentPosition);
       val filter = { (r: TransitionRule) ->
         TransitionRule.canApply(r, m.currentState, currentChar)
       };
-      val rule = Lst.find(m.transitions, filter);
-      val newState = TransitionRule.getNewState(rule);
-      val dirOffset = TransitionRule.getDirection(rule);
+      val rule = Lst.find<TransitionRule>(m.transitions, filter);
+      val newState = TransitionRule.getToState(rule);
+      val dirOffset = Direction.toOffset(TransitionRule.getDirection(rule));
       val newPosition = m.currentPosition + dirOffset;
       val newChar = TransitionRule.getOverrideChar(rule);
-      val newTape = Lst.replaceItemAtIndex(m.tape, m.currentPosition, newChar);
-      {
+      val newTape = Lst.replaceItemAtIndex<Char>(m.tape, m.currentPosition, newChar);
+      val newTuringMachine = {
         m with
         tape = newTape; currentState = newState; currentPosition = newPosition
-      }
+      };
+      val result =
+        if newState == "YES" then Result.yes()
+        else if newState == "NO" then Result.no()
+        else if newState == "HALT" then Result.halt()
+        else Result.stillRunning()
+      ;
+      Pair.create<TuringMachine, Result>(newTuringMachine, result)
 
     fun simulate(m: TuringMachine): Pair<TuringMachine, Result> =
       val p = transit(m);
-      if Pair.getB(p) == Result.stillRunning() then simulate(Pair.getA(p)) else p
+      val turingMachine = Pair.getA<TuringMachine, Result>(p);
+      val result = Pair.getB<TuringMachine, Result>(p);
+      if result == (Result.stillRunning()) then simulate(turingMachine) else p
   }
+
+  fun run(): Unit =
+    val turingMachineString = readLine();
+    val turingMachine = TuringMachine.fromString(turingMachineString);
+    val simulationResultPair = TuringMachine.simulate(turingMachine);
+    val result = Pair.getB<TuringMachine, Result>(simulationResultPair);
+    if Result.isHaltingResult(result) then printlnString(Result.toString(result))
+    else throw<Unit> "ERROR!!!"
 
 }

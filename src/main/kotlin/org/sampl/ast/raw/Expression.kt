@@ -37,6 +37,7 @@ import org.sampl.ast.type.intTypeExpr
 import org.sampl.ast.type.stringTypeExpr
 import org.sampl.ast.type.unitTypeExpr
 import org.sampl.environment.TypeCheckingEnv
+import org.sampl.exceptions.CompileTimeError
 import org.sampl.exceptions.GenericsError
 import org.sampl.exceptions.IdentifierError
 import org.sampl.exceptions.PatternMatchingError
@@ -96,7 +97,6 @@ data class VariableIdentifierExpr(
                 variable = variable, genericInfo = genericInfo, type = type
         )
     }
-
 }
 
 /**
@@ -127,7 +127,7 @@ sealed class ConstructorExpr : Expression() {
                     ?: throw IdentifierError.UndefinedTypeIdentifier(badIdentifier = typeName)
             val variantDeclarationMap = (typeDeclarations as? TypeDeclaration.Variant)?.map
                     ?: throw VariantNotFoundError(typeName = typeName, variantName = variantName)
-            if (variantDeclarationMap[variantName] != null) {
+            if (!variantDeclarationMap.containsKey(key = variantName)) {
                 throw VariantNotFoundError(typeName = typeName, variantName = variantName)
             }
             if (genericDeclarations.size != genericInfo.size) {
@@ -528,6 +528,7 @@ data class FunctionApplicationExpr(
     }
 }
 
+
 /**
  * [FunctionExpr] is the function expression with some [arguments] and the function [body].
  */
@@ -536,7 +537,12 @@ data class FunctionExpr(
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
-        val bodyExpr = body.typeCheck(environment = environment)
+        val newEnv = environment.update(
+                newTypeEnv = arguments.fold(initial = environment.typeEnv) { e, (n, t) ->
+                    e.put(key = n, value = t.asTypeInformation)
+                }
+        )
+        val bodyExpr = body.typeCheck(environment = newEnv)
         val bodyType = bodyExpr.type
         val functionDeclaredType = TypeExpr.Function(
                 argumentTypes = arguments.map { it.second }, returnType = bodyType
