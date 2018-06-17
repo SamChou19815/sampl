@@ -3,14 +3,11 @@ package org.sampl.codegen
 import org.sampl.EASTER_EGG
 import org.sampl.TOP_LEVEL_PROGRAM_NAME
 import org.sampl.ast.common.BinaryOperator
-import org.sampl.ast.common.FunctionCategory
+import org.sampl.ast.common.FunctionCategory.USER_DEFINED
 import org.sampl.ast.common.Literal
-import org.sampl.ast.decorated.DecoratedClass
-import org.sampl.ast.decorated.DecoratedClassConstantMember
-import org.sampl.ast.decorated.DecoratedClassFunctionMember
-import org.sampl.ast.decorated.DecoratedClassMembers
+import org.sampl.ast.decorated.DecoratedClassFunction
+import org.sampl.ast.decorated.DecoratedClassMember
 import org.sampl.ast.decorated.DecoratedExpression
-import org.sampl.ast.decorated.DecoratedExpression.Dummy.type
 import org.sampl.ast.decorated.DecoratedPattern
 import org.sampl.ast.decorated.DecoratedProgram
 import org.sampl.ast.type.TypeDeclaration
@@ -26,6 +23,7 @@ import org.sampl.ast.type.unitTypeExpr
 import org.sampl.util.joinToGenericsInfoString
 import java.io.BufferedReader
 import java.io.InputStreamReader
+import java.util.LinkedList
 
 /**
  * [ToKotlinCompiler] is responsible for compiling the given AST node to valid Kotlin Code.
@@ -100,20 +98,66 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
                 .lineSequence()
                 .forEach { q.addLine(line = it) }
         q.addEmptyLine()
-        val clazz = node.clazz
-        convert(node = clazz)
-        clazz.members.map { it.functionMembers }.flatten().firstOrNull { member ->
-            member.isPublic && member.identifier == "main" && member.arguments.isEmpty()
-                    && member.returnType == unitTypeExpr
-        } ?: return
+        // Convert main members
+        node.members.convert(isTopLevel = true)
+        // Add main if exists
+        node.members.asSequence().mapNotNull { member ->
+            member as? DecoratedClassMember.FunctionGroup
+        }.mapNotNull { functionGroup ->
+            functionGroup.functions.filter { it.category == USER_DEFINED }.firstOrNull { f ->
+                f.isPublic && f.identifier == "main" && f.arguments.isEmpty()
+            }
+        }.firstOrNull() ?: return
         q.addLine(line = "fun main(args: Array<String>) {")
         q.indentAndApply {
-            addLine(line = "${clazz.identifier.name}.main()")
+            addLine(line = "println(main())")
         }
         q.addLine(line = "}")
     }
 
-    override fun convert(node: DecoratedClass) {
+    /**
+     * [convert] converts a list of [DecoratedClassMember] to code.
+     *
+     * @param isTopLevel tells whether the members are at top level. Default to false.
+     */
+    private fun List<DecoratedClassMember>.convert(isTopLevel: Boolean = false) {
+        val constants = LinkedList<DecoratedClassMember.Constant>()
+        val functionGroups = LinkedList<DecoratedClassMember.FunctionGroup>()
+        val classes = LinkedList<DecoratedClassMember.Clazz>()
+        for (member in this) {
+            when (member) {
+                is DecoratedClassMember.Constant -> constants.add(member)
+                is DecoratedClassMember.FunctionGroup -> functionGroups.add(member)
+                is DecoratedClassMember.Clazz -> classes.add(member)
+            }
+        }
+        if (isTopLevel) {
+            constants.forEach { convert(node = it) }
+            functionGroups.forEach { convert(node = it) }
+        } else {
+            q.addLine(line = "companion object {")
+            q.indentAndApply {
+                constants.forEach { convert(node = it) }
+                functionGroups.forEach { convert(node = it) }
+            }
+            q.addLine(line = "}")
+            q.addEmptyLine()
+        }
+        classes.forEach { convert(node = it) }
+    }
+
+    override fun convert(node: DecoratedClassMember.Constant) {
+        val public = if (node.isPublic) "" else "private "
+        q.addLine(line = "${public}val ${node.identifier}: ${node.type.toKotlinType()} = run {")
+        q.indentAndApply { node.expr.acceptConversion(converter = this@ToKotlinCompiler) }
+        q.addLine(line = "}")
+        q.addEmptyLine()
+    }
+
+    override fun convert(node: DecoratedClassMember.FunctionGroup): Unit =
+            node.functions.filter { it.category == USER_DEFINED }.forEach { convert(node = it) }
+
+    override fun convert(node: DecoratedClassMember.Clazz) {
         val i = node.identifier
         val m = node.members
         val d = node.declaration
@@ -128,7 +172,7 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
      * [convertClass] converts a class with [identifier] [members] and [declaration] to well
      * formatted Kotlin code.
      */
-    private fun convertClass(identifier: TypeIdentifier, members: List<DecoratedClassMembers>,
+    private fun convertClass(identifier: TypeIdentifier, members: List<DecoratedClassMember>,
                              declaration: TypeDeclaration.Variant) {
         val classRawName = identifier.name
         val classType = if (identifier.genericsInfo.isEmpty()) classRawName else {
@@ -185,7 +229,7 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
                     addLine(line = "data class $nameCode(val data: $dataType): $inheritanceCode()")
                 }
             }
-            convert(node = members.flatten())
+            members.convert()
         }
         q.addLine(line = "}")
     }
@@ -194,7 +238,7 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
      * [convertClass] converts a class with [identifier] [members] and [declaration] to well
      * formatted Kotlin code.
      */
-    private fun convertClass(identifier: TypeIdentifier, members: List<DecoratedClassMembers>,
+    private fun convertClass(identifier: TypeIdentifier, members: List<DecoratedClassMember>,
                              declaration: TypeDeclaration.Struct) {
         if (declaration.map.isEmpty()) {
             q.addLine(line = "class $identifier {")
@@ -220,55 +264,12 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
                 q.addLine(line = "fun copy(): $identifier = this")
                 q.addEmptyLine()
             }
-            convert(node = members.flatten())
+            members.convert()
         }
         q.addLine(line = "}")
     }
 
-    /**
-     * [flatten] can flatten a list of [DecoratedClassMembers] into one [DecoratedClassMembers].
-     * This is OK since Kotlin does not care about cyclic dependency.
-     */
-    private fun List<DecoratedClassMembers>.flatten(): DecoratedClassMembers {
-        val constants = arrayListOf<DecoratedClassConstantMember>()
-        val functions = arrayListOf<DecoratedClassFunctionMember>()
-        val classes = arrayListOf<DecoratedClass>()
-        for (m in this) {
-            constants.addAll(m.constantMembers)
-            functions.addAll(m.functionMembers)
-            classes.addAll(m.nestedClassMembers)
-        }
-        return DecoratedClassMembers(
-                constantMembers = constants,
-                functionMembers = functions,
-                nestedClassMembers = classes
-        )
-    }
-
-    override fun convert(node: DecoratedClassMembers) {
-        val compilerAction: (CodeConvertible) -> Unit = { m ->
-            m.acceptConversion(converter = this)
-            q.addEmptyLine()
-        }
-        q.addLine(line = "companion object {")
-        q.indentAndApply {
-            node.constantMembers.forEach(compilerAction)
-            node.functionMembers.asSequence()
-                    .filter { it.category == FunctionCategory.USER_DEFINED }
-                    .forEach(compilerAction)
-        }
-        q.addLine(line = "}")
-        node.nestedClassMembers.forEach(compilerAction)
-    }
-
-    override fun convert(node: DecoratedClassConstantMember) {
-        val public = if (node.isPublic) "" else "private "
-        q.addLine(line = "${public}val ${node.identifier}: ${node.type.toKotlinType()} = run {")
-        q.indentAndApply { node.expr.acceptConversion(converter = this@ToKotlinCompiler) }
-        q.addLine(line = "}")
-    }
-
-    override fun convert(node: DecoratedClassFunctionMember) {
+    override fun convert(node: DecoratedClassFunction) {
         val public = if (node.isPublic) "" else "private "
         val generics = node.genericsDeclaration
                 .takeIf { it.isNotEmpty() }
@@ -282,6 +283,7 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
         q.addLine(line = "${public}fun$generics $id($argumentsString): $r = run {")
         q.indentAndApply { node.body.acceptConversion(converter = this@ToKotlinCompiler) }
         q.addLine(line = "}")
+        q.addEmptyLine()
     }
 
     override fun convert(node: DecoratedExpression.Literal) {

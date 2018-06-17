@@ -1,5 +1,3 @@
-@file:JvmName(name = "Pervasives")
-
 package org.sampl.util
 
 import java.util.Arrays

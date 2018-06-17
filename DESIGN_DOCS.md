@@ -129,4 +129,3 @@ AST for the convenience of rapid prototyping. It will be improved later.
 expected to have at least 20 bugs or some undefined behavior.
 - Function Reference is different in SAMPL and Kotlin. Currently code generation with function 
 reference has some problem (e.g. it cannot correctly convert from `funName` to `::funName`).
-- Currently the rule for ordering class members are very ugly.

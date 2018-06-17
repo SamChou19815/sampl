@@ -28,8 +28,10 @@ object FullCompiler {
         // Invoke Kotlin compiler
         val classPath = "$KOTLIN_CODE_OUT_DIR:$currentClassPath"
         val command = "kotlinc-jvm $filename -classpath $classPath $kotlinCompilerFixedArgs"
-        val exitValue = executeAndGetValue(command = command)
+        File(JAR_OUT_DIR).mkdirs()
+        val (exitValue, _, errorOutput) = executeAndGetValue(command = command)
         if (exitValue != 0) {
+            println(errorOutput)
             // If type checking and code generation work, we should not get error.
             throw RuntimeException("It should return 0, but instead we got: $exitValue.")
         }

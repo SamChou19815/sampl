@@ -1,5 +1,3 @@
-@file:JvmName(name = "FileUtil")
-
 package org.sampl.util
 
 import org.sampl.EXTENSION

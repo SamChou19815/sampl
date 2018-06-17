@@ -13,11 +13,8 @@ lexer grammar PLLexerPart;
 IMPORT : 'import';
 
 CLASS : 'class';
-TYPE : 'type';
 OF : 'of';
-LET : 'let';
 VAL : 'val';
-CONST : 'const';
 FUN : 'fun';
 
 PRIVATE : 'private';

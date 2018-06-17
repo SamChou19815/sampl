@@ -38,11 +38,11 @@ strictly prohibited. Within each class, type declaration can be recursive. Curre
 allowed: `class BadExample(value: BadExample)` Classes are all public and static. Types are public
 but its definitions can only be used within the scope of the class.
 
-Constants of a class are static. They must appear first in class members declarations and cannot be
-mutually recursive with any other member in the entire program. All functions within the class are 
-treated as they are all mutually recursive.
+Inside a class contains class members. A program also contains those members.
 
-As stated before, nested classes cannot be mutually recursive.
+Members can contain constants, functions and nested class in any order. Cyclic dependencies are
+not allowed, except that all functions inside a function groups are mutually recursive. A function
+group is the maximum continuous sequence of function declarations in class.
 
 ### Member Reference
 

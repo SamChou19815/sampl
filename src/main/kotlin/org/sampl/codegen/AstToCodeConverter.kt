@@ -1,13 +1,9 @@
 package org.sampl.codegen
 
-import org.sampl.ast.decorated.DecoratedClass
-import org.sampl.ast.decorated.DecoratedClassConstantMember
-import org.sampl.ast.decorated.DecoratedClassFunctionMember
-import org.sampl.ast.decorated.DecoratedClassMembers
+import org.sampl.ast.decorated.DecoratedClassFunction
+import org.sampl.ast.decorated.DecoratedClassMember
 import org.sampl.ast.decorated.DecoratedExpression
 import org.sampl.ast.decorated.DecoratedProgram
-import org.sampl.ast.type.TypeExpr
-import org.sampl.ast.type.TypeIdentifier
 
 /**
  * [AstToCodeConverter] defines a set of methods that helps the conversion from AST to target code.
@@ -24,22 +20,22 @@ interface AstToCodeConverter {
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.
      */
-    fun convert(node: DecoratedClass)
+    fun convert(node: DecoratedClassMember.Constant)
 
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.
      */
-    fun convert(node: DecoratedClassMembers)
+    fun convert(node: DecoratedClassMember.FunctionGroup)
 
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.
      */
-    fun convert(node: DecoratedClassConstantMember)
+    fun convert(node: DecoratedClassMember.Clazz)
 
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.
      */
-    fun convert(node: DecoratedClassFunctionMember)
+    fun convert(node: DecoratedClassFunction)
 
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.

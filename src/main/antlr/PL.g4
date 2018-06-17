@@ -2,22 +2,22 @@ grammar PL;
 
 import PLLexerPart;
 
-compilationUnit : importDeclaration? classDeclaration EOF;
-
-importDeclaration : IMPORT LBRACE UpperIdentifier (COMMA UpperIdentifier)* RBRACE;
+program : classMemberDeclaration* EOF;
 
 classDeclaration :
-    CLASS UpperIdentifier genericsDeclaration?
+    PRIVATE? CLASS UpperIdentifier genericsDeclaration?
     (LPAREN typeExprInDeclaration RPAREN)?
-    (LBRACE classMembersDeclaration* RBRACE)?;
+    (LBRACE classMemberDeclaration* RBRACE)?;
 
-classMembersDeclaration :
-    classConstantDeclaration* // first constant definitions
-    classFunctionDeclaration+ // then function definitions
-    classDeclaration* // finally nested class definitions
+classMemberDeclaration
+    : classConstantDeclaration
+    | classFunctionGroupDeclaration
+    | classDeclaration
     ;
 
 classConstantDeclaration: PRIVATE? VAL LowerIdentifier ASSIGN expression;
+
+classFunctionGroupDeclaration : classFunctionDeclaration+;
 
 classFunctionDeclaration :
     PRIVATE? FUN genericsDeclaration? LowerIdentifier
@@ -67,17 +67,21 @@ expression
     ;
 
 constructor
-    : (UpperIdentifier DOT)+ UpperIdentifier genericsSpecialization? # NoArgVariantConstructor
-    | (UpperIdentifier DOT)+ UpperIdentifier OF LPAREN expression RPAREN # OneArgVariantConstructor
+    : (UpperIdentifier DOT)+ UpperIdentifier genericsSpecialization?
+      # NoArgVariantConstructor
+    | (UpperIdentifier DOT)+ UpperIdentifier WITH LPAREN expression RPAREN
+      # OneArgVariantConstructor
     | (UpperIdentifier DOT)* UpperIdentifier LBRACE
           structConstructorValueDeclaration (SEMICOLON structConstructorValueDeclaration)*
           SEMICOLON?
-      RBRACE # StructConstructor
+      RBRACE
+      # StructConstructor
     | LBRACE
           expression WITH
           structConstructorValueDeclaration (SEMICOLON structConstructorValueDeclaration)*
           SEMICOLON?
-      RBRACE # StructWithConstructor
+      RBRACE
+      # StructWithConstructor
     ;
 
 structConstructorValueDeclaration : LowerIdentifier ASSIGN expression;

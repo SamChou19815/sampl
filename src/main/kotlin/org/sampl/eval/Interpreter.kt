@@ -26,11 +26,11 @@ import org.sampl.ast.common.BinaryOperator.STR_CONCAT
 import org.sampl.ast.common.BinaryOperator.USHR
 import org.sampl.ast.common.BinaryOperator.XOR
 import org.sampl.ast.common.FunctionCategory
+import org.sampl.ast.common.FunctionCategory.PRIMITIVE
+import org.sampl.ast.common.FunctionCategory.PROVIDED
+import org.sampl.ast.common.FunctionCategory.USER_DEFINED
 import org.sampl.ast.common.Literal
-import org.sampl.ast.decorated.DecoratedClass
-import org.sampl.ast.decorated.DecoratedClassConstantMember
-import org.sampl.ast.decorated.DecoratedClassFunctionMember
-import org.sampl.ast.decorated.DecoratedClassMembers
+import org.sampl.ast.decorated.DecoratedClassMember
 import org.sampl.ast.decorated.DecoratedExpression
 import org.sampl.ast.decorated.DecoratedPattern
 import org.sampl.ast.decorated.DecoratedProgram
@@ -52,41 +52,45 @@ class Interpreter(private val program: DecoratedProgram) {
      * [eval] evaluates the given program given in the constructor.
      */
     fun eval(): Value {
-        val completeEnv = eval(env = FpMap.empty(), node = program.clazz)
-        val mainFunction = program.clazz.members.map { it.functionMembers }.flatten()
-                .firstOrNull { member ->
-                    member.isPublic && member.identifier == "main" && member.arguments.isEmpty()
-                } ?: return UnitValue
+        val completeEnv = eval(env = FpMap.empty(), members = program.members)
+        val mainFunction = program.members.asSequence().mapNotNull { member ->
+            member as? DecoratedClassMember.FunctionGroup
+        }.mapNotNull { functionGroup ->
+            functionGroup.functions.filter { it.category == USER_DEFINED }.firstOrNull { f ->
+                f.isPublic && f.identifier == "main" && f.arguments.isEmpty()
+            }
+        }.firstOrNull() ?: return UnitValue
         return mainFunction.body.eval(env = completeEnv)
+    }
+
+    /**
+     * [eval] evaluates the given class [members] to a new environment under the given [env].
+     */
+    private fun eval(env: EvalEnv, members: List<DecoratedClassMember>): EvalEnv {
+        var currentEnv = env
+        for (member in members) {
+            currentEnv = when (member) {
+                is DecoratedClassMember.Constant -> eval(env = currentEnv, node = member)
+                is DecoratedClassMember.FunctionGroup -> eval(env = currentEnv, node = member)
+                is DecoratedClassMember.Clazz -> eval(env = currentEnv, node = member)
+            }
+        }
+        return currentEnv
     }
 
     /**
      * [eval] evaluates the given [node] to a new environment under the given [env].
      */
-    private fun eval(env: EvalEnv, node: DecoratedClass): EvalEnv =
-            node.members.fold(initial = env) { e, m -> eval(env = e, node = m) }
-
-    /**
-     * [eval] evaluates the given [node] to a new environment under the given [env].
-     */
-    private fun eval(env: EvalEnv, node: DecoratedClassMembers): EvalEnv = env
-            .let { node.constantMembers.fold(initial = it, operation = ::eval) }
-            .let { evalFunctions(env = it, nodes = node.functionMembers) }
-            .let { evalClasses(env = it, nodes = node.nestedClassMembers) }
-
-    /**
-     * [eval] evaluates the given [node] to a new environment under the given [env].
-     */
-    private fun eval(env: EvalEnv, node: DecoratedClassConstantMember): EvalEnv =
+    private fun eval(env: EvalEnv, node: DecoratedClassMember.Constant): EvalEnv =
             env.put(key = node.identifier, value = node.expr.eval(env = env))
 
     /**
-     * [eval] evaluates the given [nodes] to a new environment under the given [env].
+     * [eval] evaluates the given [node] to a new environment under the given [env].
      */
-    private fun evalFunctions(env: EvalEnv, nodes: List<DecoratedClassFunctionMember>): EvalEnv {
+    private fun eval(env: EvalEnv, node: DecoratedClassMember.FunctionGroup): EvalEnv {
         var e = env
-        val closures = ArrayList<ClosureValue>(nodes.size)
-        for (f in nodes) {
+        val closures = ArrayList<ClosureValue>(node.functions.size)
+        for (f in node.functions) {
             val closure = ClosureValue(
                     category = f.category, name = f.identifier, environment = e,
                     arguments = f.arguments.map { it.first }, code = f.body
@@ -99,10 +103,10 @@ class Interpreter(private val program: DecoratedProgram) {
     }
 
     /**
-     * [eval] evaluates the given [nodes] to a new environment under the given [env].
+     * [eval] evaluates the given [node] to a new environment under the given [env].
      */
-    private fun evalClasses(env: EvalEnv, nodes: List<DecoratedClass>): EvalEnv =
-            nodes.fold(initial = env) { e, clazz -> eval(e, clazz).exitClass(clazz = clazz) }
+    private fun eval(env: EvalEnv, node: DecoratedClassMember.Clazz): EvalEnv =
+            eval(env = env, members = node.members).exitClass(clazz = node)
 
     /**
      * [eval] evaluates this node to a value under the given [env].
@@ -398,13 +402,13 @@ class Interpreter(private val program: DecoratedProgram) {
                 // Exact application
                 val newEnv = namesToValues.fold(closure.environment) { e, (n, v) -> e.put(n, v) }
                 when (closure.category) {
-                    FunctionCategory.PRIMITIVE -> {
+                    PRIMITIVE -> {
                         // Improve performance later
                         PrimitiveRuntimeLibrary.invokeFunction(
                                 name = closure.name!!, arguments = argumentValues
                         )
                     }
-                    FunctionCategory.PROVIDED -> {
+                    PROVIDED -> {
                         if (program.providedRuntimeLibrary == null) {
                             error(message = "Impossible")
                         }
@@ -412,7 +416,7 @@ class Interpreter(private val program: DecoratedProgram) {
                                 name = closure.name!!, arguments = argumentValues
                         )
                     }
-                    FunctionCategory.USER_DEFINED -> closure.code.eval(env = newEnv)
+                    USER_DEFINED -> closure.code.eval(env = newEnv)
                 }
             }
             argumentsSize > valuesSize -> {

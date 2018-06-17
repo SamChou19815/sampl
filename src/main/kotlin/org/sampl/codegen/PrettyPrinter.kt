@@ -1,10 +1,8 @@
 package org.sampl.codegen
 
 import org.sampl.ast.common.FunctionCategory.USER_DEFINED
-import org.sampl.ast.decorated.DecoratedClass
-import org.sampl.ast.decorated.DecoratedClassConstantMember
-import org.sampl.ast.decorated.DecoratedClassFunctionMember
-import org.sampl.ast.decorated.DecoratedClassMembers
+import org.sampl.ast.decorated.DecoratedClassFunction
+import org.sampl.ast.decorated.DecoratedClassMember
 import org.sampl.ast.decorated.DecoratedExpression
 import org.sampl.ast.decorated.DecoratedPattern
 import org.sampl.ast.decorated.DecoratedProgram
@@ -38,31 +36,13 @@ class PrettyPrinter private constructor() : AstToCodeConverter {
                 if (hasLowerPrecedence(parent = parent)) "($code)" else code
             }
 
-    override fun convert(node: DecoratedProgram): Unit = convert(node = node.clazz)
+    override fun convert(node: DecoratedProgram): Unit = node.members.convert()
 
-    override fun convert(node: DecoratedClass) {
-        if (node.declaration.isEmpty && node.members.isEmpty()) {
-            q.addLine(line = "class ${node.identifier}")
-            return
-        } else if (node.declaration.isEmpty) {
-            q.addLine(line = "class ${node.identifier} {")
-            q.addEmptyLine()
-            q.indentAndApply { node.members.forEach { convert(node = it) } }
-            q.addLine(line = "}")
-            return
-        } else if (node.members.isEmpty()) {
-            q.addLine(line = "class ${node.identifier} (")
-            q.indentAndApply { convert(node = node.declaration) }
-            q.addLine(line = ")")
-        } else {
-            q.addLine(line = "class ${node.identifier} (")
-            q.indentAndApply { convert(node = node.declaration) }
-            q.addLine(line = ") {")
-            q.addEmptyLine()
-            q.indentAndApply { node.members.forEach { convert(node = it) } }
-            q.addLine(line = "}")
-        }
-    }
+    /**
+     * [convert] converts a list of [DecoratedClassMember] to code.
+     */
+    private fun List<DecoratedClassMember>.convert(): Unit =
+            forEach { it.acceptConversion(converter = this@PrettyPrinter) }
 
     private fun convert(node: TypeDeclaration): Unit = when (node) {
         is TypeDeclaration.Variant -> {
@@ -91,17 +71,7 @@ class PrettyPrinter private constructor() : AstToCodeConverter {
         }
     }
 
-    override fun convert(node: DecoratedClassMembers) {
-        val printerAction: (CodeConvertible) -> Unit = { m ->
-            m.acceptConversion(converter = this)
-            q.addEmptyLine()
-        }
-        node.constantMembers.forEach(action = printerAction)
-        node.functionMembers.filter { it.category == USER_DEFINED }.forEach(action = printerAction)
-        node.nestedClassMembers.forEach(action = printerAction)
-    }
-
-    override fun convert(node: DecoratedClassConstantMember) {
+    override fun convert(node: DecoratedClassMember.Constant) {
         val header = StringBuilder().apply {
             if (!node.isPublic) {
                 append("private ")
@@ -110,9 +80,36 @@ class PrettyPrinter private constructor() : AstToCodeConverter {
         }.toString()
         q.addLine(line = header)
         q.indentAndApply { node.expr.acceptConversion(converter = this@PrettyPrinter) }
+        q.addEmptyLine()
     }
 
-    override fun convert(node: DecoratedClassFunctionMember) {
+    override fun convert(node: DecoratedClassMember.FunctionGroup): Unit =
+            node.functions.filter { it.category == USER_DEFINED }.forEach { convert(node = it) }
+
+    override fun convert(node: DecoratedClassMember.Clazz) {
+        if (node.declaration.isEmpty && node.members.isEmpty()) {
+            q.addLine(line = "class ${node.identifier}")
+        } else if (node.declaration.isEmpty) {
+            q.addLine(line = "class ${node.identifier} {")
+            q.addEmptyLine()
+            q.indentAndApply { node.members.convert() }
+            q.addLine(line = "}")
+        } else if (node.members.isEmpty()) {
+            q.addLine(line = "class ${node.identifier} (")
+            q.indentAndApply { convert(node = node.declaration) }
+            q.addLine(line = ")")
+        } else {
+            q.addLine(line = "class ${node.identifier} (")
+            q.indentAndApply { convert(node = node.declaration) }
+            q.addLine(line = ") {")
+            q.addEmptyLine()
+            q.indentAndApply { node.members.convert() }
+            q.addLine(line = "}")
+        }
+        q.addEmptyLine()
+    }
+
+    override fun convert(node: DecoratedClassFunction) {
         val header = StringBuilder().apply {
             if (!node.isPublic) {
                 append("private ")
@@ -131,6 +128,7 @@ class PrettyPrinter private constructor() : AstToCodeConverter {
         }.toString()
         q.addLine(line = header)
         q.indentAndApply { node.body.acceptConversion(converter = this@PrettyPrinter) }
+        q.addEmptyLine()
     }
 
     override fun convert(node: DecoratedExpression.Literal) {

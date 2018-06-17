@@ -7,7 +7,7 @@ import org.sampl.codegen.ToKotlinCompiler
 import org.sampl.eval.IntValue
 import org.sampl.eval.StringValue
 import org.sampl.eval.UnitValue
-import org.sampl.util.AntlrUtil
+import org.sampl.util.createRawProgramFromSource
 import org.sampl.util.readFromFile
 import org.sampl.util.writeToFile
 
@@ -21,7 +21,6 @@ class SimpleTest {
      * 'Propositions Are Types, Proofs Are Programs'.
      */
     private val propositionsAreTypesProofsArePrograms: String = """
-    class PropositionsAreTypesProofsArePrograms {
         val trueVar = ()
         val implication = { (a: String) -> 5 }
         fun <A, B> modusPonens(f: (A) -> B, v: A): B = f(v)
@@ -35,7 +34,6 @@ class SimpleTest {
              | Some _ -> true
         }
         class Empty
-    }
     """.trimIndent()
 
     /**
@@ -43,7 +41,6 @@ class SimpleTest {
      * language.
      */
     private val multipleFeaturesProgram: String = """
-    class MultipleFeatures {
         val implication = { (a: String) -> 5 }
         fun <A, B> modusPonens(f: (A) -> B, v: A): B = f(v)
         // Function Application
@@ -51,11 +48,10 @@ class SimpleTest {
         fun constant5Impl2(v: String): Int = modusPonens<String, Int>(implication, v)
         fun applyWithString(): Int = constant5Impl2("hi")
         // Curring
-        fun add(a: Int, b: Int): Int = a + b
         fun add1(b: Int): Int = add(1)(b)
+        fun add(a: Int, b: Int): Int = a + b
         // Main
         fun main(): Int = add1(41)
-    }
     """.trimIndent()
 
     /**
@@ -63,7 +59,6 @@ class SimpleTest {
      * to test its signature is OK.
      */
     private val standardRuntimeSignatureProgram: String = """
-    class Runtime {
         fun printInt(value: Int): Unit = ()
         fun printFloat(value: Float): Unit = ()
         fun printBool(value: Bool): Unit = ()
@@ -86,36 +81,29 @@ class SimpleTest {
         fun charToString(value: Char): String = ""
         fun getChar (index: Int, s: String): Char = 'c'
         fun getSubstring (from: Int, to: Int, s: String): Char = 'c'
-    }
     """.trimIndent()
 
     /**
      * [standardHelloWorldProgram] is the standard hello world program.
      */
     private val standardHelloWorldProgram: String = """
-    class MainClass {
         fun main(): Unit = printlnString("Hello World, " ^ "Sam!")
-    }
     """.trimIndent()
 
     /**
      * [stringHelloWorldProgram] is the hello world program but returns a string.
      */
     private val stringHelloWorldProgram: String = """
-    class MainClass {
         fun main(): String = "Hello World, " ^ "Sam!"
-    }
     """.trimIndent()
 
     /**
      * [intHelloWorldProgram] is the hello world program but returns an int.
      */
     private val intHelloWorldProgram: String = """
-    class MainClass {
         fun main(): Int =
           val a = 32;
           a + 10
-    }
     """.trimIndent()
 
     /**
@@ -130,10 +118,10 @@ class SimpleTest {
      * The output is written in Program + outputId.kt
      */
     private fun runInSteps(program: String, outputId: Int) {
-        val firstTypeCheck = AntlrUtil.createClassFromSource(program).typeCheck()
+        val firstTypeCheck = createRawProgramFromSource(program).typeCheck()
         val prettyPrintedCode = PrettyPrinter.prettyPrint(node = firstTypeCheck)
         // println(prettyPrintedCode)
-        val secondTypeCheck = AntlrUtil.createClassFromSource(prettyPrintedCode).typeCheck()
+        val secondTypeCheck = createRawProgramFromSource(prettyPrintedCode).typeCheck()
         assertEquals(firstTypeCheck, secondTypeCheck)
         val kotlinCode = ToKotlinCompiler.compile(node = secondTypeCheck)
         writeToFile(filename = "./src/test/resources/Program$outputId.kt", content = kotlinCode)
@@ -170,7 +158,6 @@ class SimpleTest {
         assertEquals(StringValue(value = "Hello World, Sam!"),
                 PLInterpreter.interpret(stringHelloWorldProgram))
         assertEquals(IntValue(value = 42), PLInterpreter.interpret(intHelloWorldProgram))
-        assertEquals(UnitValue, PLInterpreter.interpret(turingMachineSimulatorProgram))
     }
 
 }

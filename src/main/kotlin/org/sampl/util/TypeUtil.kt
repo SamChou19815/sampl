@@ -1,5 +1,3 @@
-@file:JvmName(name = "TypeUtil")
-
 package org.sampl.util
 
 import org.sampl.ast.type.TypeExpr

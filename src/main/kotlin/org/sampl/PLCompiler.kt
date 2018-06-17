@@ -2,7 +2,7 @@ package org.sampl
 
 import org.sampl.codegen.ToKotlinCompiler
 import org.sampl.runtime.RuntimeLibrary
-import org.sampl.util.AntlrUtil
+import org.sampl.util.createRawProgramFromSource
 
 /**
  * [PLCompiler] is responsible for the compilation of all the given source files.
@@ -17,7 +17,7 @@ object PLCompiler {
      */
     @JvmStatic
     fun compile(code: String, providedRuntimeLibrary: RuntimeLibrary? = null): String =
-            AntlrUtil.createClassFromSource(code = code)
+            createRawProgramFromSource(code = code)
                     .typeCheck(providedRuntimeLibrary = providedRuntimeLibrary)
                     .let(block = ToKotlinCompiler.Companion::compile)
 

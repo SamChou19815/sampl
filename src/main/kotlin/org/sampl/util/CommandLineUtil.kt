@@ -1,5 +1,3 @@
-@file:JvmName(name = "CommandLineUtil")
-
 package org.sampl.util
 
 import java.io.IOException
@@ -11,7 +9,13 @@ import java.io.IOException
  * @throws IOException if the command cannot be correctly executed.
  */
 @Throws(IOException::class)
-fun executeAndGetValue(command: String): Int {
+fun executeAndGetValue(command: String): Triple<Int, String, String> {
     val runtime: Runtime = Runtime.getRuntime()
-    return runtime.exec(command).waitFor()
+    val process: Process = runtime.exec(command)
+    val normalOutput = process.inputStream.bufferedReader()
+            .lineSequence().joinToString(separator = "\n")
+    val errorOutput = process.errorStream.bufferedReader()
+            .lineSequence().joinToString(separator = "\n")
+    val exitCode = process.waitFor()
+    return Triple(first = exitCode, second = normalOutput, third = errorOutput)
 }

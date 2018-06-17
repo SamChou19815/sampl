@@ -2,9 +2,8 @@ package org.sampl.runtime
 
 import org.sampl.ast.common.FunctionCategory
 import org.sampl.ast.common.Literal
-import org.sampl.ast.raw.ClassFunctionMember
-import org.sampl.ast.raw.ClassMembers
-import org.sampl.ast.raw.Clazz
+import org.sampl.ast.raw.ClassFunction
+import org.sampl.ast.raw.ClassMember
 import org.sampl.ast.raw.LiteralExpr
 import org.sampl.ast.type.TypeExpr
 import org.sampl.ast.type.TypeInfo
@@ -94,11 +93,11 @@ internal fun R.toAnnotatedFunctions(allowGenerics: Boolean = false): List<Pair<S
  * [toFunctionMember] converts a pair of function name and type info to a class function member
  * with the specified function category [c].
  */
-private fun Pair<String, TypeInfo>.toFunctionMember(c: FunctionCategory): ClassFunctionMember {
+private fun Pair<String, TypeInfo>.toFunctionMember(c: FunctionCategory): ClassFunction {
     val (name, typeInfo) = this
     val functionType = typeInfo.typeExpr as TypeExpr.Function
     val arguments = functionType.argumentTypes.mapIndexed { i, t -> "var$i" to t }
-    return ClassFunctionMember(
+    return ClassFunction(
             category = c, isPublic = true, identifier = name,
             genericsDeclaration = typeInfo.genericsInfo,
             arguments = arguments, returnType = functionType.returnType,
@@ -107,10 +106,10 @@ private fun Pair<String, TypeInfo>.toFunctionMember(c: FunctionCategory): ClassF
 }
 
 /**
- * [Clazz.withInjectedRuntime] returns a copy of itself but with [PrimitiveRuntimeLibrary]
+ * [withInjectedRuntime] returns a copy of itself but with [PrimitiveRuntimeLibrary]
  * and an optional [providedRuntimeLibrary] injected to itself.
  */
-internal fun Clazz.withInjectedRuntime(providedRuntimeLibrary: R? = null): Clazz {
+internal fun List<ClassMember>.withInjectedRuntime(providedRuntimeLibrary: R?): List<ClassMember> {
     val primitiveRTSeq = PrimitiveRuntimeLibrary
             .toAnnotatedFunctionSequence(allowGenerics = true)
             .map { it.toFunctionMember(c = FunctionCategory.PRIMITIVE) }
@@ -120,13 +119,8 @@ internal fun Clazz.withInjectedRuntime(providedRuntimeLibrary: R? = null): Clazz
             ?: emptySequence()
     val newFunctionMembers = primitiveRTSeq.toMutableList()
             .apply { addAll(elements = providedRTSeq) }
-            .toList();
-    val newMemberGroup = ClassMembers(
-            constantMembers = emptyList(),
-            functionMembers = newFunctionMembers,
-            nestedClassMembers = emptyList()
-    )
-    val oldMemberGroups = members
-    val newMemberGroups = arrayListOf(newMemberGroup).apply { addAll(oldMemberGroups) }
-    return copy(members = newMemberGroups)
+            .toList()
+            .let { ClassMember.FunctionGroup(functions = it) }
+    val oldMembers = this
+    return arrayListOf<ClassMember>(newFunctionMembers).apply { addAll(elements = oldMembers) }
 }

@@ -2,9 +2,7 @@ package org.sampl.environment
 
 import com.developersam.fp.FpMap
 import org.sampl.ast.common.FunctionCategory
-import org.sampl.ast.raw.ClassFunctionMember
 import org.sampl.ast.raw.ClassMember
-import org.sampl.ast.raw.Clazz
 import org.sampl.ast.type.TypeDeclaration
 import org.sampl.ast.type.TypeInfo
 import org.sampl.ast.type.boolTypeId
@@ -52,60 +50,74 @@ data class TypeCheckingEnv(
      * [enterClass] produces a new [TypeCheckingEnv] with all the public information preserved and
      * make all the types declared in the class available. Type checking is not done here.
      */
-    fun enterClass(clazz: Clazz): TypeCheckingEnv {
-        return TypeCheckingEnv(
-                typeDefinitions = typeDefinitions.put(
-                        key = clazz.name,
-                        value = clazz.identifier.genericsInfo to clazz.declaration
-                ),
-                declaredTypes = declaredTypes.put(
-                        key = clazz.name, value = clazz.identifier.genericsInfo
-                ),
-                typeEnv = typeEnv
-        )
-    }
+    fun enterClass(clazz: ClassMember.Clazz): TypeCheckingEnv = TypeCheckingEnv(
+            typeDefinitions = typeDefinitions.put(
+                    key = clazz.identifier.name,
+                    value = clazz.identifier.genericsInfo to clazz.declaration
+            ),
+            declaredTypes = declaredTypes.put(
+                    key = clazz.identifier.name, value = clazz.identifier.genericsInfo
+            ),
+            typeEnv = typeEnv
+    )
 
     /**
      * [exitClass] produces a new [TypeCheckingEnv] with all the public information preserved and
      * make the access of current class elements prefixed with class name.
      */
-    fun exitClass(clazz: Clazz): TypeCheckingEnv {
+    fun exitClass(clazz: ClassMember.Clazz): TypeCheckingEnv {
+        val className = clazz.identifier.name
         // remove added type definitions
-        val removedTypeDefinitions = typeDefinitions.remove(key = clazz.name)
-        var currentEnv = this
-        for (m in clazz.members) {
-            // remove and change declared types
-            val newDeclaredTypes = declaredTypes.asSequence()
-                    // when exiting, we need to use fully qualified name.
-                    .filter { (name, _) ->
-                        val names = m.nestedClassMembers.map(Clazz::name)
-                        name in names
-                    }
-                    .fold(initial = declaredTypes) { dec, (name, genericsInfo) ->
-                        dec.remove(key = name).put("${clazz.name}.$name", genericsInfo)
-                    }
-            // remove private members
-            val removeAndChangeMember = { env: FpMap<String, TypeInfo>, member: ClassMember ->
-                if (member is ClassFunctionMember &&
-                        member.category != FunctionCategory.USER_DEFINED) {
-                    env
-                } else {
-                    val name = member.name
-                    if (member.isPublic) {
-                        val v = env[name] ?: error(message = "Impossible. Name: $name")
-                        env.remove(key = name).put(key = "${clazz.name}.$name", value = v)
+        val removedTypeDefinitions = typeDefinitions.remove(key = clazz.identifier.name)
+        var currentEnv = this.copy(typeDefinitions = removedTypeDefinitions)
+        for (member in clazz.members) {
+            currentEnv = when (member) {
+                is ClassMember.Constant -> {
+                    val name = member.identifier
+                    var typeEnv = currentEnv.typeEnv
+                    typeEnv = if (member.isPublic) {
+                        val v = currentEnv[name] ?: error(message = "Impossible. Name: $name")
+                        typeEnv.remove(key = name)
+                                .put(key = "$className.$name", value = v)
                     } else {
-                        env.remove(key = name)
+                        typeEnv
+                                .remove(key = name)
                     }
+                    currentEnv.update(newTypeEnv = typeEnv)
+                }
+                is ClassMember.FunctionGroup -> {
+                    val typeEnv = member.functions.fold(initial = currentEnv.typeEnv) { env, f ->
+                        if (f.category != FunctionCategory.USER_DEFINED) {
+                            env
+                        } else {
+                            val name = f.identifier
+                            if (f.isPublic) {
+                                val v = env[name] ?: error(message = "Impossible. Name: $name")
+                                env.remove(key = name).put(key = "$className.$name", value = v)
+                            } else {
+                                env.remove(key = name)
+                            }
+                        }
+                    }
+                    currentEnv.update(newTypeEnv = typeEnv)
+                }
+                is ClassMember.Clazz -> {
+                    val subclassNames = clazz.members.mapNotNull { m ->
+                        if (m is ClassMember.Clazz) {
+                            m.identifier.name
+                        } else {
+                            null
+                        }
+                    }
+                    val newDeclaredTypes = currentEnv.declaredTypes.asSequence()
+                            // when exiting, we need to use fully qualified name.
+                            .filter { (name, _) -> name in subclassNames }
+                            .fold(initial = currentEnv.declaredTypes) { dec, (name, genericsInfo) ->
+                                dec.remove(key = name).put("$className.$name", genericsInfo)
+                            }
+                    currentEnv.copy(declaredTypes = newDeclaredTypes)
                 }
             }
-            val newTypeEnv = typeEnv
-                    .let { m.constantMembers.fold(initial = it, operation = removeAndChangeMember) }
-                    .let { m.functionMembers.fold(initial = it, operation = removeAndChangeMember) }
-            currentEnv = TypeCheckingEnv(
-                    typeDefinitions = removedTypeDefinitions,
-                    declaredTypes = newDeclaredTypes, typeEnv = newTypeEnv
-            )
         }
         return currentEnv
     }

@@ -3,7 +3,7 @@ package org.sampl
 import org.sampl.eval.Interpreter
 import org.sampl.eval.Value
 import org.sampl.runtime.RuntimeLibrary
-import org.sampl.util.AntlrUtil
+import org.sampl.util.createRawProgramFromSource
 
 /**
  * [PLCompiler] is responsible for the interpretation of all the given source files.
@@ -17,7 +17,7 @@ object PLInterpreter {
      */
     @JvmStatic
     fun interpret(code: String, providedRuntimeLibrary: RuntimeLibrary? = null): Value =
-            AntlrUtil.createClassFromSource(code = code)
+            createRawProgramFromSource(code = code)
                     .typeCheck(providedRuntimeLibrary = providedRuntimeLibrary)
                     .let { Interpreter(program = it).eval() }
 
