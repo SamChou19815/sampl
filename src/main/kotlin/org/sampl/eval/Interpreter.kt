@@ -428,7 +428,8 @@ class Interpreter(private val program: DecoratedProgram) {
                 val newFunctionsAnnotatedArgs = newFunctionArguments.zip(newFunctionArgTypes)
                         .map { (name, type) ->
                             DecoratedExpression.VariableIdentifier(
-                                    variable = name, genericInfo = emptyList(), type = type
+                                    variable = name, genericInfo = emptyList(),
+                                    isClassFunction = false, type = type
                             )
                         }
                 val functionApplicationExpr = DecoratedExpression.FunctionApplication(

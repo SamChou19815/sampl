@@ -154,7 +154,7 @@ class TuringMachine(
     val parts = split(";", s);
     val transitionRuleRawList = Lst.fromArray(split(",", getString(0, parts)));
     val transitionRules = Lst.map<String, TransitionRule>(
-      transitionRuleRawList, { (ruleString: String) -> TransitionRule.fromString(ruleString) }
+      transitionRuleRawList, TransitionRule.fromString
     );
     val startState = getString(1, parts);
     val initialTapeContent = Lst.stringToCharList(getString(2, parts));

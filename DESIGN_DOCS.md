@@ -127,5 +127,3 @@ However, we do prefer immutable data structures over mutable ones.
 AST for the convenience of rapid prototyping. It will be improved later.
 - Type checking, interpretation, and code generation has not been thoroughly tested. They are 
 expected to have at least 20 bugs or some undefined behavior.
-- Function Reference is different in SAMPL and Kotlin. Currently code generation with function 
-reference has some problem (e.g. it cannot correctly convert from `funName` to `::funName`).

@@ -22,6 +22,7 @@ import org.sampl.ast.type.stringTypeExpr
 import org.sampl.ast.type.unitTypeExpr
 import org.sampl.util.joinToGenericsInfoString
 import java.io.BufferedReader
+import java.io.File.separator
 import java.io.InputStreamReader
 import java.util.LinkedList
 
@@ -295,11 +296,22 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
     }
 
     override fun convert(node: DecoratedExpression.VariableIdentifier) {
-        val genericsInfo = node.genericInfo
-                .takeIf { it.isNotEmpty() }
-                ?.joinToString(separator = ", ", prefix = "<", postfix = ">") { it.toKotlinType() }
-                ?: ""
-        q.addLine(line = node.variable + genericsInfo)
+        if (!node.isClassFunction) {
+            if (node.genericInfo.isNotEmpty()) {
+                error(message = "Impossible!")
+            }
+            q.addLine(line = node.variable)
+            return
+        }
+        // Node is function. Must write in terms of function lambda in Kotlin
+        val functionNodeType = node.type as TypeExpr.Function
+        val argsWithType = functionNodeType.argumentTypes.mapIndexed { i, typeExpr ->
+            "_temp$i: ${typeExpr.toKotlinType()}"
+        }
+        val argsIdOnly = argsWithType.mapIndexed { i, _ -> "_temp$i" }
+                .joinToString(separator = ", ", prefix = "${node.variable}(", postfix = ")")
+        argsWithType.joinToString(separator = ", ", prefix = "{ ", postfix = " -> $argsIdOnly }")
+                .let { q.addLine(line = it) }
     }
 
     override fun convert(node: DecoratedExpression.Constructor) {

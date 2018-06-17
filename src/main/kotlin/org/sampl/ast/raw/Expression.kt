@@ -83,7 +83,8 @@ data class VariableIdentifierExpr(
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         environment.normalTypeEnv[variable]?.let { typeExpr ->
             return DecoratedExpression.VariableIdentifier(
-                    variable = variable, genericInfo = emptyList(), type = typeExpr
+                    variable = variable, genericInfo = emptyList(),
+                    isClassFunction = false, type = typeExpr
             )
         }
         // Not found in normal environment, try function environment
@@ -99,7 +100,7 @@ data class VariableIdentifierExpr(
         val substitutionMap = genericSymbolsToSubstitute.zip(genericInfo).toMap()
         val type = functionTypeInfo.typeExpr.substituteGenerics(map = substitutionMap)
         return DecoratedExpression.VariableIdentifier(
-                variable = variable, genericInfo = genericInfo, type = type
+                variable = variable, genericInfo = genericInfo, isClassFunction = true, type = type
         )
     }
 }

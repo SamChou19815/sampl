@@ -62,7 +62,7 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
      */
     data class VariableIdentifier(
             val variable: String, val genericInfo: List<TypeExpr>,
-            override val type: TypeExpr
+            val isClassFunction: Boolean, override val type: TypeExpr
     ) : DecoratedExpression(precedenceLevel = 1) {
 
         override fun acceptConversion(converter: AstToCodeConverter): Unit =
