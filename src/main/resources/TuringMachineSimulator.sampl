@@ -80,10 +80,6 @@ class Lst<T>(Nil | Cons of Pair<T, Lst<T>>) {
 
 class Direction(Left | Right | Stay) {
 
-  fun left(): Direction = Direction.Left
-  fun right(): Direction = Direction.Right
-  fun stay(): Direction = Direction.Stay
-
   fun fromChar(c: Char): Direction =
     if c == '<' then Direction.Left
     else if c == '>' then Direction.Right
@@ -125,30 +121,26 @@ class TransitionRule(
 
 }
 
-class Result(Yes | No | Halt | StillRunning) {
-  fun yes(): Result = Result.Yes
-  fun no(): Result = Result.No
-  fun halt(): Result = Result.Halt
-  fun stillRunning(): Result = Result.StillRunning
-
-  fun toString(r: Result): String = match r with
-    | Yes -> "YES"
-    | No -> "NO"
-    | Halt -> "HALT"
-    | StillRunning -> "STILL_RUNNING"
-
-  fun isHaltingResult(r: Result): Bool = match r with
-    | Yes -> true
-    | No -> true
-    | Halt -> true
-    | StillRunning -> false
-
-}
-
 class TuringMachine(
   transitions: Lst<TransitionRule>, tape: Lst<Char>,
   currentState: String, currentPosition: Int
 ) {
+
+  class Result(Yes | No | Halt | StillRunning) {
+
+    fun toString(r: Result): String = match r with
+      | Yes -> "YES"
+      | No -> "NO"
+      | Halt -> "HALT"
+      | StillRunning -> "STILL_RUNNING"
+
+    fun isHaltingResult(r: Result): Bool = match r with
+      | Yes -> true
+      | No -> true
+      | Halt -> true
+      | StillRunning -> false
+
+  }
 
   /**
    * Assumption:
@@ -177,20 +169,18 @@ class TuringMachine(
       TransitionRule.canApply(r, m.currentState, currentChar)
     };
     val rule = Lst.find<TransitionRule>(m.transitions, filter);
-    val newState = TransitionRule.getToState(rule);
-    val dirOffset = Direction.toOffset(TransitionRule.getDirection(rule));
-    val newPosition = m.currentPosition + dirOffset;
-    val newChar = TransitionRule.getOverrideChar(rule);
-    val newTape = Lst.replaceItemAtIndex<Char>(m.tape, m.currentPosition, newChar);
+    val newTape = Lst.replaceItemAtIndex<Char>(m.tape, m.currentPosition, rule.overrideChar);
+    val newState = rule.toState;
+    val newPosition = m.currentPosition + (Direction.toOffset(rule.direction));
     val newTuringMachine = {
       m with
       tape = newTape; currentState = newState; currentPosition = newPosition
     };
     val result =
-      if newState == "YES" then Result.yes()
-      else if newState == "NO" then Result.no()
-      else if newState == "HALT" then Result.halt()
-      else Result.stillRunning()
+      if newState == "YES" then Result.Yes
+      else if newState == "NO" then Result.No
+      else if newState == "HALT" then Result.Halt
+      else Result.StillRunning
     ;
     Pair.create<TuringMachine, Result>(newTuringMachine, result)
 
@@ -198,7 +188,7 @@ class TuringMachine(
     val p = transit(m);
     val turingMachine = Pair.getA<TuringMachine, Result>(p);
     val result = Pair.getB<TuringMachine, Result>(p);
-    if result == (Result.stillRunning()) then simulate(turingMachine) else p
+    if result == Result.StillRunning then simulate(turingMachine) else p
 
 }
 
@@ -206,6 +196,7 @@ fun main(): Unit =
     val turingMachineString = readLine();
     val turingMachine = TuringMachine.fromString(turingMachineString);
     val simulationResultPair = TuringMachine.simulate(turingMachine);
-    val result = Pair.getB<TuringMachine, Result>(simulationResultPair);
-    if Result.isHaltingResult(result) then printlnString(Result.toString(result))
+    val result = Pair.getB<TuringMachine, TuringMachine.Result>(simulationResultPair);
+    if TuringMachine.Result.isHaltingResult(result) then
+      printlnString(TuringMachine.Result.toString(result))
     else throw<Unit> "ERROR!!!"

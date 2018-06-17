@@ -2,6 +2,7 @@ package org.sampl.environment
 
 import com.developersam.fp.FpMap
 import org.sampl.ast.common.FunctionCategory
+import org.sampl.ast.raw.ClassFunction
 import org.sampl.ast.raw.ClassMember
 import org.sampl.ast.type.TypeDeclaration
 import org.sampl.ast.type.TypeInfo
@@ -62,64 +63,118 @@ data class TypeCheckingEnv(
     )
 
     /**
+     * [ClassMember.Constant.processWhenExit] returns a new type environment when exiting a
+     * class given [currentTypeEnv], [className], and [subclassNames] for reference.
+     * It needs to remove all private members and prefix each member and its type by the class name.
+     */
+    private fun ClassMember.Constant.processWhenExit(
+            currentTypeEnv: FpMap<String, TypeInfo>, className: String, subclassNames: List<String>
+    ): FpMap<String, TypeInfo> =
+            if (isPublic) {
+                var v = currentTypeEnv[identifier]
+                        ?: error(message = "Impossible. Name: $identifier")
+                val newT = subclassNames.fold(initial = v.typeExpr) { t, n ->
+                    t.toPrefixed(typeToPrefix = n, prefix = className)
+                }
+                v = v.copy(typeExpr = newT)
+                currentTypeEnv.remove(key = identifier).put(
+                        key = "$className.$identifier", value = v
+                )
+            } else {
+                currentTypeEnv.remove(key = identifier)
+            }
+
+    /**
+     * [ClassFunction.processWhenExit] returns a new type environment when exiting a class given
+     * [currentTypeEnv], [className], and [subclassNames] for reference.
+     * It needs to remove all private members and prefix each member and its type by the class name.
+     */
+    private fun ClassFunction.processWhenExit(
+            currentTypeEnv: FpMap<String, TypeInfo>, className: String, subclassNames: List<String>
+    ): FpMap<String, TypeInfo> = when {
+        category != FunctionCategory.USER_DEFINED -> currentTypeEnv
+        isPublic -> {
+            var v = currentTypeEnv[identifier] ?: error(message = "Impossible. Name: $identifier")
+            val newT = subclassNames.fold(initial = v.typeExpr) { t, n ->
+                t.toPrefixed(typeToPrefix = n, prefix = className)
+            }
+            v = v.copy(typeExpr = newT)
+            currentTypeEnv.remove(key = identifier)
+                    .put(key = "$className.$identifier", value = v)
+        }
+        else -> currentTypeEnv.remove(key = identifier)
+    }
+
+    /**
+     * [ClassMember.Clazz.processAsSubclassWhenExit] returns a new type environment when exiting
+     * a class given [currentEnv], [className], and [subclassNames] for reference.
+     * It needs to remove all private members and prefix each member and its type by the class name.
+     */
+    private fun ClassMember.Clazz.processAsSubclassWhenExit(
+            currentEnv: TypeCheckingEnv, className: String, subclassNames: List<String>
+    ): TypeCheckingEnv {
+        val subclassName = identifier.name
+        val newDeclaredTypes = currentEnv.declaredTypes.asSequence()
+                // when exiting, we need to use fully qualified name.
+                .filter { (name, _) -> name in subclassNames }
+                .fold(initial = currentEnv.declaredTypes) { dec, (name, genericsInfo) ->
+                    dec.remove(key = name).put("$className.$name", genericsInfo)
+                }
+        // Also prefix each class member of the subclass with the classname.
+        val newTypeEnv = currentEnv.typeEnv.mapByKeyValuePair { s, typeInfo ->
+            if (s.indexOf(subclassName) == 0) {
+                // prefixed with name, need to prefix!
+                val newT = subclassNames.fold(initial = typeInfo.typeExpr) { t, n ->
+                    t.toPrefixed(typeToPrefix = n, prefix = className)
+                }
+                "$className.$s" to typeInfo.copy(typeExpr = newT)
+            } else {
+                s to typeInfo
+            }
+        }
+        return currentEnv.copy(declaredTypes = newDeclaredTypes, typeEnv = newTypeEnv)
+    }
+
+    /**
      * [exitClass] produces a new [TypeCheckingEnv] with all the public information preserved and
      * make the access of current class elements prefixed with class name.
      */
     fun exitClass(clazz: ClassMember.Clazz): TypeCheckingEnv {
         val className = clazz.identifier.name
         // remove added type definitions
-        val removedTypeDefinitions = typeDefinitions.remove(key = clazz.identifier.name)
-        var currentEnv = this.copy(typeDefinitions = removedTypeDefinitions)
-        for (member in clazz.members) {
-            currentEnv = when (member) {
-                is ClassMember.Constant -> {
-                    val name = member.identifier
-                    var typeEnv = currentEnv.typeEnv
-                    typeEnv = if (member.isPublic) {
-                        val v = currentEnv[name] ?: error(message = "Impossible. Name: $name")
-                        typeEnv.remove(key = name)
-                                .put(key = "$className.$name", value = v)
-                    } else {
-                        typeEnv
-                                .remove(key = name)
-                    }
-                    currentEnv.update(newTypeEnv = typeEnv)
-                }
-                is ClassMember.FunctionGroup -> {
-                    val typeEnv = member.functions.fold(initial = currentEnv.typeEnv) { env, f ->
-                        if (f.category != FunctionCategory.USER_DEFINED) {
-                            env
-                        } else {
-                            val name = f.identifier
-                            if (f.isPublic) {
-                                val v = env[name] ?: error(message = "Impossible. Name: $name")
-                                env.remove(key = name).put(key = "$className.$name", value = v)
-                            } else {
-                                env.remove(key = name)
-                            }
-                        }
-                    }
-                    currentEnv.update(newTypeEnv = typeEnv)
-                }
-                is ClassMember.Clazz -> {
-                    val subclassNames = clazz.members.mapNotNull { m ->
-                        if (m is ClassMember.Clazz) {
-                            m.identifier.name
-                        } else {
-                            null
-                        }
-                    }
-                    val newDeclaredTypes = currentEnv.declaredTypes.asSequence()
-                            // when exiting, we need to use fully qualified name.
-                            .filter { (name, _) -> name in subclassNames }
-                            .fold(initial = currentEnv.declaredTypes) { dec, (name, genericsInfo) ->
-                                dec.remove(key = name).put("$className.$name", genericsInfo)
-                            }
-                    currentEnv.copy(declaredTypes = newDeclaredTypes)
-                }
+        val subclassNames = clazz.members.mapNotNull { m ->
+            if (m is ClassMember.Clazz) {
+                val name = m.identifier.name
+                name
+            } else {
+                null
             }
         }
-        return currentEnv
+        // prefix member name
+        val currentEnv = clazz.members.fold(initial = this) { e, member ->
+            when (member) {
+                is ClassMember.Constant -> e.update(newTypeEnv = member.processWhenExit(
+                        currentTypeEnv = e.typeEnv, className = className,
+                        subclassNames = subclassNames
+                ))
+                is ClassMember.FunctionGroup -> {
+                    val typeEnv = member.functions.fold(initial = e.typeEnv) { env, f ->
+                        f.processWhenExit(
+                                currentTypeEnv = env, className = className,
+                                subclassNames = subclassNames
+                        )
+                    }
+                    e.update(newTypeEnv = typeEnv)
+                }
+                is ClassMember.Clazz -> member.processAsSubclassWhenExit(
+                        currentEnv = e, className = className, subclassNames = subclassNames
+                )
+            }
+        }
+        val removedTypeDefinitions = clazz.members
+                .mapNotNull { m -> (m as? ClassMember.Clazz)?.identifier?.name }
+                .fold(initial = currentEnv.typeDefinitions) { d, n -> d.remove(key = n) }
+        return currentEnv.copy(typeDefinitions = removedTypeDefinitions)
     }
 
     companion object {

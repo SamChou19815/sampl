@@ -33,6 +33,11 @@ sealed class TypeExpr {
     abstract fun containsIdentifier(identifier: String): Boolean
 
     /**
+     * [toPrefixed] returns a new [TypeExpr] with all [typeToPrefix] prefixed with [prefix].
+     */
+    abstract fun toPrefixed(typeToPrefix: String, prefix: String): TypeExpr
+
+    /**
      * [Identifier] represents a single [type] with optional [genericsInfo].
      */
     data class Identifier(
@@ -57,6 +62,12 @@ sealed class TypeExpr {
                 return true;
             }
             return genericsInfo.any { it.containsIdentifier(identifier = identifier) }
+        }
+
+        override fun toPrefixed(typeToPrefix: String, prefix: String): TypeExpr {
+            val newType = if (type.indexOf(typeToPrefix) == 0) "$prefix.$type" else type
+            val newGenericsInfo = genericsInfo.map { it.toPrefixed(typeToPrefix, prefix) }
+            return TypeExpr.Identifier(type = newType, genericsInfo = newGenericsInfo)
         }
 
         override fun toString(): String =
@@ -89,6 +100,12 @@ sealed class TypeExpr {
             return returnType.containsIdentifier(identifier = identifier)
                     || argumentTypes.any { it.containsIdentifier(identifier = identifier) }
         }
+
+        override fun toPrefixed(typeToPrefix: String, prefix: String): TypeExpr =
+                TypeExpr.Function(
+                        argumentTypes = argumentTypes.map { it.toPrefixed(typeToPrefix, prefix) },
+                        returnType = returnType.toPrefixed(typeToPrefix, prefix)
+                )
 
         override fun toString(): String =
                 "(${argumentTypes.joinToString(separator = ", ")}) -> $returnType"
