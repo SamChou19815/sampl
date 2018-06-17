@@ -108,7 +108,7 @@ data class TypeCheckingEnv(
     /**
      * [ClassMember.Clazz.processAsSubclassWhenExit] returns a new type environment when exiting
      * a class given [currentEnv], [className], and [subclassNames] for reference.
-     * It needs to remove all private members and prefix each member and its type by the class name.
+     * It needs to prefix the class type with this class name and also all its child members.
      */
     private fun ClassMember.Clazz.processAsSubclassWhenExit(
             currentEnv: TypeCheckingEnv, className: String, subclassNames: List<String>
