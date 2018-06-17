@@ -37,7 +37,6 @@ import org.sampl.ast.type.intTypeExpr
 import org.sampl.ast.type.stringTypeExpr
 import org.sampl.ast.type.unitTypeExpr
 import org.sampl.environment.TypeCheckingEnv
-import org.sampl.exceptions.CompileTimeError
 import org.sampl.exceptions.GenericsError
 import org.sampl.exceptions.IdentifierError
 import org.sampl.exceptions.PatternMatchingError
@@ -82,9 +81,21 @@ data class VariableIdentifierExpr(
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
-        val typeInfo = environment[variable]
-                ?: throw IdentifierError.UndefinedIdentifier(badIdentifier = variable)
-        val genericSymbolsToSubstitute = typeInfo.genericsInfo
+        environment.normalTypeEnv[variable]?.let { typeExpr ->
+            return DecoratedExpression.VariableIdentifier(
+                    variable = variable, genericInfo = emptyList(), type = typeExpr
+            )
+        }
+        // Not found in normal environment, try function environment
+        val functionTypeInfo = environment.classFunctionTypeEnv[variable]
+                ?: run {
+                    environment.classFunctionTypeEnv.forEach { s, typeInfo ->
+                        println("$s: $typeInfo")
+                    }
+                    println()
+                    environment.normalTypeEnv.forEach { s, typeExpr -> println("$s: $typeExpr") }
+                    throw IdentifierError.UndefinedIdentifier(badIdentifier = variable)}
+        val genericSymbolsToSubstitute = functionTypeInfo.genericsInfo
         if (genericSymbolsToSubstitute.size != genericInfo.size) {
             throw GenericsError.GenericsInfoWrongNumberOfArguments(
                     expectedNumber = genericSymbolsToSubstitute.size,
@@ -92,7 +103,7 @@ data class VariableIdentifierExpr(
             )
         }
         val substitutionMap = genericSymbolsToSubstitute.zip(genericInfo).toMap()
-        val type = typeInfo.typeExpr.substituteGenerics(map = substitutionMap)
+        val type = functionTypeInfo.typeExpr.substituteGenerics(map = substitutionMap)
         return DecoratedExpression.VariableIdentifier(
                 variable = variable, genericInfo = genericInfo, type = type
         )
@@ -537,9 +548,9 @@ data class FunctionExpr(
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
-        val newEnv = environment.update(
-                newTypeEnv = arguments.fold(initial = environment.typeEnv) { e, (n, t) ->
-                    e.put(key = n, value = t.asTypeInformation)
+        val newEnv = environment.copy(
+                normalTypeEnv = arguments.fold(initial = environment.normalTypeEnv) { e, (n, t) ->
+                    e.put(key = n, value = t)
                 }
         )
         val bodyExpr = body.typeCheck(environment = newEnv)
@@ -569,7 +580,7 @@ data class TryCatchExpr(
         val decoratedTryExpr = tryExpr.typeCheck(environment = environment)
         val tryType = decoratedTryExpr.type
         val decoratedCatchExpr = catchHandler.typeCheck(environment = environment.put(
-                variable = exception, typeInfo = stringTypeExpr.asTypeInformation
+                variable = exception, typeExpr = stringTypeExpr
         ))
         val catchType = decoratedCatchExpr.type
         if (tryType != catchType) {
@@ -594,8 +605,7 @@ data class LetExpr(
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression =
             if (environment[identifier] == null) {
                 val decoratedE1 = e1.typeCheck(environment = environment)
-                val e1TypeInfo = decoratedE1.type.asTypeInformation
-                val newEnv = environment.put(variable = identifier, typeInfo = e1TypeInfo)
+                val newEnv = environment.put(variable = identifier, typeExpr = decoratedE1.type)
                 val decoratedE2 = e2.typeCheck(environment = newEnv)
                 val e2Type = decoratedE2.type
                 DecoratedExpression.Let(

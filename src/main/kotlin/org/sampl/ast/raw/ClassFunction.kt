@@ -45,13 +45,13 @@ data class ClassFunction(
                 declaredTypes = genericsDeclaration.fold(environment.declaredTypes) { acc, s ->
                     acc.put(key = s, value = emptyList())
                 },
-                typeEnv = arguments.fold(environment.typeEnv) { acc, (name, type) ->
-                    acc.put(key = name, value = type.asTypeInformation)
+                normalTypeEnv = arguments.fold(environment.normalTypeEnv) { acc, (n, t) ->
+                    acc.put(key = n, value = t)
                 }
         )
         functionType.checkTypeValidity(environment = genericsDeclarationAndArgsAddedEnv)
         val bodyExpr: DecoratedExpression = when (category) {
-            PRIMITIVE, PROVIDED -> DecoratedExpression.Dummy
+            PRIMITIVE, PROVIDED -> DecoratedExpression.Dummy // Don't check given ones
             USER_DEFINED -> {
                 val e = body.typeCheck(environment = genericsDeclarationAndArgsAddedEnv)
                 val bodyType = e.type

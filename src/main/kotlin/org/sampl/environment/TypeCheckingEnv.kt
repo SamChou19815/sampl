@@ -5,6 +5,7 @@ import org.sampl.ast.common.FunctionCategory
 import org.sampl.ast.raw.ClassFunction
 import org.sampl.ast.raw.ClassMember
 import org.sampl.ast.type.TypeDeclaration
+import org.sampl.ast.type.TypeExpr
 import org.sampl.ast.type.TypeInfo
 import org.sampl.ast.type.boolTypeId
 import org.sampl.ast.type.charTypeId
@@ -25,27 +26,22 @@ import org.sampl.ast.type.unitTypeId
 data class TypeCheckingEnv(
         val typeDefinitions: FpMap<String, Pair<List<String>, TypeDeclaration>> = FpMap.empty(),
         val declaredTypes: FpMap<String, List<String>> = FpMap.empty(),
-        val typeEnv: FpMap<String, TypeInfo> = FpMap.empty()
+        val classFunctionTypeEnv: FpMap<String, TypeInfo> = FpMap.empty(),
+        val normalTypeEnv: FpMap<String, TypeExpr> = FpMap.empty()
 ) {
-
-    /**
-     * [update] creates a new [TypeCheckingEnv] with current level type environment updated
-     * to [newTypeEnv].
-     */
-    fun update(newTypeEnv: FpMap<String, TypeInfo>): TypeCheckingEnv = copy(typeEnv = newTypeEnv)
 
     /**
      * [get] returns the optionally existing type information for the given
      * [variable], with potentially fully-qualified name.
      */
-    operator fun get(variable: String): TypeInfo? = typeEnv[variable]
+    operator fun get(variable: String): TypeExpr? = normalTypeEnv[variable]
 
     /**
      * [put] creates a new [TypeCheckingEnv] that has the current level
-     * type environment updated with a new pair [variable] to [typeInfo].
+     * type environment updated with a new pair [variable] to [typeExpr].
      */
-    fun put(variable: String, typeInfo: TypeInfo): TypeCheckingEnv =
-            update(newTypeEnv = typeEnv.put(variable, typeInfo))
+    fun put(variable: String, typeExpr: TypeExpr): TypeCheckingEnv =
+            copy(normalTypeEnv = normalTypeEnv.put(variable, typeExpr))
 
     /**
      * [enterClass] produces a new [TypeCheckingEnv] with all the public information preserved and
@@ -59,7 +55,8 @@ data class TypeCheckingEnv(
             declaredTypes = declaredTypes.put(
                     key = clazz.identifier.name, value = clazz.identifier.genericsInfo
             ),
-            typeEnv = typeEnv
+            classFunctionTypeEnv = classFunctionTypeEnv,
+            normalTypeEnv = normalTypeEnv
     )
 
     /**
@@ -68,21 +65,16 @@ data class TypeCheckingEnv(
      * It needs to remove all private members and prefix each member and its type by the class name.
      */
     private fun ClassMember.Constant.processWhenExit(
-            currentTypeEnv: FpMap<String, TypeInfo>, className: String, subclassNames: List<String>
-    ): FpMap<String, TypeInfo> =
+            currentTypeEnv: FpMap<String, TypeExpr>, className: String, subclassNames: List<String>
+    ): FpMap<String, TypeExpr> =
             if (isPublic) {
-                var v = currentTypeEnv[identifier]
+                val oldType = currentTypeEnv[identifier]
                         ?: error(message = "Impossible. Name: $identifier")
-                val newT = subclassNames.fold(initial = v.typeExpr) { t, n ->
+                val newType = subclassNames.fold(initial = oldType) { t, n ->
                     t.toPrefixed(typeToPrefix = n, prefix = className)
                 }
-                v = v.copy(typeExpr = newT)
-                currentTypeEnv.remove(key = identifier).put(
-                        key = "$className.$identifier", value = v
-                )
-            } else {
-                currentTypeEnv.remove(key = identifier)
-            }
+                currentTypeEnv.remove(identifier).put("$className.$identifier", newType)
+            } else currentTypeEnv.remove(identifier)
 
     /**
      * [ClassFunction.processWhenExit] returns a new type environment when exiting a class given
@@ -99,8 +91,7 @@ data class TypeCheckingEnv(
                 t.toPrefixed(typeToPrefix = n, prefix = className)
             }
             v = v.copy(typeExpr = newT)
-            currentTypeEnv.remove(key = identifier)
-                    .put(key = "$className.$identifier", value = v)
+            currentTypeEnv.remove(key = identifier).put(key = "$className.$identifier", value = v)
         }
         else -> currentTypeEnv.remove(key = identifier)
     }
@@ -120,19 +111,31 @@ data class TypeCheckingEnv(
                 .fold(initial = currentEnv.declaredTypes) { dec, (name, genericsInfo) ->
                     dec.remove(key = name).put("$className.$name", genericsInfo)
                 }
-        // Also prefix each class member of the subclass with the classname.
-        val newTypeEnv = currentEnv.typeEnv.mapByKeyValuePair { s, typeInfo ->
+        // Also prefix each class constant member of the subclass with the classname.
+        val newNormalTypeEnv = currentEnv.normalTypeEnv.mapByKeyValuePair { s, typeExpr ->
             if (s.indexOf(subclassName) == 0) {
                 // prefixed with name, need to prefix!
-                val newT = subclassNames.fold(initial = typeInfo.typeExpr) { t, n ->
+                val newT = subclassNames.fold(initial = typeExpr) { t, n ->
                     t.toPrefixed(typeToPrefix = n, prefix = className)
                 }
-                "$className.$s" to typeInfo.copy(typeExpr = newT)
-            } else {
-                s to typeInfo
-            }
+                "$className.$s" to newT
+            } else s to typeExpr
         }
-        return currentEnv.copy(declaredTypes = newDeclaredTypes, typeEnv = newTypeEnv)
+        // Do the same thing for functions
+        val newFunctionTypeEnv = currentEnv.classFunctionTypeEnv.mapByKeyValuePair { s, tInfo ->
+            if (s.indexOf(subclassName) == 0) {
+                // prefixed with name, need to prefix!
+                val newTypeInfo = subclassNames.fold(initial = tInfo) { t, n ->
+                    t.copy(typeExpr = t.typeExpr.toPrefixed(typeToPrefix = n, prefix = className))
+                }
+                "$className.$s" to newTypeInfo
+            } else s to tInfo
+        }
+        return currentEnv.copy(
+                declaredTypes = newDeclaredTypes,
+                normalTypeEnv = newNormalTypeEnv,
+                classFunctionTypeEnv = newFunctionTypeEnv
+        )
     }
 
     /**
@@ -153,28 +156,26 @@ data class TypeCheckingEnv(
         // prefix member name
         val currentEnv = clazz.members.fold(initial = this) { e, member ->
             when (member) {
-                is ClassMember.Constant -> e.update(newTypeEnv = member.processWhenExit(
-                        currentTypeEnv = e.typeEnv, className = className,
+                is ClassMember.Constant -> e.copy(normalTypeEnv = member.processWhenExit(
+                        currentTypeEnv = e.normalTypeEnv, className = className,
                         subclassNames = subclassNames
                 ))
                 is ClassMember.FunctionGroup -> {
-                    val typeEnv = member.functions.fold(initial = e.typeEnv) { env, f ->
+                    val funEnv = member.functions.fold(initial = e.classFunctionTypeEnv) { env, f ->
                         f.processWhenExit(
                                 currentTypeEnv = env, className = className,
                                 subclassNames = subclassNames
                         )
                     }
-                    e.update(newTypeEnv = typeEnv)
+                    e.copy(classFunctionTypeEnv = funEnv)
                 }
                 is ClassMember.Clazz -> member.processAsSubclassWhenExit(
                         currentEnv = e, className = className, subclassNames = subclassNames
                 )
             }
         }
-        val removedTypeDefinitions = clazz.members
-                .mapNotNull { m -> (m as? ClassMember.Clazz)?.identifier?.name }
-                .fold(initial = currentEnv.typeDefinitions) { d, n -> d.remove(key = n) }
-        return currentEnv.copy(typeDefinitions = removedTypeDefinitions)
+        val newTypeDef = subclassNames.fold(currentEnv.typeDefinitions) { d, n -> d.remove(n) }
+        return currentEnv.copy(typeDefinitions = newTypeDef)
     }
 
     companion object {

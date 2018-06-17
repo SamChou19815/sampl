@@ -30,7 +30,7 @@ sealed class ClassMember {
                     isPublic = isPublic, identifier = identifier, expr = decoratedExpr,
                     type = decoratedExpr.type
             )
-            val e = env.put(variable = identifier, typeInfo = decoratedExpr.type.asTypeInformation)
+            val e = env.put(variable = identifier, typeExpr = decoratedExpr.type)
             return decoratedConstant to e
         }
 
@@ -42,11 +42,12 @@ sealed class ClassMember {
     data class FunctionGroup(val functions: List<ClassFunction>) : ClassMember() {
 
         override fun typeCheck(env: TypeCheckingEnv): Pair<DecoratedClassMember, TypeCheckingEnv> {
-            val newE = env.update(
-                    newTypeEnv = functions.fold(initial = env.typeEnv) { e, f ->
+            val newE = env.copy(
+                    classFunctionTypeEnv = functions.fold(env.classFunctionTypeEnv) { e, f ->
                         val functionTypeInfo = TypeInfo(f.functionType, f.genericsDeclaration)
                         e.put(key = f.identifier, value = functionTypeInfo)
-                    })
+                    }
+            )
             val decoratedFunctions = functions.map { it.typeCheck(environment = newE) }
                     .let { DecoratedClassMember.FunctionGroup(functions = it) }
             return decoratedFunctions to newE

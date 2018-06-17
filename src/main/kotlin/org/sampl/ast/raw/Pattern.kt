@@ -46,7 +46,7 @@ sealed class Pattern {
                 )
                 val newE = if (associatedVariable == "_") environment else environment.put(
                         variable = associatedVariable,
-                        typeInfo = associatedVarType.asTypeInformation
+                        typeExpr = associatedVarType
                 )
                 p to newE
             } else {
@@ -65,12 +65,8 @@ sealed class Pattern {
                 typeToMatch: T, environment: E, variantTypeDefs: MutableMap<String, T?>
         ): Pair<DecoratedPattern, E> {
             variantTypeDefs.clear()
-            val p = DecoratedPattern.Variable(
-                    identifier = identifier, type = typeToMatch
-            )
-            val newE = environment.put(
-                    variable = identifier, typeInfo = typeToMatch.asTypeInformation
-            )
+            val p = DecoratedPattern.Variable(identifier = identifier, type = typeToMatch)
+            val newE = environment.put(variable = identifier, typeExpr = typeToMatch)
             return p to newE
         }
 
