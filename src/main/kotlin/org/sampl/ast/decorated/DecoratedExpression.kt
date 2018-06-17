@@ -4,7 +4,6 @@ import org.sampl.ast.common.BinaryOperator
 import org.sampl.ast.type.TypeExpr
 import org.sampl.codegen.AstToCodeConverter
 import org.sampl.codegen.CodeConvertible
-import org.sampl.environment.TypeCheckingEnv
 import org.sampl.ast.common.Literal as CommonLiteral
 
 /**

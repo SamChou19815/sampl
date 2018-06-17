@@ -1,5 +1,6 @@
 package org.sampl.ast.common
 
+import org.apache.commons.text.StringEscapeUtils
 import org.sampl.ast.type.TypeExpr
 import org.sampl.ast.type.boolTypeExpr
 import org.sampl.ast.type.charTypeExpr
@@ -8,7 +9,6 @@ import org.sampl.ast.type.intTypeExpr
 import org.sampl.ast.type.stringTypeExpr
 import org.sampl.ast.type.unitTypeExpr
 import org.sampl.exceptions.InvalidLiteralError
-import org.apache.commons.text.StringEscapeUtils
 
 /**
  * [Literal] represents a set of supported literal.

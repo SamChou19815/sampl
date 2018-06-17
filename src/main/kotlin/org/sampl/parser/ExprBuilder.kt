@@ -1,5 +1,6 @@
 package org.sampl.parser
 
+import org.antlr.v4.runtime.tree.TerminalNode
 import org.sampl.antlr.PLBaseVisitor
 import org.sampl.antlr.PLParser.BitExprContext
 import org.sampl.antlr.PLParser.ComparisonExprContext
@@ -35,7 +36,6 @@ import org.sampl.ast.raw.StructMemberAccessExpr
 import org.sampl.ast.raw.ThrowExpr
 import org.sampl.ast.raw.TryCatchExpr
 import org.sampl.ast.raw.VariableIdentifierExpr
-import org.antlr.v4.runtime.tree.TerminalNode
 
 /**
  * [ExprBuilder] builds expression AST from parse tree.

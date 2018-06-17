@@ -44,10 +44,11 @@ sealed class Pattern {
                         },
                         associatedVariableType = associatedVarType
                 )
-                val newE = if (associatedVariable == "_") environment else environment.put(
-                        variable = associatedVariable,
-                        typeExpr = associatedVarType
-                )
+                val newE = if (associatedVariable == "_") environment else {
+                    environment.copy(normalTypeEnv = environment.normalTypeEnv.put(
+                            key = associatedVariable, value = associatedVarType
+                    ))
+                }
                 p to newE
             } else {
                 throw PatternMatchingError.WrongPattern(patternId = variantIdentifier)
@@ -66,7 +67,9 @@ sealed class Pattern {
         ): Pair<DecoratedPattern, E> {
             variantTypeDefs.clear()
             val p = DecoratedPattern.Variable(identifier = identifier, type = typeToMatch)
-            val newE = environment.put(variable = identifier, typeExpr = typeToMatch)
+            val newE = environment.copy(normalTypeEnv = environment.normalTypeEnv.put(
+                    key = identifier, value = typeToMatch
+            ))
             return p to newE
         }
 

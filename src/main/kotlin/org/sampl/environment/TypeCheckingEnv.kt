@@ -31,19 +31,6 @@ data class TypeCheckingEnv(
 ) {
 
     /**
-     * [get] returns the optionally existing type information for the given
-     * [variable], with potentially fully-qualified name.
-     */
-    operator fun get(variable: String): TypeExpr? = normalTypeEnv[variable]
-
-    /**
-     * [put] creates a new [TypeCheckingEnv] that has the current level
-     * type environment updated with a new pair [variable] to [typeExpr].
-     */
-    fun put(variable: String, typeExpr: TypeExpr): TypeCheckingEnv =
-            copy(normalTypeEnv = normalTypeEnv.put(variable, typeExpr))
-
-    /**
      * [enterClass] produces a new [TypeCheckingEnv] with all the public information preserved and
      * make all the types declared in the class available. Type checking is not done here.
      */

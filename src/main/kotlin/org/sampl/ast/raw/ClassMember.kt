@@ -30,7 +30,7 @@ sealed class ClassMember {
                     isPublic = isPublic, identifier = identifier, expr = decoratedExpr,
                     type = decoratedExpr.type
             )
-            val e = env.put(variable = identifier, typeExpr = decoratedExpr.type)
+            val e = env.copy(normalTypeEnv = env.normalTypeEnv.put(identifier, decoratedExpr.type))
             return decoratedConstant to e
         }
 

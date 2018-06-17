@@ -88,13 +88,7 @@ data class VariableIdentifierExpr(
         }
         // Not found in normal environment, try function environment
         val functionTypeInfo = environment.classFunctionTypeEnv[variable]
-                ?: run {
-                    environment.classFunctionTypeEnv.forEach { s, typeInfo ->
-                        println("$s: $typeInfo")
-                    }
-                    println()
-                    environment.normalTypeEnv.forEach { s, typeExpr -> println("$s: $typeExpr") }
-                    throw IdentifierError.UndefinedIdentifier(badIdentifier = variable)}
+                ?: throw IdentifierError.UndefinedIdentifier(badIdentifier = variable)
         val genericSymbolsToSubstitute = functionTypeInfo.genericsInfo
         if (genericSymbolsToSubstitute.size != genericInfo.size) {
             throw GenericsError.GenericsInfoWrongNumberOfArguments(
@@ -579,9 +573,11 @@ data class TryCatchExpr(
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val decoratedTryExpr = tryExpr.typeCheck(environment = environment)
         val tryType = decoratedTryExpr.type
-        val decoratedCatchExpr = catchHandler.typeCheck(environment = environment.put(
-                variable = exception, typeExpr = stringTypeExpr
-        ))
+        val decoratedCatchExpr = catchHandler.typeCheck(
+                environment.copy(normalTypeEnv = environment.normalTypeEnv.put(
+                        key = exception, value = stringTypeExpr
+                ))
+        )
         val catchType = decoratedCatchExpr.type
         if (tryType != catchType) {
             throw UnexpectedTypeError(expectedType = tryType, actualType = catchType)
@@ -603,9 +599,11 @@ data class LetExpr(
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression =
-            if (environment[identifier] == null) {
+            if (environment.normalTypeEnv[identifier] == null) {
                 val decoratedE1 = e1.typeCheck(environment = environment)
-                val newEnv = environment.put(variable = identifier, typeExpr = decoratedE1.type)
+                val newEnv = environment.copy(normalTypeEnv = environment.normalTypeEnv.put(
+                        key = identifier, value = decoratedE1.type
+                ))
                 val decoratedE2 = e2.typeCheck(environment = newEnv)
                 val e2Type = decoratedE2.type
                 DecoratedExpression.Let(

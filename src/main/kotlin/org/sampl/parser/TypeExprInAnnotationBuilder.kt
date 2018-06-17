@@ -1,8 +1,8 @@
 package org.sampl.parser
 
+import org.antlr.v4.runtime.tree.TerminalNode
 import org.sampl.antlr.PLBaseVisitor
 import org.sampl.ast.type.TypeExpr
-import org.antlr.v4.runtime.tree.TerminalNode
 import org.sampl.antlr.PLParser.FunctionTypeInAnnotationContext as Func
 import org.sampl.antlr.PLParser.SingleIdentifierTypeInAnnotationContext as Single
 
