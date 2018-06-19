@@ -13,6 +13,7 @@ internal object PatternBuilder : PLBaseVisitor<Pattern>() {
 
     override fun visitVariantPattern(ctx: VariantPatternContext): Pattern =
             Pattern.Variant(
+                    lineNo = ctx.start.line,
                     variantIdentifier = ctx.UpperIdentifier().text,
                     associatedVariable = if (ctx.WILDCARD() != null) "_" else {
                         ctx.LowerIdentifier()?.text
@@ -20,9 +21,12 @@ internal object PatternBuilder : PLBaseVisitor<Pattern>() {
             )
 
     override fun visitVariablePattern(ctx: VariablePatternContext): Pattern =
-            Pattern.Variable(identifier = ctx.LowerIdentifier().text)
+            Pattern.Variable(
+                    lineNo = ctx.LowerIdentifier().symbol.line,
+                    identifier = ctx.LowerIdentifier().text
+            )
 
     override fun visitWildcardPattern(ctx: WildcardPatternContext): Pattern =
-            Pattern.WildCard
+            Pattern.WildCard(lineNo = ctx.WILDCARD().symbol.line)
 
 }

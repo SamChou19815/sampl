@@ -22,7 +22,8 @@ object ConstructorExprBuilder : PLBaseVisitor<E>() {
         val genericInfo = ctx.genericsSpecialization()?.typeExprInAnnotation()
                 ?.map { it.accept(TypeExprInAnnotationBuilder) } ?: emptyList()
         return E.NoArgVariant(
-                typeName = typeName, variantName = variantName, genericInfo = genericInfo
+                lineNo = ctx.start.line, typeName = typeName,
+                variantName = variantName, genericInfo = genericInfo
         )
     }
 
@@ -33,7 +34,10 @@ object ConstructorExprBuilder : PLBaseVisitor<E>() {
                 .joinToString(separator = ".")
         val variantName = ids[ids.size - 1].text
         val data = ctx.expression().accept(ExprBuilder)
-        return E.OneArgVariant(typeName = typeName, variantName = variantName, data = data)
+        return E.OneArgVariant(
+                lineNo = ctx.start.line, typeName = typeName,
+                variantName = variantName, data = data
+        )
     }
 
     /**
@@ -44,6 +48,7 @@ object ConstructorExprBuilder : PLBaseVisitor<E>() {
 
     override fun visitStructConstructor(ctx: StructConstructorContext): E =
             E.Struct(
+                    lineNo = ctx.start.line,
                     typeName = ctx.UpperIdentifier().joinToString(separator = "."),
                     declarations = ctx.structConstructorValueDeclaration()
                             .map(::buildDeclaration).toMap()
@@ -51,6 +56,7 @@ object ConstructorExprBuilder : PLBaseVisitor<E>() {
 
     override fun visitStructWithConstructor(ctx: StructWithConstructorContext): E =
             E.StructWithCopy(
+                    lineNo = ctx.start.line,
                     old = ctx.expression().accept(ExprBuilder),
                     newDeclarations = ctx.structConstructorValueDeclaration()
                             .map(::buildDeclaration).toMap()

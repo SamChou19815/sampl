@@ -11,6 +11,11 @@ import org.sampl.environment.TypeCheckingEnv as E
 sealed class Pattern {
 
     /**
+     * [lineNo] reports the line number of the pattern.
+     */
+    abstract val lineNo: Int
+
+    /**
      * [typeCheck] tries to type check itself with [environment] and [typeToMatch] and produces a
      * [DecoratedPattern] and a new TypeCheckingEnv after type checking this pattern.
      * It should also removed used types in [variantTypeDefs].
@@ -23,7 +28,10 @@ sealed class Pattern {
      * [Variant] represents the variant pattern with [variantIdentifier] and potentially an
      * [associatedVariable].
      */
-    data class Variant(val variantIdentifier: String, val associatedVariable: String?) : Pattern() {
+    data class Variant(
+            override val lineNo: Int, val variantIdentifier: String,
+            val associatedVariable: String?
+    ) : Pattern() {
 
         override fun typeCheck(
                 typeToMatch: T, environment: E, variantTypeDefs: MutableMap<String, T?>
@@ -60,7 +68,9 @@ sealed class Pattern {
     /**
      * [Variable] represents a variable that matches everything.
      */
-    data class Variable(val identifier: String) : Pattern() {
+    data class Variable(
+            override val lineNo: Int, val identifier: String
+    ) : Pattern() {
 
         override fun typeCheck(
                 typeToMatch: T, environment: E, variantTypeDefs: MutableMap<String, T?>
@@ -78,7 +88,7 @@ sealed class Pattern {
     /**
      * [WildCard] represents a wildcard but does not bound to anything.
      */
-    object WildCard : Pattern() {
+    data class WildCard(override val lineNo: Int) : Pattern() {
         override fun typeCheck(
                 typeToMatch: T, environment: E, variantTypeDefs: MutableMap<String, T?>
         ): Pair<DecoratedPattern, E> {

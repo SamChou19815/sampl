@@ -1,6 +1,7 @@
 package org.sampl.parser
 
 import org.antlr.v4.runtime.tree.TerminalNode
+import org.apache.commons.text.StringEscapeUtils
 import org.sampl.antlr.PLBaseVisitor
 import org.sampl.antlr.PLParser.BitExprContext
 import org.sampl.antlr.PLParser.ComparisonExprContext
@@ -13,6 +14,7 @@ import org.sampl.antlr.PLParser.FunctionApplicationExprContext
 import org.sampl.antlr.PLParser.IdentifierExprContext
 import org.sampl.antlr.PLParser.IfElseExprContext
 import org.sampl.antlr.PLParser.LetExprContext
+import org.sampl.antlr.PLParser.LiteralContext
 import org.sampl.antlr.PLParser.LiteralExprContext
 import org.sampl.antlr.PLParser.MatchExprContext
 import org.sampl.antlr.PLParser.NestedExprContext
@@ -36,6 +38,7 @@ import org.sampl.ast.raw.StructMemberAccessExpr
 import org.sampl.ast.raw.ThrowExpr
 import org.sampl.ast.raw.TryCatchExpr
 import org.sampl.ast.raw.VariableIdentifierExpr
+import org.sampl.exceptions.InvalidLiteralError
 
 /**
  * [ExprBuilder] builds expression AST from parse tree.
@@ -45,10 +48,78 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
     override fun visitNestedExpr(ctx: NestedExprContext): Expression =
             ctx.expression().accept(this)
 
-    override fun visitLiteralExpr(ctx: LiteralExprContext): Expression =
-            LiteralExpr(literal = Literal.from(text = ctx.literal().text))
+    override fun visitLiteralExpr(ctx: LiteralExprContext): Expression {
+        val literalObj: LiteralContext = ctx.literal()
+        // Case UNIT
+        literalObj.UNIT()?.let { node ->
+            return LiteralExpr(lineNo = node.symbol.line, literal = Literal.Unit)
+        }
+        // Case INT
+        literalObj.IntegerLiteral()?.let { node ->
+            val lineNo = node.symbol.line
+            val text = node.text
+            val intValue = text.toLongOrNull() ?: throw InvalidLiteralError(invalidLiteral = text)
+            return LiteralExpr(lineNo = lineNo, literal = Literal.Int(value = intValue))
+        }
+        // Case FLOAT
+        literalObj.FloatingPointLiteral()?.let { node ->
+            val lineNo = node.symbol.line
+            val text = node.text
+            val floatValue = text.toDoubleOrNull()
+                    ?: throw InvalidLiteralError(invalidLiteral = text)
+            return LiteralExpr(lineNo = lineNo, literal = Literal.Float(value = floatValue))
+        }
+        // Case BOOL
+        literalObj.BooleanLiteral()?.let { node ->
+            val lineNo = node.symbol.line
+            val text = node.text
+            return when (text) {
+                "true" -> LiteralExpr(lineNo = lineNo, literal = Literal.Bool(value = true))
+                "false" -> LiteralExpr(lineNo = lineNo, literal = Literal.Bool(value = false))
+                else -> throw InvalidLiteralError(invalidLiteral = text)
+            }
+        }
+        // Case CHAR
+        literalObj.CharacterLiteral()?.let { node ->
+            val lineNo = node.symbol.line
+            val text = node.text
+            val unescaped: kotlin.String = StringEscapeUtils.unescapeJava(text)
+            val len = unescaped.length
+            if (len < 2) {
+                throw InvalidLiteralError(invalidLiteral = text)
+            }
+            val first = unescaped[0]
+            val last = unescaped[len - 1]
+            return if (first == '\'' && last == '\'') {
+                val betweenQuotes = unescaped.substring(startIndex = 1, endIndex = len - 1)
+                LiteralExpr(lineNo = lineNo, literal = Literal.Char(value = betweenQuotes[0]))
+            } else {
+                throw InvalidLiteralError(invalidLiteral = text)
+            }
+        }
+        // Case STRING
+        literalObj.StringLiteral()?.let { node ->
+            val lineNo = node.symbol.line
+            val text = node.text
+            val unescaped: kotlin.String = StringEscapeUtils.unescapeJava(text)
+            val len = unescaped.length
+            if (len < 2) {
+                throw InvalidLiteralError(invalidLiteral = text)
+            }
+            val first = unescaped[0]
+            val last = unescaped[len - 1]
+            return if (first == '"' && last == '"') {
+                val betweenQuotes = unescaped.substring(startIndex = 1, endIndex = len - 1)
+                LiteralExpr(lineNo = lineNo, literal = Literal.String(value = betweenQuotes))
+            } else {
+                throw InvalidLiteralError(invalidLiteral = text)
+            }
+        }
+        throw InvalidLiteralError(invalidLiteral = ctx.text)
+    }
 
     override fun visitIdentifierExpr(ctx: IdentifierExprContext): Expression {
+        val lineNo = ctx.start.line
         val upperIds = ctx.UpperIdentifier()
         val lower = ctx.LowerIdentifier().text
         val variable = if (upperIds.isEmpty()) lower else {
@@ -60,7 +131,9 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
                 ?.typeExprInAnnotation()
                 ?.map { it.accept(TypeExprInAnnotationBuilder) }
                 ?: emptyList()
-        return VariableIdentifierExpr(variable = variable, genericInfo = genericInfo)
+        return VariableIdentifierExpr(
+                lineNo = lineNo, variable = variable, genericInfo = genericInfo
+        )
     }
 
     override fun visitConstructorExpr(ctx: ConstructorExprContext): Expression =
@@ -68,15 +141,17 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
 
     override fun visitStructMemberAccessExpr(ctx: StructMemberAccessExprContext): Expression =
             StructMemberAccessExpr(
+                    lineNo = ctx.start.line,
                     structExpr = ctx.expression().accept(this),
                     memberName = ctx.LowerIdentifier().text
             )
 
     override fun visitNotExpr(ctx: NotExprContext): Expression =
-            NotExpr(expr = ctx.expression().accept(this))
+            NotExpr(lineNo = ctx.start.line, expr = ctx.expression().accept(this))
 
     override fun visitBitExpr(ctx: BitExprContext): Expression =
             BinaryExpr(
+                    lineNo = ctx.start.line,
                     left = ctx.expression(0).accept(this),
                     op = BinaryOperator.fromRaw(text = ctx.bitOperator().text),
                     right = ctx.expression(1).accept(this)
@@ -84,6 +159,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
 
     override fun visitFactorExpr(ctx: FactorExprContext): Expression =
             BinaryExpr(
+                    lineNo = ctx.start.line,
                     left = ctx.expression(0).accept(this),
                     op = BinaryOperator.fromRaw(text = ctx.factorOperator().text),
                     right = ctx.expression(1).accept(this)
@@ -91,6 +167,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
 
     override fun visitTermExpr(ctx: TermExprContext): Expression =
             BinaryExpr(
+                    lineNo = ctx.start.line,
                     left = ctx.expression(0).accept(this),
                     op = BinaryOperator.fromRaw(text = ctx.termOperator().text),
                     right = ctx.expression(1).accept(this)
@@ -98,6 +175,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
 
     override fun visitComparisonExpr(ctx: ComparisonExprContext): Expression =
             BinaryExpr(
+                    lineNo = ctx.start.line,
                     left = ctx.expression(0).accept(this),
                     op = BinaryOperator.fromRaw(text = ctx.comparisonOperator().text),
                     right = ctx.expression(1).accept(this)
@@ -105,6 +183,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
 
     override fun visitConjunctionExpr(ctx: ConjunctionExprContext): Expression =
             BinaryExpr(
+                    lineNo = ctx.start.line,
                     left = ctx.expression(0).accept(this),
                     op = BinaryOperator.AND,
                     right = ctx.expression(1).accept(this)
@@ -112,6 +191,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
 
     override fun visitDisjunctionExpr(ctx: DisjunctionExprContext): Expression =
             BinaryExpr(
+                    lineNo = ctx.start.line,
                     left = ctx.expression(0).accept(this),
                     op = BinaryOperator.OR,
                     right = ctx.expression(1).accept(this)
@@ -119,12 +199,14 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
 
     override fun visitThrowExpr(ctx: ThrowExprContext): Expression =
             ThrowExpr(
+                    lineNo = ctx.start.line,
                     type = ctx.typeExprInAnnotation().accept(TypeExprInAnnotationBuilder),
                     expr = ctx.expression().accept(this)
             )
 
     override fun visitIfElseExpr(ctx: IfElseExprContext): Expression =
             IfElseExpr(
+                    lineNo = ctx.start.line,
                     condition = ctx.expression(0).accept(this),
                     e1 = ctx.expression(1).accept(this),
                     e2 = ctx.expression(2).accept(this)
@@ -132,6 +214,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
 
     override fun visitMatchExpr(ctx: MatchExprContext): Expression =
             MatchExpr(
+                    lineNo = ctx.start.line,
                     exprToMatch = ctx.expression().accept(this),
                     matchingList = ctx.patternToExpr().map { c ->
                         val pattern = c.pattern().accept(PatternBuilder)
@@ -142,6 +225,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
 
     override fun visitFunExpr(ctx: FunExprContext): Expression =
             FunctionExpr(
+                    lineNo = ctx.start.line,
                     arguments = ctx.argumentDeclarations().accept(ArgumentDeclarationsBuilder),
                     body = ctx.expression().accept(this)
             )
@@ -153,11 +237,14 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
         for (i in 1 until exprContextList.size) {
             arguments.add(exprContextList[i].accept(this))
         }
-        return FunctionApplicationExpr(functionExpr, arguments)
+        return FunctionApplicationExpr(
+                lineNo = ctx.start.line, functionExpr = functionExpr, arguments = arguments
+        )
     }
 
     override fun visitTryCatchExpr(ctx: TryCatchExprContext): Expression =
             TryCatchExpr(
+                    lineNo = ctx.start.line,
                     tryExpr = ctx.expression(0).accept(this),
                     exception = ctx.LowerIdentifier().text,
                     catchHandler = ctx.expression(1).accept(this)
@@ -165,6 +252,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
 
     override fun visitLetExpr(ctx: LetExprContext): Expression =
             LetExpr(
+                    lineNo = ctx.start.line,
                     identifier = ctx.LowerIdentifier().text,
                     e1 = ctx.expression(0).accept(this),
                     e2 = ctx.expression(1).accept(this)

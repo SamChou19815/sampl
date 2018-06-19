@@ -1,6 +1,5 @@
 package org.sampl.ast.common
 
-import org.apache.commons.text.StringEscapeUtils
 import org.sampl.ast.type.TypeExpr
 import org.sampl.ast.type.boolTypeExpr
 import org.sampl.ast.type.charTypeExpr
@@ -8,7 +7,6 @@ import org.sampl.ast.type.floatTypeExpr
 import org.sampl.ast.type.intTypeExpr
 import org.sampl.ast.type.stringTypeExpr
 import org.sampl.ast.type.unitTypeExpr
-import org.sampl.exceptions.InvalidLiteralError
 
 /**
  * [Literal] represents a set of supported literal.
@@ -69,41 +67,6 @@ sealed class Literal(val inferredType: TypeExpr) {
 
         override fun toString(): kotlin.String = "\"$value\""
 
-    }
-
-    companion object {
-
-        /**
-         * [from] creates a literal from a [text].
-         *
-         * If the literal in [text] is bad, it will throw an [InvalidLiteralError].
-         */
-        fun from(text: kotlin.String): Literal {
-            val unescaped: kotlin.String = StringEscapeUtils.unescapeJava(text)
-            when (unescaped) {
-                "()" -> return Unit
-                "true" -> return Bool(value = true)
-                "false" -> return Bool(value = false)
-                else -> {
-                    unescaped.toLongOrNull()?.let { return Int(value = it) }
-                    unescaped.toDoubleOrNull()?.let { return Float(value = it) }
-                    val len = unescaped.length
-                    if (len < 2) {
-                        throw InvalidLiteralError(invalidLiteral = text)
-                    }
-                    val first = unescaped[0]
-                    val last = unescaped[len - 1]
-                    val betweenQuotes = unescaped.substring(startIndex = 1, endIndex = len - 1)
-                    return if (first == '\'' && last == '\'') {
-                        Char(value = betweenQuotes[0])
-                    } else if (first == '"' && last == '"') {
-                        String(value = betweenQuotes)
-                    } else {
-                        throw InvalidLiteralError(invalidLiteral = text)
-                    }
-                }
-            }
-        }
     }
 
 }

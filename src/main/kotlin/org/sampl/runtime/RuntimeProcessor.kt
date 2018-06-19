@@ -101,7 +101,7 @@ private fun Pair<String, TypeInfo>.toFunctionMember(c: FunctionCategory): ClassF
             category = c, isPublic = true, identifier = name,
             genericsDeclaration = typeInfo.genericsInfo,
             arguments = arguments, returnType = functionType.returnType,
-            body = LiteralExpr(literal = Literal.Unit) // dummy expression
+            body = LiteralExpr(lineNo = 0, literal = Literal.Unit) // dummy expression
     )
 }
 

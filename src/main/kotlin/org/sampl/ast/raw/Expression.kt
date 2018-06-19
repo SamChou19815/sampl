@@ -53,6 +53,11 @@ import java.util.LinkedList
 sealed class Expression {
 
     /**
+     * [lineNo] reports the line number of the expression.
+     */
+    abstract val lineNo: Int
+
+    /**
      * [typeCheck] returns the decorated expression with the inferred type  under the given
      * [environment].
      *
@@ -63,9 +68,9 @@ sealed class Expression {
 }
 
 /**
- * [LiteralExpr] represents a [literal] as an expression.
+ * [LiteralExpr] represents a [literal] as an expression at [lineNo].
  */
-data class LiteralExpr(val literal: Literal) : Expression() {
+data class LiteralExpr(override val lineNo: Int, val literal: Literal) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression =
             DecoratedExpression.Literal(literal = literal, type = literal.inferredType)
@@ -73,11 +78,11 @@ data class LiteralExpr(val literal: Literal) : Expression() {
 }
 
 /**
- * [VariableIdentifierExpr] represents a [variable] identifier as an expression.
+ * [VariableIdentifierExpr] represents a [variable] identifier as an expression at [lineNo].
  * It can only contain [genericInfo] which helps to determine the fixed type for this expression.
  */
 data class VariableIdentifierExpr(
-        val variable: String, private val genericInfo: List<TypeExpr>
+        override val lineNo: Int, val variable: String, private val genericInfo: List<TypeExpr>
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
@@ -121,10 +126,10 @@ sealed class ConstructorExpr : Expression() {
 
     /**
      * [NoArgVariant] represents a singleton value in variant with [typeName], [variantName] and
-     * some potential [genericInfo] to assist type inference.
+     * some potential [genericInfo] to assist type inference at [lineNo].
      */
     data class NoArgVariant(
-            val typeName: String, val variantName: String,
+            override val lineNo: Int, val typeName: String, val variantName: String,
             val genericInfo: List<TypeExpr>
     ) : ConstructorExpr() {
 
@@ -152,10 +157,11 @@ sealed class ConstructorExpr : Expression() {
 
     /**
      * [OneArgVariant] represents a tagged enum in variant with [typeName], [variantName] and
-     * associated [data].
+     * associated [data] at [lineNo].
      */
     data class OneArgVariant(
-            val typeName: String, val variantName: String, val data: Expression
+            override val lineNo: Int, val typeName: String, val variantName: String,
+            val data: Expression
     ) : ConstructorExpr() {
 
         override fun constructorTypeCheck(e: TypeCheckingEnv): DecoratedExpression.Constructor {
@@ -188,10 +194,12 @@ sealed class ConstructorExpr : Expression() {
     }
 
     /**
-     * [Struct] represents a struct initialization with [typeName] and initial value [declarations].
+     * [Struct] represents a struct initialization with [typeName] and initial value [declarations]
+     * at [lineNo].
      */
     data class Struct(
-            val typeName: String, val declarations: Map<String, Expression>
+            override val lineNo: Int, val typeName: String,
+            val declarations: Map<String, Expression>
     ) : ConstructorExpr() {
 
         override fun constructorTypeCheck(e: TypeCheckingEnv): DecoratedExpression.Constructor {
@@ -231,10 +239,12 @@ sealed class ConstructorExpr : Expression() {
     }
 
     /**
-     * [StructWithCopy] represents a copy of [old] struct with some new values in [newDeclarations].
+     * [StructWithCopy] represents a copy of [old] struct with some new values in [newDeclarations]
+     * at [lineNo].
      */
     data class StructWithCopy(
-            val old: Expression, val newDeclarations: Map<String, Expression>
+            override val lineNo: Int, val old: Expression,
+            val newDeclarations: Map<String, Expression>
     ) : ConstructorExpr() {
 
         override fun constructorTypeCheck(e: TypeCheckingEnv): DecoratedExpression.Constructor {
@@ -275,10 +285,10 @@ sealed class ConstructorExpr : Expression() {
 }
 
 /**
- * [StructMemberAccessExpr] represents accessing [memberName] of [structExpr].
+ * [StructMemberAccessExpr] represents accessing [memberName] of [structExpr] at [lineNo].
  */
 data class StructMemberAccessExpr(
-        val structExpr: Expression, val memberName: String
+        override val lineNo: Int, val structExpr: Expression, val memberName: String
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
@@ -303,9 +313,9 @@ data class StructMemberAccessExpr(
 }
 
 /**
- * [NotExpr] represents the logical inversion of expression [expr].
+ * [NotExpr] represents the logical inversion of expression [expr] at [lineNo].
  */
-data class NotExpr(val expr: Expression) : Expression() {
+data class NotExpr(override val lineNo: Int, val expr: Expression) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val e = expr.typeCheck(environment = environment)
@@ -320,9 +330,11 @@ data class NotExpr(val expr: Expression) : Expression() {
 }
 
 /**
- * [BinaryExpr] represents a binary expression with operator [op] between [left] and [right].
+ * [BinaryExpr] represents a binary expression with operator [op] between [left] and [right] at
+ * [lineNo].
  */
 data class BinaryExpr(
+        override val lineNo: Int,
         val left: Expression, val op: BinaryOperator, val right: Expression
 ) : Expression() {
 
@@ -415,9 +427,11 @@ data class BinaryExpr(
 
 /**
  * [ThrowExpr] represents the throw exception expression, where the thrown exception is [expr].
- * The throw expression is coerced to have [type].
+ * The throw expression is coerced to have [type] at [lineNo].
  */
-data class ThrowExpr(val type: TypeExpr, val expr: Expression) : Expression() {
+data class ThrowExpr(
+        override val lineNo: Int, val type: TypeExpr, val expr: Expression
+) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val e = expr.typeCheck(environment = environment)
@@ -432,10 +446,10 @@ data class ThrowExpr(val type: TypeExpr, val expr: Expression) : Expression() {
 
 /**
  * [IfElseExpr] represents the if else expression, guarded by [condition] and having two
- * branches [e1] and [e2].
+ * branches [e1] and [e2] at [lineNo].
  */
 data class IfElseExpr(
-        val condition: Expression, val e1: Expression, val e2: Expression
+        override val lineNo: Int, val condition: Expression, val e1: Expression, val e2: Expression
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
@@ -460,10 +474,11 @@ data class IfElseExpr(
 
 /**
  * [MatchExpr] represents the pattern matching expression, with a list of [matchingList] to match
- * against [exprToMatch].
+ * against [exprToMatch] at [lineNo].
  */
 data class MatchExpr(
-        val exprToMatch: Expression, val matchingList: List<Pair<Pattern, Expression>>
+        override val lineNo: Int, val exprToMatch: Expression,
+        val matchingList: List<Pair<Pattern, Expression>>
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
@@ -511,10 +526,10 @@ data class MatchExpr(
 
 /**
  * [FunctionApplicationExpr] is the function application expression, with [functionExpr] as the
- * function and [arguments] as arguments of the function.
+ * function and [arguments] as arguments of the function at [lineNo].
  */
 data class FunctionApplicationExpr(
-        val functionExpr: Expression, val arguments: List<Expression>
+        override val lineNo: Int, val functionExpr: Expression, val arguments: List<Expression>
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
@@ -551,10 +566,11 @@ data class FunctionApplicationExpr(
 
 
 /**
- * [FunctionExpr] is the function expression with some [arguments] and the function [body].
+ * [FunctionExpr] is the function expression with some [arguments] and the function [body]
+ * at [lineNo].
  */
 data class FunctionExpr(
-        val arguments: List<Pair<String, TypeExpr>>, val body: Expression
+        override val lineNo: Int, val arguments: List<Pair<String, TypeExpr>>, val body: Expression
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
@@ -578,12 +594,13 @@ data class FunctionExpr(
 }
 
 /**
- * [TryCatchExpr] represents the try catch finally structure as an expression, where the
- * [tryExpr] is evaluated, and guard by catch branch with [exception] in scope and [catchHandler]
- * to deal with it.
+ * [TryCatchExpr] represents the try catch finally structure as an expression at [lineNo]., where
+ * the [tryExpr] is evaluated, and guard by catch branch with [exception] in scope and
+ * [catchHandler] to deal with it.
  */
 data class TryCatchExpr(
-        val tryExpr: Expression, val exception: String, val catchHandler: Expression
+        override val lineNo: Int, val tryExpr: Expression, val exception: String,
+        val catchHandler: Expression
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
@@ -607,11 +624,11 @@ data class TryCatchExpr(
 }
 
 /**
- * [LetExpr] represents the let expression of the form
+ * [LetExpr] represents the let expression at [lineNo] of the form
  * `let` [identifier] `=` [e1] `;` [e2]
  */
 data class LetExpr(
-        val identifier: String, val e1: Expression, val e2: Expression
+        override val lineNo: Int, val identifier: String, val e1: Expression, val e2: Expression
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression =
