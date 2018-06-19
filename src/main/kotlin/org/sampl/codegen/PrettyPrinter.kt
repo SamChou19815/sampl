@@ -288,6 +288,7 @@ class PrettyPrinter private constructor() : AstToCodeConverter {
         /**
          * [prettyPrint] returns the given [node] as well-formatted code in string.
          */
+        @JvmStatic
         fun prettyPrint(node: CodeConvertible): String =
                 PrettyPrinter().apply { node.acceptConversion(converter = this) }.q.toIndentedCode()
 

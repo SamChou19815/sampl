@@ -164,6 +164,7 @@ data class TypeCheckingEnv(
         /**
          * [initial] is the initial [TypeCheckingEnv] with predefined types includes.
          */
+        @JvmField
         val initial: TypeCheckingEnv = TypeCheckingEnv(
                 declaredTypes = FpMap.create(
                         TOP_LEVEL_PROGRAM_NAME to emptyList(),

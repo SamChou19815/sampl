@@ -10,12 +10,6 @@ import org.sampl.util.joinToGenericsInfoString
 sealed class TypeExpr {
 
     /**
-     * [asTypeInformation] converts itself to [TypeInfo] without generics declaration.
-     */
-    val asTypeInformation: TypeInfo
-        get() = TypeInfo(typeExpr = this)
-
-    /**
      * [substituteGenerics] uses the given [map] to substitute generic symbols in the type
      * expression with concrete value types.
      */

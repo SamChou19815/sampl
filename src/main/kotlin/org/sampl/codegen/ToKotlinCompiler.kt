@@ -482,6 +482,7 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
         /**
          * [compile] returns the given [node] as well-formatted Kotlin code in string.
          */
+        @JvmStatic
         fun compile(node: CodeConvertible): String =
                 ToKotlinCompiler()
                         .apply { node.acceptConversion(converter = this) }

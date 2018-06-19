@@ -47,7 +47,7 @@ class RuntimeProcessorTest {
     private object RuntimeLibraryWithOnePublicFunction : RuntimeLibrary {
         @RuntimeFunction
         @JvmStatic
-        fun abc(): Unit = Unit
+        fun ab(): Unit = Unit
     }
 
     /**
@@ -66,7 +66,7 @@ class RuntimeProcessorTest {
     @Test
     fun onePublicFunctionTest() {
         testCorrectness(lib = RuntimeLibraryWithOnePublicFunction, expectedOutput = listOf(
-                "abc" to TypeExpr.Function(emptyList(), unitTypeExpr).asTypeInformation
+                "ab" to TypeExpr.Function(emptyList(), unitTypeExpr).let { TypeInfo(typeExpr = it) }
         ))
     }
 
@@ -128,7 +128,7 @@ class RuntimeProcessorTest {
      */
     @Test
     fun primitiveRuntimeLibraryIsGoodTest() {
-        PrimitiveRuntimeLibrary.toAnnotatedFunctions(allowGenerics = true).forEach { println(it) }
+        PrimitiveRuntimeLibrary.toAnnotatedFunctions(allowGenerics = true)
     }
 
 }
