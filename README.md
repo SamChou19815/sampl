@@ -125,3 +125,9 @@ interpreter features, so the 30M Kotlin compiler is completely useless to them.
 
 This project is still in prototype. There will be no backward-compatible guarantees in the near
 feature. Especially do not use this in production.
+
+## Current Status
+
+- Version: Alpha 2
+- License: MIT
+- Contributers: `["Sam Zhou"]`
