@@ -154,7 +154,6 @@ class SimpleTest {
     fun interpretSimple() {
         assertEquals(UnitValue, PLInterpreter.interpret(propositionsAreTypesProofsArePrograms))
         assertEquals(IntValue(value = 42), PLInterpreter.interpret(multipleFeaturesProgram))
-        assertEquals(UnitValue, PLInterpreter.interpret(standardHelloWorldProgram))
         assertEquals(StringValue(value = "Hello World, Sam!"),
                 PLInterpreter.interpret(stringHelloWorldProgram))
         assertEquals(IntValue(value = 42), PLInterpreter.interpret(intHelloWorldProgram))
