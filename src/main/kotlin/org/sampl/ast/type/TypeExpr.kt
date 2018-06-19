@@ -1,6 +1,5 @@
 package org.sampl.ast.type
 
-import org.sampl.ast.decorated.DecoratedExpression.Dummy.type
 import org.sampl.environment.TypeCheckingEnv
 import org.sampl.exceptions.IdentifierError
 import org.sampl.util.joinToGenericsInfoString

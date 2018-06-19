@@ -1,6 +1,7 @@
 package org.sampl.environment
 
 import com.developersam.fp.FpMap
+import org.sampl.TOP_LEVEL_PROGRAM_NAME
 import org.sampl.ast.common.FunctionCategory
 import org.sampl.ast.raw.ClassFunction
 import org.sampl.ast.raw.ClassMember
@@ -165,6 +166,7 @@ data class TypeCheckingEnv(
          */
         val initial: TypeCheckingEnv = TypeCheckingEnv(
                 declaredTypes = FpMap.create(
+                        TOP_LEVEL_PROGRAM_NAME to emptyList(),
                         unitTypeId.name to unitTypeId.genericsInfo,
                         intTypeId.name to intTypeId.genericsInfo,
                         floatTypeId.name to floatTypeId.genericsInfo,

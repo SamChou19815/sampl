@@ -22,7 +22,6 @@ import org.sampl.ast.type.stringTypeExpr
 import org.sampl.ast.type.unitTypeExpr
 import org.sampl.util.joinToGenericsInfoString
 import java.io.BufferedReader
-import java.io.File.separator
 import java.io.InputStreamReader
 import java.util.LinkedList
 
