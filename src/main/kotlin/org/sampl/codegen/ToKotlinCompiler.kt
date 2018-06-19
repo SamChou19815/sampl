@@ -416,7 +416,7 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
 
     override fun convert(node: DecoratedExpression.FunctionApplication) {
         val funType = node.functionExpr.type as TypeExpr.Function
-        val funStr = node.functionExpr.toOneLineCode(parent = node)
+        val funStr = node.functionExpr.toFunctionOneLineCodeInFunctionApplication(parent = node)
         val shorterLen = node.arguments.size
         val longerLen = funType.argumentTypes.size
         if (longerLen == shorterLen) {
@@ -446,6 +446,22 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
             }
             q.addLine(line = "}")
         }
+    }
+
+    /**
+     * [DecoratedExpression.toFunctionOneLineCodeInFunctionApplication] converts the given
+     * function expression to one line code in function application context and with [parent].
+     */
+    private fun DecoratedExpression.toFunctionOneLineCodeInFunctionApplication(
+            parent: DecoratedExpression.FunctionApplication
+    ): String {
+        if (this !is DecoratedExpression.VariableIdentifier || !isClassFunction) {
+            return toOneLineCode(parent = parent)
+        }
+        val genericInfo = genericInfo.takeIf { it.isNotEmpty() }
+                ?.joinToString(separator = ", ", prefix = "<", postfix = ">") { it.toKotlinType() }
+                ?: ""
+        return variable + genericInfo
     }
 
     override fun convert(node: DecoratedExpression.Function) {
