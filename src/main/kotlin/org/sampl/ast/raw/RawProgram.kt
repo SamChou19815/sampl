@@ -36,26 +36,34 @@ data class RawProgram(val members: List<ClassMember>) {
                 is ClassMember.Constant -> {
                     val name = member.identifier
                     if (!constantFunctionNameSet.add(element = name)) {
-                        throw IdentifierError.ShadowedName(shadowedName = name)
+                        throw IdentifierError.ShadowedName(
+                                lineNo = member.identifierLineNo, shadowedName = name
+                        )
                     }
                 }
                 is ClassMember.FunctionGroup -> {
                     for (f in member.functions) {
                         val name = f.identifier
                         if (!constantFunctionNameSet.add(element = name)) {
-                            throw IdentifierError.ShadowedName(shadowedName = name)
+                            throw IdentifierError.ShadowedName(
+                                    lineNo = f.identifierLineNo, shadowedName = name
+                            )
                         }
                     }
                 }
                 is ClassMember.Clazz -> {
                     val name = member.identifier.name
                     if (!set.add(element = name)) {
-                        throw IdentifierError.ShadowedName(shadowedName = name)
+                        throw IdentifierError.ShadowedName(
+                                lineNo = member.identifierLineNo, shadowedName = name
+                        )
                     }
                     if (member.declaration is TypeDeclaration.Variant) {
                         for (k in member.declaration.map.keys) {
                             if (!set.add(element = k)) {
-                                throw IdentifierError.ShadowedName(shadowedName = k)
+                                throw IdentifierError.ShadowedName(
+                                        lineNo = member.identifierLineNo, shadowedName = k
+                                )
                             }
                         }
                     }

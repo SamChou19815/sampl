@@ -16,10 +16,12 @@ sealed class ClassMember {
 
     /**
      * [Constant] represents a constant declaration of the form:
-     * `public/private`([isPublic]) `let` [identifier] `=` [expr].
+     * `public/private`([isPublic]) `let` [identifier] `=` [expr],
+     * with [identifier] at [identifierLineNo].
      */
     data class Constant(
             val isPublic: Boolean,
+            val identifierLineNo: Int,
             val identifier: String,
             val expr: Expression
     ) : ClassMember() {
@@ -57,10 +59,11 @@ sealed class ClassMember {
 
     /**
      * [Clazz] node has an type identifier with generics [identifier], a type [declaration] and a
-     * set of ordered [members].
+     * set of ordered [members] with [identifier] at [identifierLineNo].
      * It means class.
      */
     data class Clazz(
+            val identifierLineNo: Int,
             val identifier: TypeIdentifier,
             val declaration: TypeDeclaration,
             val members: List<ClassMember>

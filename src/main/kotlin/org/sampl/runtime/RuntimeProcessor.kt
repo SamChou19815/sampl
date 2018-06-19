@@ -98,7 +98,7 @@ private fun Pair<String, TypeInfo>.toFunctionMember(c: FunctionCategory): ClassF
     val functionType = typeInfo.typeExpr as TypeExpr.Function
     val arguments = functionType.argumentTypes.mapIndexed { i, t -> "var$i" to t }
     return ClassFunction(
-            category = c, isPublic = true, identifier = name,
+            category = c, isPublic = true, identifierLineNo = -1, identifier = name,
             genericsDeclaration = typeInfo.genericsInfo,
             arguments = arguments, returnType = functionType.returnType,
             body = LiteralExpr(lineNo = 0, literal = Literal.Unit) // dummy expression

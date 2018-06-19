@@ -1,5 +1,6 @@
 package org.sampl.ast.type
 
+import org.sampl.ast.decorated.DecoratedExpression.Dummy.type
 import org.sampl.environment.TypeCheckingEnv
 import org.sampl.exceptions.IdentifierError
 import org.sampl.util.joinToGenericsInfoString
@@ -38,21 +39,22 @@ sealed class TypeExpr {
     abstract fun toPrefixed(typeToPrefix: String, prefix: String): TypeExpr
 
     /**
-     * [Identifier] represents a single [type] with optional [genericsInfo].
+     * [Identifier] represents a single [type] with optional [genericsInfo], where [type] is at
+     * [lineNo]. If [lineNo] does not make sense (generated types), it is defaulted to -1.
      */
     data class Identifier(
-            val type: String, val genericsInfo: List<TypeExpr> = emptyList()
+            val lineNo: Int = -1, val type: String, val genericsInfo: List<TypeExpr> = emptyList()
     ) : TypeExpr() {
 
         override fun substituteGenerics(map: Map<String, TypeExpr>): TypeExpr =
                 map[type].takeIf { genericsInfo.isEmpty() }
-                        ?: Identifier(type, genericsInfo.map { it.substituteGenerics(map) })
+                        ?: Identifier(lineNo, type, genericsInfo.map { it.substituteGenerics(map) })
 
         override fun checkTypeValidity(environment: TypeCheckingEnv) {
             val declaredGenerics = environment.declaredTypes[type]
-                    ?: throw IdentifierError.UndefinedTypeIdentifier(badIdentifier = type)
+                    ?: throw IdentifierError.UndefinedTypeIdentifier(lineNo, type)
             if (declaredGenerics.size != genericsInfo.size) {
-                throw IdentifierError.UndefinedTypeIdentifier(badIdentifier = type)
+                throw IdentifierError.UndefinedTypeIdentifier(lineNo, type)
             }
             genericsInfo.forEach { it.checkTypeValidity(environment = environment) }
         }
@@ -67,13 +69,27 @@ sealed class TypeExpr {
         override fun toPrefixed(typeToPrefix: String, prefix: String): TypeExpr {
             val newType = if (type.indexOf(typeToPrefix) == 0) "$prefix.$type" else type
             val newGenericsInfo = genericsInfo.map { it.toPrefixed(typeToPrefix, prefix) }
-            return TypeExpr.Identifier(type = newType, genericsInfo = newGenericsInfo)
+            return TypeExpr.Identifier(
+                    lineNo = lineNo, type = newType, genericsInfo = newGenericsInfo
+            )
         }
 
         override fun toString(): String =
                 if (genericsInfo.isEmpty()) type else {
                     type + genericsInfo.joinToGenericsInfoString()
                 }
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) {
+                return true
+            }
+            if (other is TypeExpr.Identifier) {
+                return type == other.type && genericsInfo == other.genericsInfo
+            }
+            return false
+        }
+
+        override fun hashCode(): Int = type.hashCode() * 31 + genericsInfo.hashCode()
 
     }
 
@@ -109,6 +125,18 @@ sealed class TypeExpr {
 
         override fun toString(): String =
                 "(${argumentTypes.joinToString(separator = ", ")}) -> $returnType"
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) {
+                return true
+            }
+            if (other is TypeExpr.Function) {
+                return argumentTypes == other.argumentTypes && returnType == other.returnType
+            }
+            return false
+        }
+
+        override fun hashCode(): Int = argumentTypes.hashCode() * 31 + returnType.hashCode()
 
     }
 

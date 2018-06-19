@@ -1,7 +1,7 @@
 package org.sampl.exceptions
 
 /**
- * [InvalidLiteralError] reports an [invalidLiteral] during compile time.
+ * [InvalidLiteralError] reports an invalid literal at given line number during compile time.
  */
-class InvalidLiteralError(val invalidLiteral: String) :
-        CompileTimeError(reason = "Invalid Literal Detected: $invalidLiteral.")
+class InvalidLiteralError(lineNo: Int, invalidLiteral: String) :
+        CompileTimeError(reason = "Invalid Literal at line $lineNo Detected: $invalidLiteral.")

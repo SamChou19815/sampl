@@ -9,14 +9,23 @@ import org.sampl.ast.type.TypeExpr
  * @param actualType actual type deduced from the expression.
  */
 class UnexpectedTypeError(
-        private val expectedType: String, private val actualType: TypeExpr
-) : CompileTimeError(reason = "Unexpected type: $actualType. Expecting: $expectedType.") {
+        lineNo: Int, expectedType: String, actualType: TypeExpr
+) : CompileTimeError(reason = "Line $lineNo: Unexpected type: $actualType; " +
+        "Expected: $expectedType.") {
 
-    /**
-     * Construct the same error but with [expectedType] as an [TypeExpr].
-     */
-    constructor(expectedType: TypeExpr, actualType: TypeExpr) : this(
-            expectedType = expectedType.toString(), actualType = actualType
-    )
+    companion object {
+
+        /**
+         * [check] checks whether [actualType] matches [expectedType] at [lineNo]. If not, it will
+         * throw [UnexpectedTypeError].
+         */
+        @JvmStatic
+        fun check(lineNo: Int, expectedType: TypeExpr, actualType: TypeExpr) {
+            if (expectedType != actualType) {
+                throw UnexpectedTypeError(lineNo, expectedType.toString(), actualType)
+            }
+        }
+
+    }
 
 }

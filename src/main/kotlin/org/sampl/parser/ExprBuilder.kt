@@ -58,7 +58,8 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
         literalObj.IntegerLiteral()?.let { node ->
             val lineNo = node.symbol.line
             val text = node.text
-            val intValue = text.toLongOrNull() ?: throw InvalidLiteralError(invalidLiteral = text)
+            val intValue = text.toLongOrNull()
+                    ?: throw InvalidLiteralError(lineNo = lineNo, invalidLiteral = text)
             return LiteralExpr(lineNo = lineNo, literal = Literal.Int(value = intValue))
         }
         // Case FLOAT
@@ -66,7 +67,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
             val lineNo = node.symbol.line
             val text = node.text
             val floatValue = text.toDoubleOrNull()
-                    ?: throw InvalidLiteralError(invalidLiteral = text)
+                    ?: throw InvalidLiteralError(lineNo = lineNo, invalidLiteral = text)
             return LiteralExpr(lineNo = lineNo, literal = Literal.Float(value = floatValue))
         }
         // Case BOOL
@@ -76,7 +77,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
             return when (text) {
                 "true" -> LiteralExpr(lineNo = lineNo, literal = Literal.Bool(value = true))
                 "false" -> LiteralExpr(lineNo = lineNo, literal = Literal.Bool(value = false))
-                else -> throw InvalidLiteralError(invalidLiteral = text)
+                else -> throw InvalidLiteralError(lineNo = lineNo, invalidLiteral = text)
             }
         }
         // Case CHAR
@@ -86,7 +87,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
             val unescaped: kotlin.String = StringEscapeUtils.unescapeJava(text)
             val len = unescaped.length
             if (len < 2) {
-                throw InvalidLiteralError(invalidLiteral = text)
+                throw InvalidLiteralError(lineNo = lineNo, invalidLiteral = text)
             }
             val first = unescaped[0]
             val last = unescaped[len - 1]
@@ -94,7 +95,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
                 val betweenQuotes = unescaped.substring(startIndex = 1, endIndex = len - 1)
                 LiteralExpr(lineNo = lineNo, literal = Literal.Char(value = betweenQuotes[0]))
             } else {
-                throw InvalidLiteralError(invalidLiteral = text)
+                throw InvalidLiteralError(lineNo = lineNo, invalidLiteral = text)
             }
         }
         // Case STRING
@@ -104,7 +105,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
             val unescaped: kotlin.String = StringEscapeUtils.unescapeJava(text)
             val len = unescaped.length
             if (len < 2) {
-                throw InvalidLiteralError(invalidLiteral = text)
+                throw InvalidLiteralError(lineNo = lineNo, invalidLiteral = text)
             }
             val first = unescaped[0]
             val last = unescaped[len - 1]
@@ -112,10 +113,10 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
                 val betweenQuotes = unescaped.substring(startIndex = 1, endIndex = len - 1)
                 LiteralExpr(lineNo = lineNo, literal = Literal.String(value = betweenQuotes))
             } else {
-                throw InvalidLiteralError(invalidLiteral = text)
+                throw InvalidLiteralError(lineNo = lineNo, invalidLiteral = text)
             }
         }
-        throw InvalidLiteralError(invalidLiteral = ctx.text)
+        throw InvalidLiteralError(lineNo = ctx.literal().start.line, invalidLiteral = ctx.text)
     }
 
     override fun visitIdentifierExpr(ctx: IdentifierExprContext): Expression {

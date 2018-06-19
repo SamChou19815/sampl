@@ -11,24 +11,25 @@ sealed class PatternMatchingError(reason: String) : CompileTimeError(reason = re
     /**
      * [NonExhaustive] reports an non-exhaustive pattern matching.
      */
-    class NonExhaustive : CompileTimeError(reason = "Pattern matching is not exhaustive.")
+    class NonExhaustive(lineNo: Int) :
+            CompileTimeError(reason = "Pattern matching is not exhaustive. Check at line $lineNo.")
 
     /**
-     * [UnmatchableType] reports an unmatchable type [typeExpr] in pattern matching.
+     * [UnmatchableType] reports an unmatchable type in pattern matching.
      */
-    class UnmatchableType(val typeExpr: TypeExpr) :
-            CompileTimeError(reason = "This type $typeExpr is not matchable!")
+    class UnmatchableType(lineNo: Int, typeExpr: TypeExpr) :
+            CompileTimeError(reason = "This type $typeExpr at line $lineNo is not matchable!")
 
     /**
-     * [UnusedPattern] reports an unused [pattern].
+     * [UnusedPattern] reports an unused pattern.
      */
-    class UnusedPattern(val pattern: Pattern) :
-            CompileTimeError(reason = "The pattern $pattern is unused.")
+    class UnusedPattern(lineNo: Int, pattern: Pattern) :
+            CompileTimeError(reason = "The pattern $pattern at line $lineNo is unused.")
 
     /**
-     * [WrongPattern] reports a bad [patternId] as a wrong pattern.
+     * [WrongPattern] reports a bad pattern id as a wrong pattern.
      */
-    class WrongPattern(val patternId: String) :
-            CompileTimeError(reason = "There is no such pattern $patternId.")
+    class WrongPattern(lineNo: Int, patternId: String) :
+            CompileTimeError(reason = "There is no such pattern $patternId at line $lineNo.")
 
 }

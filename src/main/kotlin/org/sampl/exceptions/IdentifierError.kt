@@ -6,30 +6,24 @@ package org.sampl.exceptions
 sealed class IdentifierError(reason: String) : CompileTimeError(reason = reason) {
 
     /**
-     * [ForbiddenName] reports the usage of an forbidden name in the program.
-     */
-    class ForbiddenName(val name: String) :
-            IdentifierError(reason = "Forbidden name used: $name")
-
-    /**
-     * [ShadowedName] reports a [shadowedName] of identifiers in declaration
+     * [ShadowedName] reports a shadowed Name of identifiers in declaration
      * during compile time.
      */
-    class ShadowedName(val shadowedName: String) :
-            IdentifierError(reason = "Identifier Shadowing Detected: $shadowedName.")
+    class ShadowedName(lineNo: Int, shadowedName: String) :
+            IdentifierError(reason = "Shadowed name at line $lineNo detected: $shadowedName.")
 
     /**
-     * [UndefinedIdentifier] reports that [badIdentifier] is not found in the current
+     * [UndefinedIdentifier] reports that bad identifier is not found in the current
      * environment.
      */
-    class UndefinedIdentifier(val badIdentifier: String) :
-            IdentifierError(reason = "Identifier $badIdentifier is not found.")
+    class UndefinedIdentifier(lineNo: Int, badIdentifier: String) :
+            IdentifierError(reason = "Identifier $badIdentifier at line $lineNo is not found.")
 
     /**
-     * [UndefinedTypeIdentifier] reports that [badIdentifier] is not found in the current
+     * [UndefinedTypeIdentifier] reports that bad identifier is not found in the current
      * environment.
      */
-    class UndefinedTypeIdentifier(val badIdentifier: String) :
-            CompileTimeError(reason = "Type Identifier $badIdentifier is not found.")
+    class UndefinedTypeIdentifier(lineNo: Int, badIdentifier: String) :
+            CompileTimeError(reason = "Type $badIdentifier at line $lineNo is not found.")
 
 }

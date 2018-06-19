@@ -19,6 +19,7 @@ object ClassMemberBuilder : PLBaseVisitor<M>() {
     override fun visitClassConstantDeclaration(ctx: ClassConstantDeclarationContext): M =
             M.Constant(
                     isPublic = ctx.PRIVATE() == null,
+                    identifierLineNo = ctx.LowerIdentifier().symbol.line,
                     identifier = ctx.LowerIdentifier().text,
                     expr = ctx.expression().accept(ExprBuilder)
             )
@@ -35,6 +36,7 @@ object ClassMemberBuilder : PLBaseVisitor<M>() {
     private fun ClassFunctionDeclarationContext.toClassFunction(): ClassFunction =
             ClassFunction(
                     isPublic = PRIVATE() == null,
+                    identifierLineNo = LowerIdentifier().symbol.line,
                     identifier = LowerIdentifier().text,
                     genericsDeclaration = genericsDeclaration()
                             ?.UpperIdentifier()?.map { it.text } ?: emptyList(),
@@ -56,7 +58,10 @@ object ClassMemberBuilder : PLBaseVisitor<M>() {
                 ?.accept(TypeExprInDeclarationBuilder)
                 ?: TypeDeclaration.Struct(map = emptyMap())
         val members = ctx.classMemberDeclaration().map { it.accept(this) }
-        return M.Clazz(identifier = identifier, declaration = declaration, members = members)
+        return M.Clazz(
+                identifierLineNo = ctx.UpperIdentifier().symbol.line,
+                identifier = identifier, declaration = declaration, members = members
+        )
     }
 
 }

@@ -17,7 +17,9 @@ internal object TypeExprInAnnotationBuilder : PLBaseVisitor<TypeExpr>() {
         )
         val genericsList = ctx.genericsSpecialization()?.typeExprInAnnotation()
                 ?.map { it.accept(this) } ?: emptyList()
-        return TypeExpr.Identifier(type = type, genericsInfo = genericsList)
+        return TypeExpr.Identifier(
+                lineNo = ctx.start.line, type = type, genericsInfo = genericsList
+        )
     }
 
     override fun visitFunctionTypeInAnnotation(ctx: Func): TypeExpr {

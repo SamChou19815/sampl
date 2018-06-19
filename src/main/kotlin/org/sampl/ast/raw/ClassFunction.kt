@@ -13,13 +13,14 @@ import org.sampl.exceptions.UnexpectedTypeError
 /**
  * [ClassFunction] represents a function declaration of the form:
  * `public/private`([isPublic]) `let` [identifier] ([genericsDeclaration])?
- * [arguments] `:` [returnType] `=` [body].
+ * [arguments] `:` [returnType] `=` [body],
+ * with [identifier] at [identifierLineNo].
  * The function [category] defines its behavior during type checking, interpretation, and code
  * generation.
  */
 data class ClassFunction(
         val category: FunctionCategory = USER_DEFINED,
-        val isPublic: Boolean, val identifier: String,
+        val isPublic: Boolean, val identifierLineNo: Int, val identifier: String,
         val genericsDeclaration: List<String>,
         val arguments: List<Pair<String, TypeExpr>>,
         val returnType: TypeExpr, val body: Expression
@@ -55,9 +56,9 @@ data class ClassFunction(
             USER_DEFINED -> {
                 val e = body.typeCheck(environment = genericsDeclarationAndArgsAddedEnv)
                 val bodyType = e.type
-                if (returnType != bodyType) {
-                    throw UnexpectedTypeError(expectedType = returnType, actualType = bodyType)
-                }
+                UnexpectedTypeError.check(
+                        lineNo = identifierLineNo, expectedType = returnType, actualType = bodyType
+                )
                 e
             }
         }

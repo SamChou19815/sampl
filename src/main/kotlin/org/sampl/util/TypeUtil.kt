@@ -92,14 +92,14 @@ private data class PairedTypeExprVisitor(
 /**
  * [inferActualGenericTypeInfo] tries to infer the generic info from [genericDeclarations],
  * [genericType] and [actualType] and tries to reconcile between declaring site and use
- * site
+ * site at [lineNo].
  * It stores the known/inferred info inside [knownGenericInfo], where a `null` value in the array
  * means non-determined actual type expression.
- * If this operation fails, it will throw [GenericTypeInfoDoesNotMatchError].
+ * If this operation fails, it will throw [GenericsError.GenericsTypeInfoDoesNotMatch].
  */
 private fun inferActualGenericTypeInfo(
         genericDeclarations: List<String>, genericType: TypeExpr, actualType: TypeExpr,
-        knownGenericInfo: Array<TypeExpr?>
+        knownGenericInfo: Array<TypeExpr?>, lineNo: Int
 ) {
     var typeExpr = genericType
     try {
@@ -113,27 +113,28 @@ private fun inferActualGenericTypeInfo(
         }
     } catch (e: GenericsError.GenericsTypeInfoDoesNotMatch.InternalError) {
         throw GenericsError.GenericsTypeInfoDoesNotMatch(
-                genericDeclarations, genericType, actualType, knownGenericInfo
+                lineNo, genericDeclarations, genericType, actualType, knownGenericInfo
         )
     }
 }
 
 /**
  * [inferActualGenericTypeInfo] tries to infer the generic info and returns from
- * [genericDeclarations], and a list of [genericTypeActualTypePairs].
- * If this operation fails, it will throw [GenericTypeInfoDoesNotMatchError].
+ * [genericDeclarations], and a list of [genericTypeActualTypePairs] at [lineNo].
+ * If this operation fails, it will throw [GenericsError.GenericsTypeInfoDoesNotMatch].
  */
 internal fun inferActualGenericTypeInfo(
         genericDeclarations: List<String>,
-        genericTypeActualTypePairs: Iterable<Pair<TypeExpr, TypeExpr>>
+        genericTypeActualTypePairs: Iterable<Pair<TypeExpr, TypeExpr>>, lineNo: Int
 ): List<TypeExpr> {
     val knownInfo = arrayOfNulls<TypeExpr>(size = genericDeclarations.size)
     for ((genericType, actualType) in genericTypeActualTypePairs) {
-        inferActualGenericTypeInfo(genericDeclarations, genericType, actualType, knownInfo)
+        inferActualGenericTypeInfo(genericDeclarations, genericType, actualType, knownInfo, lineNo)
     }
     val knownInfoAsList = knownInfo.filterNotNull()
     if (knownInfoAsList.size != knownInfo.size) {
         throw GenericsError.GenericsTypeInfoDoesNotMatch(
+                lineNo = lineNo,
                 genericDeclarations = genericDeclarations, knownGenericInfo = knownInfo
         )
     }
@@ -143,18 +144,18 @@ internal fun inferActualGenericTypeInfo(
 /**
  * [inferActualGenericTypeInfo] tries to infer and return the generic info from
  * [genericDeclarations], [genericType] and [actualType] and tries to reconcile between declaring
- * site and use site.
- * If this operation fails, it will throw [GenericTypeInfoDoesNotMatchError].
+ * site and use site at [lineNo].
+ * If this operation fails, it will throw [GenericsError.GenericsTypeInfoDoesNotMatch].
  */
 internal fun inferActualGenericTypeInfo(
-        genericDeclarations: List<String>, genericType: TypeExpr, actualType: TypeExpr
+        genericDeclarations: List<String>, genericType: TypeExpr, actualType: TypeExpr, lineNo: Int
 ): List<TypeExpr> {
     val knownInfo = arrayOfNulls<TypeExpr>(size = genericDeclarations.size)
-    inferActualGenericTypeInfo(genericDeclarations, genericType, actualType, knownInfo)
+    inferActualGenericTypeInfo(genericDeclarations, genericType, actualType, knownInfo, lineNo)
     val knownInfoAsList = knownInfo.filterNotNull()
     if (knownInfoAsList.size != knownInfo.size) {
         throw GenericsError.GenericsTypeInfoDoesNotMatch(
-                genericDeclarations, genericType, actualType, knownInfo
+                lineNo, genericDeclarations, genericType, actualType, knownInfo
         )
     }
     return knownInfoAsList

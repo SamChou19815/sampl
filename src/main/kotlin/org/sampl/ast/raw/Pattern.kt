@@ -37,7 +37,9 @@ sealed class Pattern {
                 typeToMatch: T, environment: E, variantTypeDefs: MutableMap<String, T?>
         ): Pair<DecoratedPattern, E> {
             if (variantIdentifier !in variantTypeDefs) {
-                throw PatternMatchingError.WrongPattern(patternId = variantIdentifier)
+                throw PatternMatchingError.WrongPattern(
+                        lineNo = lineNo, patternId = variantIdentifier
+                )
             }
             val associatedVarType = variantTypeDefs[variantIdentifier]
             variantTypeDefs.remove(key = variantIdentifier)
@@ -59,7 +61,9 @@ sealed class Pattern {
                 }
                 p to newE
             } else {
-                throw PatternMatchingError.WrongPattern(patternId = variantIdentifier)
+                throw PatternMatchingError.WrongPattern(
+                        lineNo = lineNo, patternId = variantIdentifier
+                )
             }
         }
 

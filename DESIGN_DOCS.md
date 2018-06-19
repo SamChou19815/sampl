@@ -128,7 +128,5 @@ However, we do prefer immutable data structures over mutable ones.
 
 ## Known Problems
 
-- The error messages are very bad. In the AST construction process, line info is not added to the 
-AST for the convenience of rapid prototyping. It will be improved later.
 - Type checking, interpretation, and code generation has not been thoroughly tested. They are 
 expected to have at least 10 bugs or some undefined behavior.
