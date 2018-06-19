@@ -21,7 +21,9 @@ import org.sampl.ast.type.unitTypeId
  *
  * @param typeDefinitions the set that maps type identifiers to actual types.
  * @param declaredTypes the set of declared types with correctly qualified identifiers.
- * @param typeEnv the type environment with correctly qualified identifiers.
+ * @param classFunctionTypeEnv the type environment with correctly qualified identifiers for
+ * functions.
+ * @param normalTypeEnv the type environment with correctly qualified identifiers for normal values.
  */
 data class TypeCheckingEnv(
         val typeDefinitions: FpMap<String, Pair<List<String>, TypeDeclaration>> = FpMap.empty(),
@@ -65,22 +67,22 @@ data class TypeCheckingEnv(
 
     /**
      * [ClassFunction.processWhenExit] returns a new type environment when exiting a class given
-     * [currentTypeEnv], [className], and [subclassNames] for reference.
+     * [currentFunEnv], [className], and [subclassNames] for reference.
      * It needs to remove all private members and prefix each member and its type by the class name.
      */
     private fun ClassFunction.processWhenExit(
-            currentTypeEnv: FpMap<String, TypeInfo>, className: String, subclassNames: List<String>
+            currentFunEnv: FpMap<String, TypeInfo>, className: String, subclassNames: List<String>
     ): FpMap<String, TypeInfo> = when {
-        category != FunctionCategory.USER_DEFINED -> currentTypeEnv
+        category != FunctionCategory.USER_DEFINED -> currentFunEnv
         isPublic -> {
-            var v = currentTypeEnv[identifier] ?: error(message = "Impossible. Name: $identifier")
+            var v = currentFunEnv[identifier] ?: error(message = "Impossible. Name: $identifier")
             val newT = subclassNames.fold(initial = v.typeExpr) { t, n ->
                 t.toPrefixed(typeToPrefix = n, prefix = className)
             }
             v = v.copy(typeExpr = newT)
-            currentTypeEnv.remove(key = identifier).put(key = "$className.$identifier", value = v)
+            currentFunEnv.remove(key = identifier).put(key = "$className.$identifier", value = v)
         }
-        else -> currentTypeEnv.remove(key = identifier)
+        else -> currentFunEnv.remove(key = identifier)
     }
 
     /**
@@ -102,9 +104,7 @@ data class TypeCheckingEnv(
         val newNormalTypeEnv = currentEnv.normalTypeEnv.mapByKeyValuePair { s, typeExpr ->
             if (s.indexOf(subclassName) == 0) {
                 // prefixed with name, need to prefix!
-                val newT = subclassNames.fold(initial = typeExpr) { t, n ->
-                    t.toPrefixed(typeToPrefix = n, prefix = className)
-                }
+                val newT = typeExpr.toPrefixed(typeToPrefix = subclassName, prefix = className)
                 "$className.$s" to newT
             } else s to typeExpr
         }
@@ -112,9 +112,9 @@ data class TypeCheckingEnv(
         val newFunctionTypeEnv = currentEnv.classFunctionTypeEnv.mapByKeyValuePair { s, tInfo ->
             if (s.indexOf(subclassName) == 0) {
                 // prefixed with name, need to prefix!
-                val newTypeInfo = subclassNames.fold(initial = tInfo) { t, n ->
-                    t.copy(typeExpr = t.typeExpr.toPrefixed(typeToPrefix = n, prefix = className))
-                }
+                val newTypeInfo = tInfo.copy(typeExpr = tInfo.typeExpr.toPrefixed(
+                        typeToPrefix = subclassName, prefix = className
+                ))
                 "$className.$s" to newTypeInfo
             } else s to tInfo
         }
@@ -131,14 +131,8 @@ data class TypeCheckingEnv(
      */
     fun exitClass(clazz: ClassMember.Clazz): TypeCheckingEnv {
         val className = clazz.identifier.name
-        // remove added type definitions
         val subclassNames = clazz.members.mapNotNull { m ->
-            if (m is ClassMember.Clazz) {
-                val name = m.identifier.name
-                name
-            } else {
-                null
-            }
+            (m as? ClassMember.Clazz)?.identifier?.name
         }
         // prefix member name
         val currentEnv = clazz.members.fold(initial = this) { e, member ->
@@ -150,7 +144,7 @@ data class TypeCheckingEnv(
                 is ClassMember.FunctionGroup -> {
                     val funEnv = member.functions.fold(initial = e.classFunctionTypeEnv) { env, f ->
                         f.processWhenExit(
-                                currentTypeEnv = env, className = className,
+                                currentFunEnv = env, className = className,
                                 subclassNames = subclassNames
                         )
                     }

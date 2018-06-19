@@ -167,10 +167,17 @@ sealed class ConstructorExpr : Expression() {
                     ?: throw VariantNotFoundError(typeName = typeName, variantName = variantName)
             val decoratedData = data.typeCheck(environment = e)
             val decoratedDataType = decoratedData.type
-            val inferredGenericInfo = inferActualGenericTypeInfo(
+            val inferredGenericInfo: List<TypeExpr> = inferActualGenericTypeInfo(
                     genericDeclarations = genericDeclarations,
                     genericType = declaredVariantType, actualType = decoratedDataType
             )
+            val replacementMap = genericDeclarations.zip(inferredGenericInfo).toMap()
+            val expectedVariantType = declaredVariantType.substituteGenerics(map = replacementMap)
+            if (expectedVariantType != decoratedDataType) {
+                throw UnexpectedTypeError(
+                        expectedType = expectedVariantType, actualType = declaredVariantType
+                )
+            }
             val type = TypeExpr.Identifier(type = typeName, genericsInfo = inferredGenericInfo)
             return DecoratedExpression.Constructor.OneArgVariant(
                     typeName = typeName, variantName = variantName, data = decoratedData,
@@ -206,6 +213,14 @@ sealed class ConstructorExpr : Expression() {
                         genericDeclarations = genericDeclarations,
                         genericTypeActualTypePairs = pairs
                 )
+            }
+            val replacementMap = genericDeclarations.zip(inferredGenericInfo).toMap()
+            decoratedDeclarations.forEach { name, member ->
+                val expectedType = structDeclarationMap[name]?.substituteGenerics(replacementMap)
+                        ?: throw StructError.NoSuchMember(structName = typeName, memberName = name)
+                if (expectedType != member.type) {
+                    throw UnexpectedTypeError(expectedType = expectedType, actualType = member.type)
+                }
             }
             val type = TypeExpr.Identifier(type = typeName, genericsInfo = inferredGenericInfo)
             return DecoratedExpression.Constructor.Struct(

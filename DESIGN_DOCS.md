@@ -32,15 +32,6 @@ package `ast.type`.
 
 After the common stages described above, the interpreter will directly interpret the decorated AST.
 
-~~Before the common stages, the compiler will first perform an dependency analysis. The interpreter
-only supports a single file as the source code, while the compiler supports multiple files in the
-same directory. However, only single-file mode is supported in the later stages, and under the hood
-the multi-file support is only a structural sugar for the single-file support. The compiler will 
-build a dependency graph from the imports declarations, and use them to resolve dependencies. The
-compiler will reject cyclic dependencies because they are bad. The output of this stage is a list of
-files that represent the compilation sequence, which is then converted to nested classes in a single
-class.~~ (Not supported yet.)
-
 After the common stages, the compiler will directly translate the decorated AST to Kotlin code. 
 Since there is a close correspondence between the code in this language and Kotlin code (thanks to
 FP support in Kotlin), we do not need various IR lowering. This is done mostly in the packages
@@ -79,6 +70,15 @@ The type checking uses
 [the environment model](http://www.cs.cornell.edu/courses/cs3110/2018sp/l/18-env-model/lec.pdf) with
 immutable data structures provided by [Okaml-Lib](https://github.com/SamChou19815/Okaml-Lib).
 
+Currently, the environment records: 
+- `typeDefinitions`, which contains all the type definitions that are in scope;
+- `declaredTypes`, which contains all the types that have been declared;
+- `classFunctionTypeEnv`, which is the type environment for class member functions;
+- `normalTypeEnv`, which is the type environment for the rest.
+
+When we exit a class, we need to properly prefix its member name with the class name. This is quite
+complex, so it's done centrally in the class `TypeCheckingEnv`.
+
 The type checking methods in the data class in the package `ast.raw` take the given environment to 
 deduce types of itself and produce a type decorated data class (usually prefixed with `Decorated`) 
 in package `ast.decorated`. These methods may use mutable features for its implementation, but they
@@ -87,7 +87,12 @@ have no *visible* side effects.
 ### Interpretation
 
 Interpretation is also implemented by the environment model. Interpretation itself does not need
-the type information, so type is not recorded in the environment. 
+the type information, so type is not recorded in the environment, so the environment only contains
+a mapping from name to values. Similarly, the task of prefixing members are done centrally in the
+class `EvalEnv`. 
+
+Note that `EvalEnv` is only a type alias for `FpMap<String, Value>`. This is done for avoiding
+unnecessary object creation.
 
 Currently, the mutually recursive functions environment is dynamically patched.
 
@@ -126,4 +131,4 @@ However, we do prefer immutable data structures over mutable ones.
 - The error messages are very bad. In the AST construction process, line info is not added to the 
 AST for the convenience of rapid prototyping. It will be improved later.
 - Type checking, interpretation, and code generation has not been thoroughly tested. They are 
-expected to have at least 20 bugs or some undefined behavior.
+expected to have at least 10 bugs or some undefined behavior.
