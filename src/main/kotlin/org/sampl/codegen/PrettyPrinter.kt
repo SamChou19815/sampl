@@ -279,7 +279,12 @@ class PrettyPrinter private constructor() : AstToCodeConverter {
 
     override fun convert(node: DecoratedExpression.Let) {
         val e1Code = node.e1.toOneLineCode(parent = node)
-        q.addLine(line = "val ${node.identifier} = $e1Code;")
+        val letLine = if (node.identifier == null) {
+            "val _ = $e1Code;"
+        } else {
+            "val ${node.identifier} = $e1Code;"
+        }
+        q.addLine(line = letLine)
         node.e2.acceptConversion(converter = this)
     }
 

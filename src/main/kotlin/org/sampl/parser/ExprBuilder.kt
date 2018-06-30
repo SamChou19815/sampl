@@ -254,7 +254,7 @@ internal object ExprBuilder : PLBaseVisitor<Expression>() {
     override fun visitLetExpr(ctx: LetExprContext): Expression =
             LetExpr(
                     lineNo = ctx.start.line,
-                    identifier = ctx.LowerIdentifier().text,
+                    identifier = ctx.LowerIdentifier()?.text,
                     e1 = ctx.expression(0).accept(this),
                     e2 = ctx.expression(1).accept(this)
             )

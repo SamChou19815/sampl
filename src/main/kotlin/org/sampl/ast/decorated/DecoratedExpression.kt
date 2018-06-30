@@ -246,9 +246,10 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
     /**
      * [Let] with correct [type] represents the let expression of the form
      * `let` [identifier] `=` [e1] `;` [e2]
+     * If [identifier] is `null`, it means it's a wildcard.
      */
     data class Let(
-            val identifier: String, val e1: DecoratedExpression, val e2: DecoratedExpression,
+            val identifier: String?, val e1: DecoratedExpression, val e2: DecoratedExpression,
             override val type: TypeExpr
     ) : DecoratedExpression(precedenceLevel = 12) {
 

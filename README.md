@@ -130,4 +130,4 @@ feature. Especially do not use this in production.
 
 - Version: Alpha 2
 - License: MIT
-- Contributers: `["Sam Zhou"]`
+- Contributors: `["Sam Zhou"]`

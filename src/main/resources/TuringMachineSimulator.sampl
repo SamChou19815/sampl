@@ -69,7 +69,7 @@ class Lst<T>(Nil | Cons of Pair<T, Lst<T>>) {
   fun <T> forEach(l: Lst<T>, action: (T) -> Unit): Unit = match l with
     | Nil -> ()
     | Cons p ->
-      val ignore = action(Pair.getA(p));
+      val _ = action(Pair.getA(p));
       forEach(Pair.getB(p), action)
 
 }

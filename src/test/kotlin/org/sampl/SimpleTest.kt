@@ -45,7 +45,7 @@ class SimpleTest {
         fun <A, B> modusPonens(f: (A) -> B, v: A): B = f(v)
         // Function Application
         fun constant5Impl1(v: String): Int = implication(v)
-        fun constant5Impl2(v: String): Int = modusPonens<String, Int>(implication, v)
+        fun constant5Impl2(v: String): Int = modusPonens(implication, v)
         fun applyWithString(): Int = constant5Impl2("hi")
         // Curring
         fun add1(b: Int): Int = add(1)(b)
@@ -79,23 +79,21 @@ class SimpleTest {
         fun floatToString(value: Float): String = ""
         fun boolToString(value: Bool): String = ""
         fun charToString(value: Char): String = ""
-        fun getChar (index: Int, s: String): Char = 'c'
-        fun getSubstring (from: Int, to: Int, s: String): Char = 'c'
+        fun getChar(index: Int, s: String): Char = 'c'
+        fun getSubstring(from: Int, to: Int, s: String): Char = 'c'
     """.trimIndent()
 
     /**
      * [standardHelloWorldProgram] is the standard hello world program.
      */
-    private val standardHelloWorldProgram: String = """
-        fun main(): Unit = printlnString("Hello World, " ^ "Sam!")
-    """.trimIndent()
+    private val standardHelloWorldProgram: String =
+            """fun main(): Unit = printlnString("Hello World, " ^ "Sam!")"""
 
     /**
      * [stringHelloWorldProgram] is the hello world program but returns a string.
      */
-    private val stringHelloWorldProgram: String = """
-        fun main(): String = "Hello World, " ^ "Sam!"
-    """.trimIndent()
+    private val stringHelloWorldProgram: String =
+            """fun main(): String = "Hello World, " ^ "Sam!""""
 
     /**
      * [intHelloWorldProgram] is the hello world program but returns an int.

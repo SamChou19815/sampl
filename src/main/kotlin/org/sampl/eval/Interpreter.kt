@@ -472,7 +472,7 @@ class Interpreter(private val program: DecoratedProgram) {
      */
     private fun eval(env: EvalEnv, node: DecoratedExpression.Let): Value {
         val v1 = node.e1.eval(env = env)
-        val newEnv = env.put(key = node.identifier, value = v1)
+        val newEnv = node.identifier?.let { env.put(key = it, value = v1) } ?: env
         return node.e2.eval(env = newEnv)
     }
 

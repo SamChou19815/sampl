@@ -693,25 +693,28 @@ data class TryCatchExpr(
 
 /**
  * [LetExpr] represents the let expression at [lineNo] of the form
- * `let` [identifier] `=` [e1] `;` [e2]
+ * `let` [identifier] `=` [e1] `;` [e2].
+ * If [identifier] is `null`, it means it's a wildcard.
  */
 data class LetExpr(
-        override val lineNo: Int, val identifier: String, val e1: Expression, val e2: Expression
+        override val lineNo: Int, val identifier: String?, val e1: Expression, val e2: Expression
 ) : Expression() {
 
-    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression =
-            if (environment.normalTypeEnv[identifier] == null) {
-                val decoratedE1 = e1.typeCheck(environment = environment)
-                val newEnv = environment.copy(normalTypeEnv = environment.normalTypeEnv.put(
-                        key = identifier, value = decoratedE1.type
-                ))
-                val decoratedE2 = e2.typeCheck(environment = newEnv)
-                val e2Type = decoratedE2.type
-                DecoratedExpression.Let(
-                        identifier = identifier, e1 = decoratedE1, e2 = decoratedE2, type = e2Type
-                )
-            } else {
-                throw IdentifierError.ShadowedName(lineNo, identifier)
-            }
+    override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
+        if (identifier != null && environment.normalTypeEnv[identifier] != null) {
+            throw IdentifierError.ShadowedName(lineNo, identifier)
+        }
+        val decoratedE1 = e1.typeCheck(environment = environment)
+        val newEnv = identifier?.let { key ->
+            environment.copy(normalTypeEnv = environment.normalTypeEnv.put(
+                    key = key, value = decoratedE1.type
+            ))
+        } ?: environment
+        val decoratedE2 = e2.typeCheck(environment = newEnv)
+        val e2Type = decoratedE2.type
+        return DecoratedExpression.Let(
+                identifier = identifier, e1 = decoratedE1, e2 = decoratedE2, type = e2Type
+        )
+    }
 
 }

@@ -487,7 +487,10 @@ class ToKotlinCompiler private constructor() : AstToCodeConverter {
     }
 
     override fun convert(node: DecoratedExpression.Let) {
-        q.addLine(line = "val ${node.identifier}: ${node.e1.type.toKotlinType()} = run {")
+        val letLine = if (node.identifier == null) "run {" else {
+            "val ${node.identifier}: ${node.e1.type.toKotlinType()} = run {"
+        }
+        q.addLine(line = letLine)
         q.indentAndApply { node.e1.acceptConversion(converter = this@ToKotlinCompiler) }
         q.addLine(line = "};")
         node.e2.acceptConversion(converter = this)
