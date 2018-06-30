@@ -30,6 +30,7 @@ import org.sampl.ast.decorated.DecoratedExpression
 import org.sampl.ast.decorated.DecoratedPattern
 import org.sampl.ast.type.TypeDeclaration
 import org.sampl.ast.type.TypeExpr
+import org.sampl.ast.type.TypeInfo
 import org.sampl.ast.type.boolTypeExpr
 import org.sampl.ast.type.charTypeExpr
 import org.sampl.ast.type.floatTypeExpr
@@ -45,6 +46,7 @@ import org.sampl.exceptions.TooManyArgumentsError
 import org.sampl.exceptions.UnexpectedTypeError
 import org.sampl.exceptions.VariantNotFoundError
 import org.sampl.util.inferActualGenericTypeInfo
+import java.awt.SystemColor.info
 import java.util.LinkedList
 
 /**
@@ -82,7 +84,7 @@ data class LiteralExpr(override val lineNo: Int, val literal: Literal) : Express
  * It can only contain [genericInfo] which helps to determine the fixed type for this expression.
  */
 data class VariableIdentifierExpr(
-        override val lineNo: Int, val variable: String, private val genericInfo: List<TypeExpr>
+        override val lineNo: Int, val variable: String, val genericInfo: List<TypeExpr>
 ) : Expression() {
 
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
@@ -535,8 +537,72 @@ data class FunctionApplicationExpr(
         override val lineNo: Int, val functionExpr: Expression, val arguments: List<Expression>
 ) : Expression() {
 
+    /**
+     * [getFunctionTypeInfoForParamTypeInference] returns the type information of [functionExpr] iff
+     * - [functionExpr] is a variable expression.
+     * - the variable refers to a class member function in [environment].
+     * - the function contains generics information so type inference is not trivial.
+     * If one of the conditions is not satisfied, it will return `null`.
+     */
+    private fun getFunctionTypeInfoForParamTypeInference(
+            environment: TypeCheckingEnv
+    ): Pair<String, TypeInfo>? {
+        if (functionExpr !is VariableIdentifierExpr) {
+            return null
+        }
+        if (functionExpr.genericInfo.isNotEmpty()) {
+            return null
+        }
+        val variable = functionExpr.variable
+        if (variable in environment.normalTypeEnv) {
+            return null
+        }
+        val functionTypeInfo = environment.classFunctionTypeEnv[variable]
+                ?: throw IdentifierError.UndefinedIdentifier(functionExpr.lineNo, variable)
+        return functionTypeInfo.takeIf { it.genericsInfo.isNotEmpty() }?.let { variable to it }
+    }
+
+    /**
+     * [typeCheckFunctionExprWithParamTypeInference] tries to type check the function expression
+     * with type information from the arguments and without explicitly declared type info in
+     * generics bracket.
+     */
+    private fun typeCheckFunctionExprWithParamTypeInference(
+            variable: String, functionTypeInfo: TypeInfo,
+            decoratedArguments: List<DecoratedExpression>
+    ): DecoratedExpression {
+        val declaredFunctionType = functionTypeInfo.typeExpr as TypeExpr.Function
+        val pairs = declaredFunctionType.argumentTypes.zip(decoratedArguments.map { it.type })
+        val inferredGenericsInfo =
+                try {
+                    inferActualGenericTypeInfo(
+                            genericDeclarations = functionTypeInfo.genericsInfo,
+                            genericTypeActualTypePairs = pairs, lineNo = lineNo
+                    )
+                } catch (e: Exception) {
+                    println(pairs)
+                    throw e
+                }
+        val replacementMap = functionTypeInfo.genericsInfo.zip(inferredGenericsInfo).toMap()
+        val functionActualType = declaredFunctionType.substituteGenerics(map = replacementMap)
+        return DecoratedExpression.VariableIdentifier(
+                variable = variable, genericInfo = emptyList(),
+                isClassFunction = true, type = functionActualType
+        )
+    }
+
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
-        val decoratedFunctionExpr = functionExpr.typeCheck(environment = environment)
+        val decoratedArguments = arguments.map { it.typeCheck(environment = environment) }
+        val pair = getFunctionTypeInfoForParamTypeInference(environment = environment)
+        val decoratedFunctionExpr = if (pair == null) {
+            functionExpr.typeCheck(environment = environment)
+        } else {
+            val (variable, typeInfo) = pair
+            typeCheckFunctionExprWithParamTypeInference(
+                    variable = variable, functionTypeInfo = typeInfo,
+                    decoratedArguments = decoratedArguments
+            )
+        }
         val functionTypeOpt = decoratedFunctionExpr.type
         val functionType = functionTypeOpt as? TypeExpr.Function
                 ?: throw UnexpectedTypeError(
@@ -544,17 +610,15 @@ data class FunctionApplicationExpr(
                         actualType = functionTypeOpt
                 )
         val unusedArgs: LinkedList<TypeExpr> = LinkedList(functionType.argumentTypes)
-        val decoratedArgumentExpr = arrayListOf<DecoratedExpression>()
-        for (expr in arguments) {
+        for (i in decoratedArguments.indices) {
+            val decoratedExpr = decoratedArguments[i]
             if (unusedArgs.isEmpty()) {
                 throw TooManyArgumentsError(lineNo = lineNo)
             }
             val expType = unusedArgs.removeFirst()
-            val decoratedExpr = expr.typeCheck(environment = environment)
-            decoratedArgumentExpr.add(element = decoratedExpr)
             val exprType = decoratedExpr.type
             UnexpectedTypeError.check(
-                    lineNo = expr.lineNo, expectedType = expType, actualType = exprType
+                    lineNo = arguments[i].lineNo, expectedType = expType, actualType = exprType
             )
         }
         val returnType = if (unusedArgs.isEmpty()) functionType.returnType else
@@ -562,12 +626,12 @@ data class FunctionApplicationExpr(
                     argumentTypes = ArrayList(unusedArgs), returnType = functionType.returnType
             )
         return DecoratedExpression.FunctionApplication(
-                functionExpr = decoratedFunctionExpr, arguments = decoratedArgumentExpr,
+                functionExpr = decoratedFunctionExpr, arguments = decoratedArguments,
                 type = returnType
         )
     }
-}
 
+}
 
 /**
  * [FunctionExpr] is the function expression with some [arguments] and the function [body]

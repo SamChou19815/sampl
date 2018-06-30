@@ -33,8 +33,9 @@ sealed class GenericsError(reason: String) : CompileTimeError(reason = reason) {
             actualTypeExpr: TypeExpr? = null, knownGenericInfo: Array<TypeExpr?>
     ) : GenericsError(
             reason = """
-    Generic information does not match in declaring site and use site at line $lineNo.
-    Declared Site: <$genericDeclarations> ${genericTypeExpr?.toString() ?: "[Unknown]"}.
+    Generics information does not match in declaring site and use site at line $lineNo.
+    Generics Info: <${genericDeclarations.joinToString(separator = ",")}>
+    Declared Site: ${genericTypeExpr?.toString() ?: "[Unknown]"}.
     Use Site: ${actualTypeExpr?.toString() ?: "[Unknown]"}.
     Already Known/Inferred Info: ${Arrays.toString(knownGenericInfo)}.
     """.trimIndent()

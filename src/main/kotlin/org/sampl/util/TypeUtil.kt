@@ -41,13 +41,14 @@ private data class PairedTypeExprVisitor(
                     knownGenericInfo[index] = actualType
                     actualType
                 } else {
-                    die() // bad case
+                    die()
                 }
             } else {
                 // expect not to replace, shape and first name must match
                 if (genericType.type != actualType.type
                         || genericType.genericsInfo.size != actualType.genericsInfo.size) {
-                    die() // Does not match. This is bad.
+                    // doesn't match, move on
+                    genericType
                 } else {
                     val visitedChildren = genericType.genericsInfo
                             .zip(actualType.genericsInfo) { g, a ->
@@ -78,10 +79,12 @@ private data class PairedTypeExprVisitor(
             }
             val actualGenericName = genericType.type
             if (actualGenericName != oneGenericDeclaration) {
-                die()
+                // doesn't match, move on
+                genericType
+            } else {
+                knownGenericInfo[index] = actualType
+                actualType
             }
-            knownGenericInfo[index] = actualType
-            actualType
         } else {
             die()
         }
@@ -125,7 +128,8 @@ private fun inferActualGenericTypeInfo(
  */
 internal fun inferActualGenericTypeInfo(
         genericDeclarations: List<String>,
-        genericTypeActualTypePairs: Iterable<Pair<TypeExpr, TypeExpr>>, lineNo: Int
+        genericTypeActualTypePairs: Iterable<Pair<TypeExpr, TypeExpr>>,
+        lineNo: Int
 ): List<TypeExpr> {
     val knownInfo = arrayOfNulls<TypeExpr>(size = genericDeclarations.size)
     for ((genericType, actualType) in genericTypeActualTypePairs) {
