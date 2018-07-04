@@ -13,11 +13,11 @@ repositories {
 }
 
 dependencies {
-    compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
-    antlr "org.antlr:antlr4:4.5" // use ANTLR version 4
-    compile 'com.github.SamChou19815:okaml-lib:0.4.0'
-    compile 'org.apache.commons:commons-text:+'
-    testCompile 'junit:junit:4.12'
+    compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
+    antlr 'org.antlr:antlr4:4.5' // use ANTLR version 4
+    implementation 'com.github.SamChou19815:okaml-lib:0.4.0'
+    implementation 'org.apache.commons:commons-text:+'
+    testImplementation 'junit:junit:4.12'
 }
 
 generateGrammarSource {
