@@ -258,7 +258,7 @@ object PrimitiveRuntimeLibrary : RuntimeLibrary {
     fun split(delimiter: String, s: String): Array<String> = s.split(delimiter).toTypedArray()
 
     /**
-     * [getStringArrayLength] returns the length of the given string array [s].
+     * [getStringArrayLength] returns the length of the given string array [a].
      */
     @RuntimeFunction
     @JvmStatic

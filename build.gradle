@@ -41,6 +41,15 @@ compileTestKotlin {
 compileJava.dependsOn generateGrammarSource
 compileKotlin.dependsOn generateGrammarSource
 
+dokka {
+    outputFormat = 'html'
+    outputDirectory = "../docs"
+    jdkVersion = 8
+    skipDeprecated = false
+    skipEmptyPackages = true
+    impliedPlatforms = ['JVM']
+}
+
 test {
     testLogging {
         events "passed", "skipped", "failed", "standardOut", "standardError"

@@ -24,7 +24,7 @@ const val TOP_LEVEL_PROGRAM_NAME: String = "Program"
 const val KOTLIN_CODE_OUT_DIR: String = "./build/$LANG_NAME/kotlin/"
 
 /**
- * [JAR_OUT_NAME] is the output directory for the compiled JVM bytecode in Jar.
+ * [JAR_OUT_DIR] is the output directory for the compiled JVM bytecode in Jar.
  */
 const val JAR_OUT_DIR: String = "./build/$LANG_NAME/jar/"
 

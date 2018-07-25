@@ -9,6 +9,9 @@ import org.sampl.ast.type.TypeExpr as T
  */
 object ArgumentDeclarationsBuilder : PLBaseVisitor<List<Pair<String, T>>>() {
 
+    /**
+     * Visit ArgumentDeclarations.
+     */
     override fun visitArgumentDeclarations(ctx: C): List<Pair<String, T>> =
             ctx.annotatedVariable().map { c ->
                 val text: String = c.LowerIdentifier().text

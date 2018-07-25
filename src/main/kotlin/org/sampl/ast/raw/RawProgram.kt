@@ -18,6 +18,8 @@ import org.sampl.runtime.withInjectedRuntime
 
 /**
  * [RawProgram] represents the top-level not-type-checked program with a list of [members].
+ *
+ * @property members a list of class members is a program.
  */
 data class RawProgram(val members: List<ClassMember>) {
 

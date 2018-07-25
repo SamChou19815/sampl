@@ -6,6 +6,9 @@ import org.sampl.ast.type.TypeIdentifier
 import org.sampl.ast.type.TypeInfo
 import org.sampl.environment.TypeCheckingEnv
 
+/**
+ * [ClassMember] defines a set of supported class members.
+ */
 sealed class ClassMember {
 
     /**
@@ -18,6 +21,11 @@ sealed class ClassMember {
      * [Constant] represents a constant declaration of the form:
      * `public/private`([isPublic]) `let` [identifier] `=` [expr],
      * with [identifier] at [identifierLineNo].
+     *
+     * @property isPublic whether the constant is public.
+     * @property identifierLineNo identifier line number of the constant.
+     * @property identifier identifier of the constant.
+     * @property expr expression of the constant.
      */
     data class Constant(
             val isPublic: Boolean,
@@ -40,6 +48,8 @@ sealed class ClassMember {
 
     /**
      * [FunctionGroup] represents a group of functions.
+     *
+     * @property functions a group of functions.
      */
     data class FunctionGroup(val functions: List<ClassFunction>) : ClassMember() {
 
@@ -61,6 +71,11 @@ sealed class ClassMember {
      * [Clazz] node has an type identifier with generics [identifier], a type [declaration] and a
      * set of ordered [members] with [identifier] at [identifierLineNo].
      * It means class.
+     *
+     * @property identifierLineNo the line number of the identifier.
+     * @property identifier identifier of the class.
+     * @property declaration the type declaration.
+     * @property members a list of members of the class.
      */
     data class Clazz(
             val identifierLineNo: Int,

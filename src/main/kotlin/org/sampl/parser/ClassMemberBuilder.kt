@@ -16,6 +16,9 @@ import org.sampl.ast.raw.ClassMember as M
  */
 object ClassMemberBuilder : PLBaseVisitor<M>() {
 
+    /**
+     * Visit ClassConstantDeclaration.
+     */
     override fun visitClassConstantDeclaration(ctx: ClassConstantDeclarationContext): M =
             M.Constant(
                     isPublic = ctx.PRIVATE() == null,
@@ -24,6 +27,9 @@ object ClassMemberBuilder : PLBaseVisitor<M>() {
                     expr = ctx.expression().accept(ExprBuilder)
             )
 
+    /**
+     * Visit ClassFunctionGroupDeclaration.
+     */
     override fun visitClassFunctionGroupDeclaration(ctx: ClassFunctionGroupDeclarationContext): M =
             ctx.classFunctionDeclaration()
                     .map { it.toClassFunction() }
@@ -46,6 +52,9 @@ object ClassMemberBuilder : PLBaseVisitor<M>() {
                     body = expression().accept(ExprBuilder)
             )
 
+    /**
+     * Visit ClassDeclaration.
+     */
     override fun visitClassDeclaration(ctx: ClassDeclarationContext): M {
         val identifier = TypeIdentifier(
                 name = ctx.UpperIdentifier().text,

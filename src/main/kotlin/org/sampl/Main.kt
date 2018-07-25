@@ -13,6 +13,9 @@ private val usage: String = """
         -compile <filename>   # Prints the equivalent Kotlin code as the compilation result
 """.trimIndent()
 
+/**
+ * The entry point for command line interface.
+ */
 fun main(args: Array<String>) {
     if (args.size < 2) {
         println(usage)

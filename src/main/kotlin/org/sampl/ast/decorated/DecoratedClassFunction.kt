@@ -12,6 +12,15 @@ import org.sampl.codegen.CodeConvertible
  * The function [category] defines its behavior during type checking, interpretation, and code
  * generation.
  * It has an additional [type] field.
+ *
+ * @property category category of the function.
+ * @property isPublic whether the function is public.
+ * @property identifier the identifier for the function.
+ * @property genericsDeclaration the generics declaration.
+ * @property arguments a list of arguments passed to the function.
+ * @property returnType type of the return value.
+ * @property body body part of the function.
+ * @property type of the entire function.
  */
 data class DecoratedClassFunction(
         val category: FunctionCategory, val isPublic: Boolean, val identifier: String,

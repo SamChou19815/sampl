@@ -71,9 +71,14 @@ sealed class Expression {
 
 /**
  * [LiteralExpr] represents a [literal] as an expression at [lineNo].
+ *
+ * @property literal the literal object.
  */
 data class LiteralExpr(override val lineNo: Int, val literal: Literal) : Expression() {
 
+    /**
+     * @see Expression.typeCheck
+     */
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression =
             DecoratedExpression.Literal(literal = literal, type = literal.inferredType)
 
@@ -82,11 +87,17 @@ data class LiteralExpr(override val lineNo: Int, val literal: Literal) : Express
 /**
  * [VariableIdentifierExpr] represents a [variable] identifier as an expression at [lineNo].
  * It can only contain [genericInfo] which helps to determine the fixed type for this expression.
+ *
+ * @property variable the variable to refer to.
+ * @property genericInfo a list of associated generics info, if any.
  */
 data class VariableIdentifierExpr(
         override val lineNo: Int, val variable: String, val genericInfo: List<TypeExpr>
 ) : Expression() {
 
+    /**
+     * @see Expression.typeCheck
+     */
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         environment.normalTypeEnv[variable]?.let { typeExpr ->
             return DecoratedExpression.VariableIdentifier(
@@ -124,6 +135,9 @@ sealed class ConstructorExpr : Expression() {
      */
     protected abstract fun constructorTypeCheck(e: TypeCheckingEnv): DecoratedExpression.Constructor
 
+    /**
+     * @see Expression.typeCheck
+     */
     final override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression =
             constructorTypeCheck(e = environment)
 
@@ -136,6 +150,9 @@ sealed class ConstructorExpr : Expression() {
             val genericInfo: List<TypeExpr>
     ) : ConstructorExpr() {
 
+        /**
+         * @see ConstructorExpr.constructorTypeCheck
+         */
         override fun constructorTypeCheck(e: TypeCheckingEnv): DecoratedExpression.Constructor {
             val (genericDeclarations, typeDeclarations) = e.typeDefinitions[typeName]
                     ?: throw IdentifierError.UndefinedTypeIdentifier(lineNo, typeName)
@@ -172,6 +189,9 @@ sealed class ConstructorExpr : Expression() {
             val data: Expression
     ) : ConstructorExpr() {
 
+        /**
+         * @see ConstructorExpr.constructorTypeCheck
+         */
         override fun constructorTypeCheck(e: TypeCheckingEnv): DecoratedExpression.Constructor {
             val (genericDeclarations, typeDeclarations) = e.typeDefinitions[typeName]
                     ?: throw IdentifierError.UndefinedTypeIdentifier(lineNo, typeName)
@@ -215,6 +235,9 @@ sealed class ConstructorExpr : Expression() {
             val declarations: Map<String, Expression>
     ) : ConstructorExpr() {
 
+        /**
+         * @see ConstructorExpr.constructorTypeCheck
+         */
         override fun constructorTypeCheck(e: TypeCheckingEnv): DecoratedExpression.Constructor {
             val (genericDeclarations, typeDeclarations) = e.typeDefinitions[typeName]
                     ?: throw IdentifierError.UndefinedTypeIdentifier(lineNo, typeName)
@@ -262,6 +285,9 @@ sealed class ConstructorExpr : Expression() {
             val newDeclarations: Map<String, Expression>
     ) : ConstructorExpr() {
 
+        /**
+         * @see ConstructorExpr.constructorTypeCheck
+         */
         override fun constructorTypeCheck(e: TypeCheckingEnv): DecoratedExpression.Constructor {
             val decoratedOld = old.typeCheck(environment = e)
             val expectedFinalType = decoratedOld.type as? TypeExpr.Identifier
@@ -309,6 +335,9 @@ data class StructMemberAccessExpr(
         override val lineNo: Int, val structExpr: Expression, val memberName: String
 ) : Expression() {
 
+    /**
+     * @see Expression.typeCheck
+     */
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val decoratedStructExpr = structExpr.typeCheck(environment = environment)
         val structType = decoratedStructExpr.type as? TypeExpr.Identifier
@@ -337,6 +366,9 @@ data class StructMemberAccessExpr(
  */
 data class NotExpr(override val lineNo: Int, val expr: Expression) : Expression() {
 
+    /**
+     * @see Expression.typeCheck
+     */
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val e = expr.typeCheck(environment = environment)
         UnexpectedTypeError.check(
@@ -356,6 +388,9 @@ data class BinaryExpr(
         val left: Expression, val op: BinaryOperator, val right: Expression
 ) : Expression() {
 
+    /**
+     * @see Expression.typeCheck
+     */
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val leftExpr = left.typeCheck(environment = environment)
         val leftType = leftExpr.type
@@ -439,6 +474,9 @@ data class ThrowExpr(
         override val lineNo: Int, val type: TypeExpr, val expr: Expression
 ) : Expression() {
 
+    /**
+     * @see Expression.typeCheck
+     */
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val e = expr.typeCheck(environment = environment)
         UnexpectedTypeError.check(
@@ -457,6 +495,9 @@ data class IfElseExpr(
         override val lineNo: Int, val condition: Expression, val e1: Expression, val e2: Expression
 ) : Expression() {
 
+    /**
+     * @see Expression.typeCheck
+     */
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val conditionExpr = condition.typeCheck(environment = environment)
         UnexpectedTypeError.check(
@@ -486,6 +527,9 @@ data class MatchExpr(
         val matchingList: List<Pair<Pattern, Expression>>
 ) : Expression() {
 
+    /**
+     * @see Expression.typeCheck
+     */
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val decoratedExprToMatch = exprToMatch.typeCheck(environment = environment)
         val typeToMatch = decoratedExprToMatch.type
@@ -591,6 +635,9 @@ data class FunctionApplicationExpr(
         )
     }
 
+    /**
+     * @see Expression.typeCheck
+     */
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val decoratedArguments = arguments.map { it.typeCheck(environment = environment) }
         val pair = getFunctionTypeInfoForParamTypeInference(environment = environment)
@@ -641,6 +688,9 @@ data class FunctionExpr(
         override val lineNo: Int, val arguments: List<Pair<String, TypeExpr>>, val body: Expression
 ) : Expression() {
 
+    /**
+     * @see Expression.typeCheck
+     */
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val newEnv = environment.copy(
                 normalTypeEnv = arguments.fold(initial = environment.normalTypeEnv) { e, (n, t) ->
@@ -671,6 +721,9 @@ data class TryCatchExpr(
         val catchHandler: Expression
 ) : Expression() {
 
+    /**
+     * @see Expression.typeCheck
+     */
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         val decoratedTryExpr = tryExpr.typeCheck(environment = environment)
         val tryType = decoratedTryExpr.type
@@ -695,11 +748,18 @@ data class TryCatchExpr(
  * [LetExpr] represents the let expression at [lineNo] of the form
  * `let` [identifier] `=` [e1] `;` [e2].
  * If [identifier] is `null`, it means it's a wildcard.
+ *
+ * @property identifier new identifier to name.
+ * @property e1 the expression for the identifier.
+ * @property e2 the expression after the let.
  */
 data class LetExpr(
         override val lineNo: Int, val identifier: String?, val e1: Expression, val e2: Expression
 ) : Expression() {
 
+    /**
+     * @see Expression.typeCheck
+     */
     override fun typeCheck(environment: TypeCheckingEnv): DecoratedExpression {
         if (identifier != null && environment.normalTypeEnv[identifier] != null) {
             throw IdentifierError.ShadowedName(lineNo, identifier)

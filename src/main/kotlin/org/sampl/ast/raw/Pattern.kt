@@ -27,6 +27,9 @@ sealed class Pattern {
     /**
      * [Variant] represents the variant pattern with [variantIdentifier] and potentially an
      * [associatedVariable].
+     *
+     * @property variantIdentifier the identifier of the variant as pattern.
+     * @property associatedVariable the identifier of the optional associated variable as pattern.
      */
     data class Variant(
             override val lineNo: Int, val variantIdentifier: String,
@@ -71,6 +74,8 @@ sealed class Pattern {
 
     /**
      * [Variable] represents a variable that matches everything.
+     *
+     * @property identifier the identifier of the variable as pattern.
      */
     data class Variable(
             override val lineNo: Int, val identifier: String

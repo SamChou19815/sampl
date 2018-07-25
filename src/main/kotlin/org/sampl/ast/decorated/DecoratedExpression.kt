@@ -36,6 +36,9 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
 
         override val type: TypeExpr get() = throw UnsupportedOperationException()
 
+        /**
+         * @see CodeConvertible.acceptConversion
+         */
         override fun acceptConversion(converter: AstToCodeConverter) {
             throw UnsupportedOperationException()
         }
@@ -44,11 +47,17 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
 
     /**
      * [Literal] with correct [type] represents a [literal] as an expression.
+     *
+     * @property literal the literal object.
+     * @property type type of the literal.
      */
     data class Literal(
             val literal: CommonLiteral, override val type: TypeExpr
     ) : DecoratedExpression(precedenceLevel = 0) {
 
+        /**
+         * @see CodeConvertible.acceptConversion
+         */
         override fun acceptConversion(converter: AstToCodeConverter): Unit =
                 converter.convert(node = this)
 
@@ -59,12 +68,20 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
      * expression.
      * It can only contain [genericInfo] which helps to determine the fixed type for this
      * expression.
+     *
+     * @property variable the variable to refer to.
+     * @property genericInfo a list of associated generics info, if any.
+     * @property isClassFunction whether it's referring to a class function.
+     * @property type type of the variable.
      */
     data class VariableIdentifier(
             val variable: String, val genericInfo: List<TypeExpr>,
             val isClassFunction: Boolean, override val type: TypeExpr
     ) : DecoratedExpression(precedenceLevel = 1) {
 
+        /**
+         * @see CodeConvertible.acceptConversion
+         */
         override fun acceptConversion(converter: AstToCodeConverter): Unit =
                 converter.convert(node = this)
 
@@ -76,6 +93,9 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
      */
     sealed class Constructor : DecoratedExpression(precedenceLevel = 2) {
 
+        /**
+         * @see CodeConvertible.acceptConversion
+         */
         override fun acceptConversion(converter: AstToCodeConverter): Unit =
                 converter.convert(node = this)
 
@@ -126,6 +146,9 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
             val structExpr: DecoratedExpression, val memberName: String, override val type: TypeExpr
     ) : DecoratedExpression(precedenceLevel = 3) {
 
+        /**
+         * @see CodeConvertible.acceptConversion
+         */
         override fun acceptConversion(converter: AstToCodeConverter): Unit =
                 converter.convert(node = this)
 
@@ -138,6 +161,9 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
             val expr: DecoratedExpression, override val type: TypeExpr
     ) : DecoratedExpression(precedenceLevel = 4) {
 
+        /**
+         * @see CodeConvertible.acceptConversion
+         */
         override fun acceptConversion(converter: AstToCodeConverter): Unit =
                 converter.convert(node = this)
 
@@ -152,6 +178,9 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
             override val type: TypeExpr
     ) : DecoratedExpression(precedenceLevel = 5) {
 
+        /**
+         * @see CodeConvertible.acceptConversion
+         */
         override fun acceptConversion(converter: AstToCodeConverter): Unit =
                 converter.convert(node = this)
 
@@ -165,6 +194,9 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
             override val type: TypeExpr, val expr: DecoratedExpression
     ) : DecoratedExpression(precedenceLevel = 6) {
 
+        /**
+         * @see CodeConvertible.acceptConversion
+         */
         override fun acceptConversion(converter: AstToCodeConverter): Unit =
                 converter.convert(node = this)
 
@@ -179,6 +211,9 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
             val e2: DecoratedExpression, override val type: TypeExpr
     ) : DecoratedExpression(precedenceLevel = 7) {
 
+        /**
+         * @see CodeConvertible.acceptConversion
+         */
         override fun acceptConversion(converter: AstToCodeConverter): Unit =
                 converter.convert(node = this)
 
@@ -194,6 +229,9 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
             override val type: TypeExpr
     ) : DecoratedExpression(precedenceLevel = 8) {
 
+        /**
+         * @see CodeConvertible.acceptConversion
+         */
         override fun acceptConversion(converter: AstToCodeConverter): Unit =
                 converter.convert(node = this)
 
@@ -208,6 +246,9 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
             override val type: TypeExpr
     ) : DecoratedExpression(precedenceLevel = 9) {
 
+        /**
+         * @see CodeConvertible.acceptConversion
+         */
         override fun acceptConversion(converter: AstToCodeConverter): Unit =
                 converter.convert(node = this)
 
@@ -223,6 +264,9 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
             override val type: TypeExpr
     ) : DecoratedExpression(precedenceLevel = 10) {
 
+        /**
+         * @see CodeConvertible.acceptConversion
+         */
         override fun acceptConversion(converter: AstToCodeConverter): Unit =
                 converter.convert(node = this)
 
@@ -238,6 +282,9 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
             val catchHandler: DecoratedExpression, override val type: TypeExpr
     ) : DecoratedExpression(precedenceLevel = 11) {
 
+        /**
+         * @see CodeConvertible.acceptConversion
+         */
         override fun acceptConversion(converter: AstToCodeConverter): Unit =
                 converter.convert(node = this)
 
@@ -247,12 +294,20 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
      * [Let] with correct [type] represents the let expression of the form
      * `let` [identifier] `=` [e1] `;` [e2]
      * If [identifier] is `null`, it means it's a wildcard.
+     *
+     * @property identifier new identifier to name.
+     * @property e1 the expression for the identifier.
+     * @property e2 the expression after the let.
+     * @property type type of the let expression.
      */
     data class Let(
             val identifier: String?, val e1: DecoratedExpression, val e2: DecoratedExpression,
             override val type: TypeExpr
     ) : DecoratedExpression(precedenceLevel = 12) {
 
+        /**
+         * @see CodeConvertible.acceptConversion
+         */
         override fun acceptConversion(converter: AstToCodeConverter): Unit =
                 converter.convert(node = this)
 
