@@ -1,10 +1,28 @@
 # SAMPL - Sound And Modern Programming Language
 
-<img src="./logo.jpeg" width="80%" />
+![logo](https://developersam.com/assets/app-icons/sampl.png)
 
 It is a JVM language that embraces the functional programming paradigm, which currently supports 
 immutable data structures, null safety, pattern matching, currying, limited type inference, and 
 limited interop with other JVM languages.
+
+## Gradle Config
+
+[![Release](https://jitpack.io/v/SamChou19815/sampl.svg)](https://jitpack.io/#SamChou19815/sampl)
+
+Read the docs [here](http://docs.developersam.com/sampl/)
+
+Add this to your `build.gradle` to use the artifact.
+
+```groovy
+repositories {
+    jcenter()
+    maven { url "https://jitpack.io" }
+}
+dependencies {
+    compile 'com.github.SamChou19815:sampl:0.0.1'
+}
+```
 
 ## Scope of this Project
 
