@@ -46,7 +46,6 @@ import org.sampl.exceptions.TooManyArgumentsError
 import org.sampl.exceptions.UnexpectedTypeError
 import org.sampl.exceptions.VariantNotFoundError
 import org.sampl.util.inferActualGenericTypeInfo
-import java.awt.SystemColor.info
 import java.util.LinkedList
 
 /**
@@ -144,6 +143,10 @@ sealed class ConstructorExpr : Expression() {
     /**
      * [NoArgVariant] represents a singleton value in variant with [typeName], [variantName] and
      * some potential [genericInfo] to assist type inference at [lineNo].
+     *
+     * @property typeName the name of the type.
+     * @property variantName the name of the variant.
+     * @property genericsInfo a list of associated generics info.
      */
     data class NoArgVariant(
             override val lineNo: Int, val typeName: String, val variantName: String,
@@ -173,7 +176,7 @@ sealed class ConstructorExpr : Expression() {
             }
             val type = TypeExpr.Identifier(type = typeName, genericsInfo = genericInfo)
             return DecoratedExpression.Constructor.NoArgVariant(
-                    typeName = typeName, variantName = variantName, genericInfo = genericInfo,
+                    typeName = typeName, variantName = variantName, genericsInfo = genericInfo,
                     type = type
             )
         }
@@ -183,6 +186,10 @@ sealed class ConstructorExpr : Expression() {
     /**
      * [OneArgVariant] represents a tagged enum in variant with [typeName], [variantName] and
      * associated [data] at [lineNo].
+     *
+     * @property typeName the name of the type.
+     * @property variantName the name of the variant.
+     * @property data the data bind to the variant.
      */
     data class OneArgVariant(
             override val lineNo: Int, val typeName: String, val variantName: String,
@@ -229,6 +236,9 @@ sealed class ConstructorExpr : Expression() {
     /**
      * [Struct] represents a struct initialization with [typeName] and initial value [declarations]
      * at [lineNo].
+     *
+     * @property typeName the name of the type.
+     * @property declarations the declaration map of the struct.
      */
     data class Struct(
             override val lineNo: Int, val typeName: String,
@@ -279,6 +289,9 @@ sealed class ConstructorExpr : Expression() {
     /**
      * [StructWithCopy] represents a copy of [old] struct with some new values in [newDeclarations]
      * at [lineNo].
+     *
+     * @property old the old source struct.
+     * @property newDeclarations a map of new declarations.
      */
     data class StructWithCopy(
             override val lineNo: Int, val old: Expression,
@@ -330,6 +343,9 @@ sealed class ConstructorExpr : Expression() {
 
 /**
  * [StructMemberAccessExpr] represents accessing [memberName] of [structExpr] at [lineNo].
+ *
+ * @property structExpr the expression for the struct.
+ * @property memberName the name of the member.
  */
 data class StructMemberAccessExpr(
         override val lineNo: Int, val structExpr: Expression, val memberName: String
@@ -363,6 +379,8 @@ data class StructMemberAccessExpr(
 
 /**
  * [NotExpr] represents the logical inversion of expression [expr] at [lineNo].
+ *
+ * @property expr the expression to invert.
  */
 data class NotExpr(override val lineNo: Int, val expr: Expression) : Expression() {
 
@@ -382,6 +400,10 @@ data class NotExpr(override val lineNo: Int, val expr: Expression) : Expression(
 /**
  * [BinaryExpr] represents a binary expression with operator [op] between [left] and [right] at
  * [lineNo].
+ *
+ * @property left left part.
+ * @property op the operator.
+ * @property right right part.
  */
 data class BinaryExpr(
         override val lineNo: Int,
@@ -469,6 +491,8 @@ data class BinaryExpr(
 /**
  * [ThrowExpr] represents the throw exception expression, where the thrown exception is [expr].
  * The throw expression is coerced to have [type] at [lineNo].
+ *
+ * @property expr the stuff to throw.
  */
 data class ThrowExpr(
         override val lineNo: Int, val type: TypeExpr, val expr: Expression
@@ -490,6 +514,10 @@ data class ThrowExpr(
 /**
  * [IfElseExpr] represents the if else expression, guarded by [condition] and having two
  * branches [e1] and [e2] at [lineNo].
+ *
+ * @property condition the condition to check.
+ * @property e1 expression of the first branch.
+ * @property e2 expression of the second branch.
  */
 data class IfElseExpr(
         override val lineNo: Int, val condition: Expression, val e1: Expression, val e2: Expression
@@ -521,6 +549,9 @@ data class IfElseExpr(
 /**
  * [MatchExpr] represents the pattern matching expression, with a list of [matchingList] to match
  * against [exprToMatch] at [lineNo].
+ *
+ * @property exprToMatch the expression to match.
+ * @property matchingList a list of functions to match the pattern.
  */
 data class MatchExpr(
         override val lineNo: Int, val exprToMatch: Expression,
@@ -576,6 +607,9 @@ data class MatchExpr(
 /**
  * [FunctionApplicationExpr] is the function application expression, with [functionExpr] as the
  * function and [arguments] as arguments of the function at [lineNo].
+ *
+ * @property functionExpr the function expression to apply.
+ * @property arguments arguments to supply.
  */
 data class FunctionApplicationExpr(
         override val lineNo: Int, val functionExpr: Expression, val arguments: List<Expression>

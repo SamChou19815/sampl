@@ -49,7 +49,6 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
      * [Literal] with correct [type] represents a [literal] as an expression.
      *
      * @property literal the literal object.
-     * @property type type of the literal.
      */
     data class Literal(
             val literal: CommonLiteral, override val type: TypeExpr
@@ -72,7 +71,6 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
      * @property variable the variable to refer to.
      * @property genericInfo a list of associated generics info, if any.
      * @property isClassFunction whether it's referring to a class function.
-     * @property type type of the variable.
      */
     data class VariableIdentifier(
             val variable: String, val genericInfo: List<TypeExpr>,
@@ -102,16 +100,24 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
         /**
          * [NoArgVariant] with correct [type] represents a singleton value in variant with
          * [typeName], [variantName] and
-         * some potential [genericInfo] to assist type inference.
+         * some potential [genericsInfo] to assist type inference.
+         *
+         * @property typeName the name of the type.
+         * @property variantName the name of the variant.
+         * @property genericsInfo a list of associated generics info.
          */
         data class NoArgVariant(
-                val typeName: String, val variantName: String, val genericInfo: List<TypeExpr>,
+                val typeName: String, val variantName: String, val genericsInfo: List<TypeExpr>,
                 override val type: TypeExpr
         ) : Constructor()
 
         /**
          * [OneArgVariant] with correct [type] represents a tagged enum in variant with [typeName],
          * [variantName] and associated [data].
+         *
+         * @property typeName the name of the type.
+         * @property variantName the name of the variant.
+         * @property data the data bind to the variant.
          */
         data class OneArgVariant(
                 val typeName: String, val variantName: String, val data: DecoratedExpression,
@@ -121,6 +127,9 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
         /**
          * [Struct] with correct [type] represents a struct initialization with [typeName] and
          * initial value [declarations].
+         *
+         * @property typeName the name of the type.
+         * @property declarations the declaration map of the struct.
          */
         data class Struct(
                 val typeName: String, val declarations: Map<String, DecoratedExpression>,
@@ -130,6 +139,9 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
         /**
          * [StructWithCopy] with correct [type] represents a copy of [old] struct with some new
          * values in [newDeclarations].
+         *
+         * @property old the old source struct.
+         * @property newDeclarations a map of new declarations.
          */
         data class StructWithCopy(
                 val old: DecoratedExpression, val newDeclarations: Map<String, DecoratedExpression>,
@@ -141,6 +153,9 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
     /**
      * [StructMemberAccess] with correct [type] represents accessing [memberName]
      * of [structExpr].
+     *
+     * @property structExpr the expression for the struct.
+     * @property memberName the name of the member.
      */
     data class StructMemberAccess(
             val structExpr: DecoratedExpression, val memberName: String, override val type: TypeExpr
@@ -156,6 +171,8 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
 
     /**
      * [Not] with correct [type] represents the logical inversion of expression [expr].
+     *
+     * @property expr the expression to invert.
      */
     data class Not(
             val expr: DecoratedExpression, override val type: TypeExpr
@@ -172,6 +189,10 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
     /**
      * [Binary] with correct [type] represents a binary expression with operator [op]
      * between [left] and [right].
+     *
+     * @property left left part.
+     * @property op the operator.
+     * @property right right part.
      */
     data class Binary(
             val left: DecoratedExpression, val op: BinaryOperator, val right: DecoratedExpression,
@@ -189,6 +210,8 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
     /**
      * [Throw] with correct [type] represents the throw exception expression, where the
      * thrown exception is [expr]. The throw expression is coerced to have [type].
+     *
+     * @property expr the stuff to throw.
      */
     data class Throw(
             override val type: TypeExpr, val expr: DecoratedExpression
@@ -205,6 +228,10 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
     /**
      * [IfElse] with correct [type] represents the if else expression, guarded by [condition] and
      * having two branches [e1] and [e2].
+     *
+     * @property condition the condition to check.
+     * @property e1 expression of the first branch.
+     * @property e2 expression of the second branch.
      */
     data class IfElse(
             val condition: DecoratedExpression, val e1: DecoratedExpression,
@@ -222,6 +249,9 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
     /**
      * [Match] with correct [type] represents the pattern matching expression, with a list
      * of [matchingList] to match against [exprToMatch].
+     *
+     * @property exprToMatch the expression to match.
+     * @property matchingList a list of functions to match the pattern.
      */
     data class Match(
             val exprToMatch: DecoratedExpression,
@@ -240,6 +270,9 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
     /**
      * [FunctionApplication] with correct [type] is the function application expression,
      * with [functionExpr] as the function and [arguments] as arguments of the function.
+     *
+     * @property functionExpr the function expression to apply.
+     * @property arguments arguments to supply.
      */
     data class FunctionApplication(
             val functionExpr: DecoratedExpression, val arguments: List<DecoratedExpression>,

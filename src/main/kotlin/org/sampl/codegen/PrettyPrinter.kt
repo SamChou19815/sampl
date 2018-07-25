@@ -150,8 +150,8 @@ class PrettyPrinter private constructor() : AstToCodeConverter {
         is DecoratedExpression.Constructor.NoArgVariant -> {
             val line = StringBuilder().apply {
                 append(node.typeName).append('.').append(node.variantName)
-                if (node.genericInfo.isNotEmpty()) {
-                    append(node.genericInfo.joinToGenericsInfoString())
+                if (node.genericsInfo.isNotEmpty()) {
+                    append(node.genericsInfo.joinToGenericsInfoString())
                 }
             }.toString()
             q.addLine(line = line)
