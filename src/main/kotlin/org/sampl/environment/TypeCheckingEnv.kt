@@ -26,7 +26,7 @@ import org.sampl.ast.type.unitTypeId
  * functions.
  * @param normalTypeEnv the type environment with correctly qualified identifiers for normal values.
  */
-data class TypeCheckingEnv(
+internal data class TypeCheckingEnv(
         val typeDefinitions: FpMap<String, Pair<List<String>, TypeDeclaration>> = FpMap.empty(),
         val declaredTypes: FpMap<String, List<String>> = FpMap.empty(),
         val classFunctionTypeEnv: FpMap<String, TypeInfo> = FpMap.empty(),

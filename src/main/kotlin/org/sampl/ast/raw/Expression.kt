@@ -51,7 +51,7 @@ import java.util.LinkedList
 /**
  * [Expression] represents a set of supported expression.
  */
-sealed class Expression {
+internal sealed class Expression {
 
     /**
      * [lineNo] reports the line number of the expression.
@@ -73,7 +73,7 @@ sealed class Expression {
  *
  * @property literal the literal object.
  */
-data class LiteralExpr(override val lineNo: Int, val literal: Literal) : Expression() {
+internal data class LiteralExpr(override val lineNo: Int, val literal: Literal) : Expression() {
 
     /**
      * @see Expression.typeCheck
@@ -90,7 +90,7 @@ data class LiteralExpr(override val lineNo: Int, val literal: Literal) : Express
  * @property variable the variable to refer to.
  * @property genericInfo a list of associated generics info, if any.
  */
-data class VariableIdentifierExpr(
+internal data class VariableIdentifierExpr(
         override val lineNo: Int, val variable: String, val genericInfo: List<TypeExpr>
 ) : Expression() {
 
@@ -126,7 +126,7 @@ data class VariableIdentifierExpr(
 /**
  * [ConstructorExpr] represents a set of constructor expression defined in type declarations.
  */
-sealed class ConstructorExpr : Expression() {
+internal sealed class ConstructorExpr : Expression() {
 
     /**
      * [constructorTypeCheck] with environment [e] is a more constrained type check that is only
@@ -142,7 +142,7 @@ sealed class ConstructorExpr : Expression() {
 
     /**
      * [NoArgVariant] represents a singleton value in variant with [typeName], [variantName] and
-     * some potential [genericInfo] to assist type inference at [lineNo].
+     * some potential [genericsInfo] to assist type inference at [lineNo].
      *
      * @property typeName the name of the type.
      * @property variantName the name of the variant.
@@ -150,7 +150,7 @@ sealed class ConstructorExpr : Expression() {
      */
     data class NoArgVariant(
             override val lineNo: Int, val typeName: String, val variantName: String,
-            val genericInfo: List<TypeExpr>
+            val genericsInfo: List<TypeExpr>
     ) : ConstructorExpr() {
 
         /**
@@ -168,15 +168,15 @@ sealed class ConstructorExpr : Expression() {
                         lineNo = lineNo, typeName = typeName, variantName = variantName
                 )
             }
-            if (genericDeclarations.size != genericInfo.size) {
+            if (genericDeclarations.size != genericsInfo.size) {
                 throw GenericsError.GenericsInfoWrongNumberOfArguments(
                         lineNo = lineNo, expectedNumber = genericDeclarations.size,
-                        actualNumber = genericInfo.size
+                        actualNumber = genericsInfo.size
                 )
             }
-            val type = TypeExpr.Identifier(type = typeName, genericsInfo = genericInfo)
+            val type = TypeExpr.Identifier(type = typeName, genericsInfo = genericsInfo)
             return DecoratedExpression.Constructor.NoArgVariant(
-                    typeName = typeName, variantName = variantName, genericsInfo = genericInfo,
+                    typeName = typeName, variantName = variantName, genericsInfo = genericsInfo,
                     type = type
             )
         }
@@ -347,7 +347,7 @@ sealed class ConstructorExpr : Expression() {
  * @property structExpr the expression for the struct.
  * @property memberName the name of the member.
  */
-data class StructMemberAccessExpr(
+internal data class StructMemberAccessExpr(
         override val lineNo: Int, val structExpr: Expression, val memberName: String
 ) : Expression() {
 
@@ -382,7 +382,7 @@ data class StructMemberAccessExpr(
  *
  * @property expr the expression to invert.
  */
-data class NotExpr(override val lineNo: Int, val expr: Expression) : Expression() {
+internal data class NotExpr(override val lineNo: Int, val expr: Expression) : Expression() {
 
     /**
      * @see Expression.typeCheck
@@ -405,7 +405,7 @@ data class NotExpr(override val lineNo: Int, val expr: Expression) : Expression(
  * @property op the operator.
  * @property right right part.
  */
-data class BinaryExpr(
+internal data class BinaryExpr(
         override val lineNo: Int,
         val left: Expression, val op: BinaryOperator, val right: Expression
 ) : Expression() {
@@ -493,8 +493,9 @@ data class BinaryExpr(
  * The throw expression is coerced to have [type] at [lineNo].
  *
  * @property expr the stuff to throw.
+ * @property type type of the throw expression.
  */
-data class ThrowExpr(
+internal data class ThrowExpr(
         override val lineNo: Int, val type: TypeExpr, val expr: Expression
 ) : Expression() {
 
@@ -519,7 +520,7 @@ data class ThrowExpr(
  * @property e1 expression of the first branch.
  * @property e2 expression of the second branch.
  */
-data class IfElseExpr(
+internal data class IfElseExpr(
         override val lineNo: Int, val condition: Expression, val e1: Expression, val e2: Expression
 ) : Expression() {
 
@@ -553,7 +554,7 @@ data class IfElseExpr(
  * @property exprToMatch the expression to match.
  * @property matchingList a list of functions to match the pattern.
  */
-data class MatchExpr(
+internal data class MatchExpr(
         override val lineNo: Int, val exprToMatch: Expression,
         val matchingList: List<Pair<Pattern, Expression>>
 ) : Expression() {
@@ -611,7 +612,7 @@ data class MatchExpr(
  * @property functionExpr the function expression to apply.
  * @property arguments arguments to supply.
  */
-data class FunctionApplicationExpr(
+internal data class FunctionApplicationExpr(
         override val lineNo: Int, val functionExpr: Expression, val arguments: List<Expression>
 ) : Expression() {
 
@@ -717,8 +718,11 @@ data class FunctionApplicationExpr(
 /**
  * [FunctionExpr] is the function expression with some [arguments] and the function [body]
  * at [lineNo].
+ *
+ * @property arguments a list of arguments with their types accepted by the function.
+ * @property body body of the function.
  */
-data class FunctionExpr(
+internal data class FunctionExpr(
         override val lineNo: Int, val arguments: List<Pair<String, TypeExpr>>, val body: Expression
 ) : Expression() {
 
@@ -749,8 +753,12 @@ data class FunctionExpr(
  * [TryCatchExpr] represents the try catch finally structure as an expression at [lineNo]., where
  * the [tryExpr] is evaluated, and guard by catch branch with [exception] in scope and
  * [catchHandler] to deal with it.
+ *
+ * @property tryExpr the expression to try.
+ * @property exception the identifier for the exception.
+ * @property catchHandler the code for catch.
  */
-data class TryCatchExpr(
+internal data class TryCatchExpr(
         override val lineNo: Int, val tryExpr: Expression, val exception: String,
         val catchHandler: Expression
 ) : Expression() {
@@ -787,7 +795,7 @@ data class TryCatchExpr(
  * @property e1 the expression for the identifier.
  * @property e2 the expression after the let.
  */
-data class LetExpr(
+internal data class LetExpr(
         override val lineNo: Int, val identifier: String?, val e1: Expression, val e2: Expression
 ) : Expression() {
 

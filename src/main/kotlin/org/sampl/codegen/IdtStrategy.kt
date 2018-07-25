@@ -5,7 +5,7 @@ package org.sampl.codegen
  *
  * @param indentationString the corresponding string used for indentation.
  */
-enum class IdtStrategy(private val indentationString: String) {
+internal enum class IdtStrategy(private val indentationString: String) {
 
     /**
      * Use two spaces for indentation.

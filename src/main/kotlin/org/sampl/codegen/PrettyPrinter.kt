@@ -12,7 +12,7 @@ import org.sampl.util.joinToGenericsInfoString
 /**
  * [PrettyPrinter] is responsible for pretty printing a program node.
  */
-class PrettyPrinter private constructor() : AstToCodeConverter {
+internal class PrettyPrinter private constructor() : AstToCodeConverter {
 
     /**
      * [q] is the only indentation queue used in this class.

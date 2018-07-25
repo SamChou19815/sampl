@@ -4,7 +4,7 @@ package org.sampl.codegen
  * [CodeConvertible] defines a set of methods that will help the conversion from this AST node to
  * the target code.
  */
-interface CodeConvertible {
+internal interface CodeConvertible {
 
     /**
      * [acceptConversion] accepts the conversion from the [converter] and lets the [converter]

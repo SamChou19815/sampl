@@ -46,7 +46,7 @@ import org.sampl.runtime.PrimitiveRuntimeLibrary
  *
  * @param program the program to evaluate.
  */
-class Interpreter(private val program: DecoratedProgram) {
+internal class Interpreter(private val program: DecoratedProgram) {
 
     /**
      * [eval] evaluates the given program given in the constructor.

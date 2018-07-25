@@ -11,7 +11,7 @@ import org.sampl.ast.common.Literal as CommonLiteral
  *
  * @param precedenceLevel smaller this number, higher the precedence.
  */
-sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvertible {
+internal sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvertible {
 
     /**
      * [type] is the type decoration.
@@ -290,6 +290,10 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
     /**
      * [Function] with correct [type] is the function expression with some [arguments], a
      * [returnType] and finally the function [body].
+     *
+     * @property arguments a list of arguments with their types accepted by the function.
+     * @property returnType the type of the return value.
+     * @property body body of the function.
      */
     data class Function(
             val arguments: List<Pair<String, TypeExpr>>,
@@ -309,6 +313,10 @@ sealed class DecoratedExpression(private val precedenceLevel: Int) : CodeConvert
      * [TryCatch] with correct [type] represents the try catch finally structure as an
      * expression, where the [tryExpr] is evaluated, and guard by catch branch with [exception] in
      * scope and [catchHandler] to deal with it.
+     *
+     * @property tryExpr the expression to try.
+     * @property exception the identifier for the exception.
+     * @property catchHandler the code for catch.
      */
     data class TryCatch(
             val tryExpr: DecoratedExpression, val exception: String,

@@ -12,7 +12,7 @@ sealed class GenericsError(reason: String) : CompileTimeError(reason = reason) {
      * [GenericsInfoWrongNumberOfArguments] reports the problem of generics information's wrong
      * number of arguments to the compiler.
      */
-    class GenericsInfoWrongNumberOfArguments(
+    class GenericsInfoWrongNumberOfArguments internal constructor(
             lineNo: Int, expectedNumber: Int = 0, actualNumber: Int
     ) : CompileTimeError(reason = "Wrong number of arguments for generic information " +
             "at line $lineNo. Expected: $expectedNumber, Actual: $actualNumber.")
@@ -27,7 +27,7 @@ sealed class GenericsError(reason: String) : CompileTimeError(reason = reason) {
      * @param actualTypeExpr the actual type expression in the use site.
      * @param knownGenericInfo optional known info.
      */
-    class GenericsTypeInfoDoesNotMatch(
+    class GenericsTypeInfoDoesNotMatch internal constructor(
             lineNo: Int,
             genericDeclarations: List<String>, genericTypeExpr: TypeExpr? = null,
             actualTypeExpr: TypeExpr? = null, knownGenericInfo: Array<TypeExpr?>

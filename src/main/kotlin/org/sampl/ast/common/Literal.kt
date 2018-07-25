@@ -13,7 +13,7 @@ import org.sampl.ast.type.unitTypeExpr
  *
  * @property inferredType the inferred type from the literal.
  */
-sealed class Literal(val inferredType: TypeExpr) {
+internal sealed class Literal(val inferredType: TypeExpr) {
 
     /**
      * [Unit] is the literal for unit.

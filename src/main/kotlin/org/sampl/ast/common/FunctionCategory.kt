@@ -4,7 +4,7 @@ package org.sampl.ast.common
  * [FunctionCategory] is a classification of function's category based on their level of
  * "predefined-ness"
  */
-enum class FunctionCategory {
+internal enum class FunctionCategory {
 
     /**
      * [PRIMITIVE] represents the most basic and primitive level functions. These functions are

@@ -22,7 +22,7 @@ import org.sampl.codegen.CodeConvertible
  * @property body body part of the function.
  * @property type of the entire function.
  */
-data class DecoratedClassFunction(
+internal data class DecoratedClassFunction(
         val category: FunctionCategory, val isPublic: Boolean, val identifier: String,
         val genericsDeclaration: List<String>,
         val arguments: List<Pair<String, TypeExpr>>,

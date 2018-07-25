@@ -11,7 +11,7 @@ import java.util.Queue
  *
  * @param strategy the strategy for indentation.
  */
-class IdtQueue(private val strategy: IdtStrategy) {
+internal class IdtQueue(private val strategy: IdtStrategy) {
 
     /**
      * [Element] represents an element that can appear in the Indentation Queue.

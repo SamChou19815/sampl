@@ -8,7 +8,7 @@ import org.sampl.environment.TypeCheckingEnv as E
 /**
  * [Pattern] is a collection of supported pattern for matching.
  */
-sealed class Pattern {
+internal sealed class Pattern {
 
     /**
      * [lineNo] reports the line number of the pattern.

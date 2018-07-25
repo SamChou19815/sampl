@@ -12,7 +12,7 @@ import org.sampl.ast.raw.ConstructorExpr as E
 /**
  * [ConstructorExprBuilder] builds constructor expression AST from parse tree.
  */
-object ConstructorExprBuilder : PLBaseVisitor<E>() {
+internal object ConstructorExprBuilder : PLBaseVisitor<E>() {
 
     /**
      * Visit NoArgVariantConstructor.
@@ -26,7 +26,7 @@ object ConstructorExprBuilder : PLBaseVisitor<E>() {
                 ?.map { it.accept(TypeExprInAnnotationBuilder) } ?: emptyList()
         return E.NoArgVariant(
                 lineNo = ctx.start.line, typeName = typeName,
-                variantName = variantName, genericInfo = genericInfo
+                variantName = variantName, genericsInfo = genericInfo
         )
     }
 

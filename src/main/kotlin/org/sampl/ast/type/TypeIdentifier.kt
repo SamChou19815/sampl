@@ -10,7 +10,7 @@ import kotlin.math.min
  * @property name the name of type.
  * @property genericsInfo a list of generics declared associated with the type, if any.
  */
-data class TypeIdentifier(
+internal data class TypeIdentifier(
         val name: String, val genericsInfo: List<String> = emptyList()
 ) : Comparable<TypeIdentifier> {
 

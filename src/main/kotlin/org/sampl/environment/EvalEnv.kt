@@ -12,7 +12,7 @@ import org.sampl.eval.Value
  * [EvalEnv] is the environment for interpretation. It contains a set of currently determined
  * values to help evaluate the program.
  */
-typealias EvalEnv = FpMap<String, Value>
+internal typealias EvalEnv = FpMap<String, Value>
 
 /**
  * [Constant.processWhenExit] returns a new environment when exiting a class given environment [e]
@@ -58,7 +58,7 @@ private fun Clazz.processAsWhenExit(e: EvalEnv, className: String): EvalEnv {
  * [exitClass] returns a new [EvalEnv] after existing the class.
  * In particular, it should rename nested values and remove private stuff.
  */
-fun EvalEnv.exitClass(clazz: Clazz): EvalEnv {
+internal fun EvalEnv.exitClass(clazz: Clazz): EvalEnv {
     val className = clazz.identifier.name
     return clazz.members.fold(initial = this) { currentEnv, m ->
         when (m) {

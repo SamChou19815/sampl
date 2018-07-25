@@ -8,7 +8,7 @@ import org.sampl.util.toTable
  * @param symbol the text symbol defined in the lexer.
  * @param precedenceLevel smaller this number, higher the precedence.
  */
-enum class BinaryOperator(val symbol: String, val precedenceLevel: Int) {
+internal enum class BinaryOperator(val symbol: String, val precedenceLevel: Int) {
 
     /**
      * Shift left.

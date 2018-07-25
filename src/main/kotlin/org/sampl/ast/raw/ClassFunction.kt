@@ -17,8 +17,17 @@ import org.sampl.exceptions.UnexpectedTypeError
  * with [identifier] at [identifierLineNo].
  * The function [category] defines its behavior during type checking, interpretation, and code
  * generation.
+ *
+ * @property category category of the function.
+ * @property isPublic whether the function is public.
+ * @property identifierLineNo the line number of the identifier for the function.
+ * @property identifier the identifier for the function.
+ * @property genericsDeclaration the generics declaration.
+ * @property arguments a list of arguments passed to the function.
+ * @property returnType type of the return value.
+ * @property body body part of the function.
  */
-data class ClassFunction(
+internal data class ClassFunction(
         val category: FunctionCategory = USER_DEFINED,
         val isPublic: Boolean, val identifierLineNo: Int, val identifier: String,
         val genericsDeclaration: List<String>,

@@ -9,7 +9,7 @@ import java.io.IOException
  * @throws IOException if the command cannot be correctly executed.
  */
 @Throws(IOException::class)
-fun executeAndGetValue(command: String): Triple<Int, String, String> {
+internal fun executeAndGetValue(command: String): Triple<Int, String, String> {
     val runtime: Runtime = Runtime.getRuntime()
     val process: Process = runtime.exec(command)
     val normalOutput = process.inputStream.bufferedReader()

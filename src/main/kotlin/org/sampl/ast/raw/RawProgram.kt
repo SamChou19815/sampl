@@ -21,7 +21,7 @@ import org.sampl.runtime.withInjectedRuntime
  *
  * @property members a list of class members is a program.
  */
-data class RawProgram(val members: List<ClassMember>) {
+internal data class RawProgram(val members: List<ClassMember>) {
 
     /**
      * [noNameShadowingValidation] validates that the members collection has no name shadowing by

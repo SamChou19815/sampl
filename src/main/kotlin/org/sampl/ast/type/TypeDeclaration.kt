@@ -3,7 +3,7 @@ package org.sampl.ast.type
 /**
  * [TypeDeclaration] represents a set of supported type expression in type declaration.
  */
-sealed class TypeDeclaration {
+internal sealed class TypeDeclaration {
 
     /**
      * [isEmpty] reports whether the declaration is an empty struct.

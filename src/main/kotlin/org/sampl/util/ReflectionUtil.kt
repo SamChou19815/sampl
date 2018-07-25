@@ -5,6 +5,6 @@ import java.net.URLClassLoader
 /**
  * [currentClassPath] returns the current class path of the program.
  */
-val currentClassPath: String
+internal val currentClassPath: String
     get() = (ClassLoader.getSystemClassLoader() as URLClassLoader)
             .urLs.joinToString(separator = ":") { it.path }

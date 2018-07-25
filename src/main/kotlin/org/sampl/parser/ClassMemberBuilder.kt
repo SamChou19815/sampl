@@ -14,7 +14,7 @@ import org.sampl.ast.raw.ClassMember as M
 /**
  * [ClassMemberBuilder] tries to build the class member AST node.
  */
-object ClassMemberBuilder : PLBaseVisitor<M>() {
+internal object ClassMemberBuilder : PLBaseVisitor<M>() {
 
     /**
      * Visit ClassConstantDeclaration.

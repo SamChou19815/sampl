@@ -14,12 +14,12 @@ sealed class Value {
     /**
      * [asAny] turns the value into an [Any] object.
      */
-    abstract val asAny: Any
+    internal abstract val asAny: Any
 
     /**
      * [toString] returns the string representation of the value.
      */
-    override fun toString(): String = "()"
+    abstract override fun toString(): String
 
 }
 
@@ -242,7 +242,7 @@ data class StructValue(val nameValueMap: Map<String, Value>) : Value() {
  * @property arguments argument declaration of the closure.
  * @property code body of the closure.
  */
-data class ClosureValue(
+class ClosureValue internal constructor(
         val category: FunctionCategory, val name: String? = null, var environment: EvalEnv,
         val arguments: List<String>, val code: DecoratedExpression
 ) : Value() {

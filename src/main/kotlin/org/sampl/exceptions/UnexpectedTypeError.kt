@@ -8,12 +8,12 @@ import org.sampl.ast.type.TypeExpr
  * @param expectedType the expected type according to the context.
  * @param actualType actual type deduced from the expression.
  */
-class UnexpectedTypeError(
+class UnexpectedTypeError internal constructor(
         lineNo: Int, expectedType: String, actualType: TypeExpr
 ) : CompileTimeError(reason = "Line $lineNo: Unexpected type: $actualType; " +
         "Expected: $expectedType.") {
 
-    companion object {
+    internal companion object {
 
         /**
          * [check] checks whether [actualType] matches [expectedType] at [lineNo]. If not, it will

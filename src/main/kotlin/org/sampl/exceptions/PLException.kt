@@ -5,4 +5,4 @@ package org.sampl.exceptions
  *
  * @param m message given to the user.
  */
-class PLException(val m: String) : RuntimeException(m)
+class PLException internal constructor(val m: String) : RuntimeException(m)

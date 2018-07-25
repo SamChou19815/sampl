@@ -7,4 +7,4 @@ package org.sampl.ast.type
  * @property typeExpr the expression of type.
  * @property genericsInfo a list of generics declared associated with the type, if any.
  */
-data class TypeInfo(val typeExpr: TypeExpr, val genericsInfo: List<String> = emptyList())
+internal data class TypeInfo(val typeExpr: TypeExpr, val genericsInfo: List<String> = emptyList())

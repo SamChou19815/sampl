@@ -7,7 +7,7 @@ import org.sampl.ast.type.TypeExpr as T
 /**
  * [ArgumentDeclarationsBuilder] builds argument declarations into AST.
  */
-object ArgumentDeclarationsBuilder : PLBaseVisitor<List<Pair<String, T>>>() {
+internal object ArgumentDeclarationsBuilder : PLBaseVisitor<List<Pair<String, T>>>() {
 
     /**
      * Visit ArgumentDeclarations.

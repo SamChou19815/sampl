@@ -9,7 +9,7 @@ import org.sampl.codegen.CodeConvertible
 /**
  * [DecoratedClassMember] contains a set of class members with type decorations.
  */
-sealed class DecoratedClassMember : CodeConvertible {
+internal sealed class DecoratedClassMember : CodeConvertible {
 
     /**
      * [Constant] represents a constant declaration of the form:

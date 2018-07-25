@@ -7,7 +7,7 @@ import org.sampl.util.joinToGenericsInfoString
 /**
  * [TypeExpr] represents a set of supported type expression in type annotation.
  */
-sealed class TypeExpr {
+internal sealed class TypeExpr {
 
     /**
      * [substituteGenerics] uses the given [map] to substitute generic symbols in the type

@@ -10,7 +10,7 @@ import org.sampl.ast.decorated.DecoratedProgram
  * This interface is designed to be target-code independent, so it can be used both for pretty
  * print and compilation.
  */
-interface AstToCodeConverter {
+internal interface AstToCodeConverter {
 
     /**
      * [convert] converts the given [node] to target code by recording well-indented code info.

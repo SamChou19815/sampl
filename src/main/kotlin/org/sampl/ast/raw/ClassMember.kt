@@ -9,7 +9,7 @@ import org.sampl.environment.TypeCheckingEnv
 /**
  * [ClassMember] defines a set of supported class members.
  */
-sealed class ClassMember {
+internal sealed class ClassMember {
 
     /**
      * [typeCheck] tries to type check this class member under the given [TypeCheckingEnv] [env].

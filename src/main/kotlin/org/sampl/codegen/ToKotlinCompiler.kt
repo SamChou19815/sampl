@@ -28,7 +28,7 @@ import java.util.LinkedList
 /**
  * [ToKotlinCompiler] is responsible for compiling the given AST node to valid Kotlin Code.
  */
-class ToKotlinCompiler private constructor() : AstToCodeConverter {
+internal class ToKotlinCompiler private constructor() : AstToCodeConverter {
 
     /**
      * [q] is the only indentation queue used in this class.
