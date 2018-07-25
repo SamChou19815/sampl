@@ -20,7 +20,7 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 dependencies {
-    implementation 'com.github.SamChou19815:sampl:0.0.1'
+    implementation 'com.github.SamChou19815:sampl:0.0.2'
 }
 ```
 
