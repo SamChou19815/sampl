@@ -347,7 +347,7 @@ internal class Interpreter(private val program: DecoratedProgram) {
      * [eval] evaluates the given [node] to a value under the given [env].
      */
     private fun eval(env: EvalEnv, node: DecoratedExpression.Throw): Value {
-        val stringValue = node.eval(env = env) as StringValue
+        val stringValue = node.expr.eval(env = env) as StringValue
         throw PLException(m = stringValue.value)
     }
 
