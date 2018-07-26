@@ -2,6 +2,7 @@ package org.sampl
 
 import org.sampl.eval.Interpreter
 import org.sampl.eval.Value
+import org.sampl.exceptions.PLException
 import org.sampl.runtime.RuntimeLibrary
 import org.sampl.util.createRawProgramFromSource
 
@@ -17,8 +18,12 @@ object PLInterpreter {
      */
     @JvmStatic
     fun interpret(code: String, providedRuntimeLibrary: RuntimeLibrary? = null): Value =
-            createRawProgramFromSource(code = code)
-                    .typeCheck(providedRuntimeLibrary = providedRuntimeLibrary)
-                    .let { Interpreter(program = it).eval() }
+            try {
+                createRawProgramFromSource(code = code)
+                        .typeCheck(providedRuntimeLibrary = providedRuntimeLibrary)
+                        .let { Interpreter(program = it).eval() }
+            } catch (e: StackOverflowError) {
+                throw PLException(m = "StackOverflow")
+            }
 
 }

@@ -1,12 +1,14 @@
 package org.sampl
 
 import junit.framework.TestCase.assertEquals
+import junit.framework.TestCase.fail
 import org.junit.Test
 import org.sampl.codegen.PrettyPrinter
 import org.sampl.codegen.ToKotlinCompiler
 import org.sampl.eval.IntValue
 import org.sampl.eval.StringValue
 import org.sampl.eval.UnitValue
+import org.sampl.exceptions.PLException
 import org.sampl.util.createRawProgramFromSource
 import org.sampl.util.readFromFile
 import org.sampl.util.writeToFile
@@ -84,6 +86,16 @@ class SimpleTest {
     """.trimIndent()
 
     /**
+     * [throwExceptionProgram] is a program that throws the exception "Ahh!"
+     */
+    private val throwExceptionProgram: String = """fun main(): Int = throw<Int> "Ahh!""""
+
+    /**
+     * [throwExceptionProgram] is a program that throws the exception "StackOverflow"
+     */
+    private val stackOverflowProgram: String = "fun main(): Int = main()"
+
+    /**
      * [standardHelloWorldProgram] is the standard hello world program.
      */
     private val standardHelloWorldProgram: String =
@@ -152,6 +164,18 @@ class SimpleTest {
     fun interpretSimple() {
         assertEquals(UnitValue, PLInterpreter.interpret(propositionsAreTypesProofsArePrograms))
         assertEquals(IntValue(value = 42), PLInterpreter.interpret(multipleFeaturesProgram))
+        try {
+            PLInterpreter.interpret(throwExceptionProgram)
+            fail()
+        } catch (e: PLException) {
+            assertEquals("Ahh!", e.m)
+        }
+        try {
+            PLInterpreter.interpret(stackOverflowProgram)
+            fail()
+        } catch (e: PLException) {
+            assertEquals("StackOverflow", e.m)
+        }
         assertEquals(StringValue(value = "Hello World, Sam!"),
                 PLInterpreter.interpret(stringHelloWorldProgram))
         assertEquals(IntValue(value = 42), PLInterpreter.interpret(intHelloWorldProgram))
