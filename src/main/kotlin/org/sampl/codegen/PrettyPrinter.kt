@@ -159,7 +159,7 @@ internal class PrettyPrinter private constructor() : AstToCodeConverter {
         is DecoratedExpression.Constructor.OneArgVariant -> {
             val line = StringBuilder().append(node.typeName)
                     .append('.').append(node.variantName)
-                    .append(" (").append(node.data.toOneLineCode()).append(")")
+                    .append(" with (").append(node.data.toOneLineCode()).append(")")
                     .toString()
             q.addLine(line = line)
         }
@@ -177,9 +177,11 @@ internal class PrettyPrinter private constructor() : AstToCodeConverter {
             val oldStructCode = node.old.toOneLineCode(parent = node)
             q.indentAndApply {
                 addLine(line = "$oldStructCode with")
+                var i = 0
                 for ((name, expr) in node.newDeclarations) {
                     val exprCode = expr.toOneLineCode(parent = node)
-                    addLine(line = "$name = $exprCode")
+                    addLine(line = if (i == 0) "$name = $exprCode" else "; $name = $exprCode")
+                    i++
                 }
             }
             q.addLine(line = "}")
