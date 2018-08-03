@@ -1,0 +1,7 @@
+/*
+name: div-by-zero
+types: PIPELINE, INTERPRETATION_WITH_EXPECTED_ERROR
+expected-error: ArithmeticException: / by zero
+*/
+
+fun main(): Int = 3 / 0

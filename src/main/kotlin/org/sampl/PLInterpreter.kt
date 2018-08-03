@@ -24,6 +24,16 @@ object PLInterpreter {
                         .let { Interpreter(program = it).eval() }
             } catch (e: StackOverflowError) {
                 throw PLException(m = "StackOverflow")
+            } catch (e: IllegalArgumentException) {
+                throw PLException(
+                        m = e.message?.let { "IllegalArgumentException: $it" }
+                                ?: "IllegalArgumentException"
+                )
+            } catch (e: ArithmeticException) {
+                throw PLException(
+                        m = e.message?.let { "ArithmeticException: $it" }
+                                ?: "ArithmeticException"
+                )
             }
 
 }

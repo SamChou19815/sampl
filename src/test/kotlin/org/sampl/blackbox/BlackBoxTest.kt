@@ -20,7 +20,8 @@ class BlackBoxTest {
             "5-standard-hello-world",
             "6-string-hello-world",
             "7-int-hello-world",
-            "8-tm-sim"
+            "8-tm-sim",
+            "9-div-by-zero"
     )
 
     /**

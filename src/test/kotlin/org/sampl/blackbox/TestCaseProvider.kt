@@ -32,15 +32,15 @@ object TestCaseProvider : (InputStream) -> List<TestCase> {
                 break
             }
             // Record properties
-            val twoParts = line.split(":").map { it.trim() }
+            val twoParts = line.split(":")
             try {
-                val key = twoParts[0]
-                val value = twoParts[1]
+                val key = twoParts[0].trim()
+                val value = twoParts.subList(1, twoParts.size).joinToString(separator = ":").trim()
                 if (key in propMap) {
                     error(message = "Bad Input! Duplicate keys in props.")
                 }
                 propMap[key] = value
-            } catch (e: ArrayIndexOutOfBoundsException) {
+            } catch (e: IndexOutOfBoundsException) {
                 error(message = "Bad Input! Incorrect prop line!")
             }
         }

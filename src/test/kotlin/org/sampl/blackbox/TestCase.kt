@@ -96,7 +96,7 @@ sealed class TestCase(val name: String, val sourceCode: String) {
                     PLInterpreter.interpret(code = sourceCode)
                     failTest(reason = "Does not give the expected error $expectedError.")
                 } catch (e: PLException) {
-                    assertEquals(expectedError, e.m)
+                    assertEquals(e.m, expectedError)
                 }
 
     }
