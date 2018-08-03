@@ -88,10 +88,12 @@ internal data class RawProgram(val members: List<ClassMember>) {
                 unitTypeName, intTypeName, floatTypeName, boolTypeName,
                 charTypeName, stringTypeName, stringArrayTypeName
         ))
-        return members.withInjectedRuntime(providedRuntimeLibrary)
-                .typeCheck(env = TypeCheckingEnv.initial)
-                .first
-                .let { DecoratedProgram(it, providedRuntimeLibrary) }
+        return DecoratedProgram(
+                members = members.withInjectedRuntime(providedRuntimeLibrary)
+                        .typeCheck(env = TypeCheckingEnv.initial)
+                        .first,
+                providedRuntimeLibrary = providedRuntimeLibrary
+        )
     }
 
 }
