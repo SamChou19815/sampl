@@ -1,0 +1,24 @@
+/*
+name: prop-types-proofs-programs
+types: PIPELINE, INTERPRETATION_WITH_EXPECTED_RESULT
+expected-result: Unit
+*/
+
+val trueVar = ()
+val implication = { (a: String) -> 5 }
+fun <A, B> modusPonens(f: (A) -> B, v: A): B = f(v)
+
+// Classes
+
+class And<A, B>(a: A, b: B)
+
+class Or<A, B>(First of A | Second of B)
+
+class Optional<T>(None | Some of T) {
+  fun <T> hasValue(v: Optional<T>): Bool =
+    match v with
+    | None -> false
+    | Some _ -> true
+}
+
+class Empty

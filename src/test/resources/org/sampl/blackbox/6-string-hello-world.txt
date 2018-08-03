@@ -1,0 +1,7 @@
+/*
+name: string-hello-world
+types: PIPELINE, INTERPRETATION_WITH_EXPECTED_RESULT
+expected-result: "Hello World, Sam!"
+*/
+
+fun main(): String = "Hello World, " ^ "Sam!"

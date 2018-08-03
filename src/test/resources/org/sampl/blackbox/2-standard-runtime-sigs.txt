@@ -1,0 +1,27 @@
+/*
+name: standard-runtime-sigs
+types: PIPELINE
+*/
+
+fun printInt(value: Int): Unit = ()
+fun printFloat(value: Float): Unit = ()
+fun printBool(value: Bool): Unit = ()
+fun printChar(value: Char): Unit = ()
+fun printString(value: String): Unit = ()
+fun println(): Unit = ()
+fun printlnInt(value: Int): Unit = ()
+fun printlnFloat(value: Float): Unit = ()
+fun printlnBool(value: Bool): Unit = ()
+fun printlnChar(value: Char): Unit = ()
+fun printlnString(value: String): Unit = ()
+fun readLine(): String = ""
+fun floatToInt(value: Float): Int = 0
+fun stringToInt(value: String): Int = if (true) then 0 else throw<Int> "NOT_CONVERTIBLE"
+fun intToFloat(value: Int): Float = 0.0
+fun stringToFloat(value: String): Float = 0.0
+fun intToString(value: Int): String = ""
+fun floatToString(value: Float): String = ""
+fun boolToString(value: Bool): String = ""
+fun charToString(value: Char): String = ""
+fun getChar(index: Int, s: String): Char = 'c'
+fun getSubstring(from: Int, to: Int, s: String): Char = 'c'

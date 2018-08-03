@@ -1,0 +1,9 @@
+/*
+name: int-hello-world
+types: PIPELINE, INTERPRETATION_WITH_EXPECTED_RESULT
+expected-result: 42
+*/
+
+fun main(): Int =
+  val a = 32;
+  a + 10

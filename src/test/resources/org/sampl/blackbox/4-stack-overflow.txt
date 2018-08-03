@@ -1,0 +1,7 @@
+/*
+name: stack-overflow
+types: PIPELINE, INTERPRETATION_WITH_EXPECTED_ERROR
+expected-error: StackOverflow
+*/
+
+fun main(): Int = main()

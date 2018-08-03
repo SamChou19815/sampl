@@ -1,0 +1,6 @@
+/*
+name: standard-hello-world
+types: PIPELINE
+*/
+
+fun main(): Unit = printlnString("Hello World, " ^ "Sam!")

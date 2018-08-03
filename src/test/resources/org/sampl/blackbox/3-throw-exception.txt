@@ -1,0 +1,7 @@
+/*
+name: throw-exception
+types: PIPELINE, INTERPRETATION_WITH_EXPECTED_ERROR
+expected-error: Ahh!
+*/
+
+fun main(): Int = throw<Int> "Ahh!"
