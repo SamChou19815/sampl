@@ -366,7 +366,7 @@ internal class Interpreter(private val program: DecoratedProgram) {
     private fun eval(env: EvalEnv, node: DecoratedExpression.Match): Value {
         val valueToMatch = node.exprToMatch.eval(env = env)
         loop@ for ((pattern, expr) in node.matchingList) {
-            when (pattern) {
+            return when (pattern) {
                 is DecoratedPattern.Variant -> {
                     if (valueToMatch is VariantValue &&
                             valueToMatch.variantIdentifier == pattern.variantIdentifier) {

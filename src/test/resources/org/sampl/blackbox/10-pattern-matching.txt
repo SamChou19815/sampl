@@ -1,0 +1,31 @@
+/*
+name: 10-pattern-matching
+types: PIPELINE, INTERPRETATION_WITH_EXPECTED_RESULT
+expected-result: 2
+*/
+
+class Either<A, B>(First of A | Second of B)
+
+class Pair<A, B>(a: A, b: B) {
+  fun <A, B> getA(p: Pair<A, B>): A = p.a
+  fun <A, B> getB(p: Pair<A, B>): B = p.b
+  fun <A, B> create(a: A, b: B): Pair<A, B> = Pair{ a = a; b = b }
+}
+
+class List<T>(Nil | Cons of Pair<T, List<T>>) {
+
+  private fun <T> length(lst: List<T>): Int = match lst with
+    | Nil -> 0
+    | Cons p -> 1 + (length(Pair.getB(p)))
+
+  private val exampleList = List.Cons with (
+    Pair.create("Hello", List.Cons with (
+      Pair.create("World", List.Nil<String>)
+    ))
+  )
+
+  val l = length(exampleList)
+
+}
+
+fun main(): Int = List.l
