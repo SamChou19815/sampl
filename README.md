@@ -4,7 +4,7 @@
 [![Release](https://jitpack.io/v/SamChou19815/sampl.svg)](https://jitpack.io/#SamChou19815/sampl)
 ![GitHub](https://img.shields.io/github/license/SamChou19815/sampl.svg)
 
-![SAMPL](https://developersam.com/assets/app-icons/sampl.png | width=300)
+<img src="https://developersam.com/assets/app-icons/sampl.png" alt="SAMPL" width="300" height="300"/>
 
 It is a JVM language that embraces the functional programming paradigm, which currently supports 
 immutable data structures, null safety, pattern matching, currying, limited type inference, and 
