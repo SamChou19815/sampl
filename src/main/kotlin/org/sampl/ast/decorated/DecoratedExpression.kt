@@ -187,6 +187,26 @@ internal sealed class DecoratedExpression(private val precedenceLevel: Int) : Co
     }
 
     /**
+     * [FunctionApplication] with correct [type] is the function application expression,
+     * with [functionExpr] as the function and [arguments] as arguments of the function.
+     *
+     * @property functionExpr the function expression to apply.
+     * @property arguments arguments to supply.
+     */
+    data class FunctionApplication(
+            val functionExpr: DecoratedExpression, val arguments: List<DecoratedExpression>,
+            override val type: TypeExpr
+    ) : DecoratedExpression(precedenceLevel = 5) {
+
+        /**
+         * @see CodeConvertible.acceptConversion
+         */
+        override fun acceptConversion(converter: AstToCodeConverter): Unit =
+                converter.convert(node = this)
+
+    }
+
+    /**
      * [Binary] with correct [type] represents a binary expression with operator [op]
      * between [left] and [right].
      *
@@ -197,7 +217,7 @@ internal sealed class DecoratedExpression(private val precedenceLevel: Int) : Co
     data class Binary(
             val left: DecoratedExpression, val op: BinaryOperator, val right: DecoratedExpression,
             override val type: TypeExpr
-    ) : DecoratedExpression(precedenceLevel = 5) {
+    ) : DecoratedExpression(precedenceLevel = 6) {
 
         /**
          * @see CodeConvertible.acceptConversion
@@ -215,7 +235,7 @@ internal sealed class DecoratedExpression(private val precedenceLevel: Int) : Co
      */
     data class Throw(
             override val type: TypeExpr, val expr: DecoratedExpression
-    ) : DecoratedExpression(precedenceLevel = 6) {
+    ) : DecoratedExpression(precedenceLevel = 7) {
 
         /**
          * @see CodeConvertible.acceptConversion
@@ -236,7 +256,7 @@ internal sealed class DecoratedExpression(private val precedenceLevel: Int) : Co
     data class IfElse(
             val condition: DecoratedExpression, val e1: DecoratedExpression,
             val e2: DecoratedExpression, override val type: TypeExpr
-    ) : DecoratedExpression(precedenceLevel = 7) {
+    ) : DecoratedExpression(precedenceLevel = 8) {
 
         /**
          * @see CodeConvertible.acceptConversion
@@ -256,26 +276,6 @@ internal sealed class DecoratedExpression(private val precedenceLevel: Int) : Co
     data class Match(
             val exprToMatch: DecoratedExpression,
             val matchingList: List<Pair<DecoratedPattern, DecoratedExpression>>,
-            override val type: TypeExpr
-    ) : DecoratedExpression(precedenceLevel = 8) {
-
-        /**
-         * @see CodeConvertible.acceptConversion
-         */
-        override fun acceptConversion(converter: AstToCodeConverter): Unit =
-                converter.convert(node = this)
-
-    }
-
-    /**
-     * [FunctionApplication] with correct [type] is the function application expression,
-     * with [functionExpr] as the function and [arguments] as arguments of the function.
-     *
-     * @property functionExpr the function expression to apply.
-     * @property arguments arguments to supply.
-     */
-    data class FunctionApplication(
-            val functionExpr: DecoratedExpression, val arguments: List<DecoratedExpression>,
             override val type: TypeExpr
     ) : DecoratedExpression(precedenceLevel = 9) {
 

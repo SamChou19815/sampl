@@ -51,6 +51,7 @@ expression
     | constructor # ConstructorExpr
     | expression DOT LowerIdentifier # StructMemberAccessExpr
     | NOT expression # NotExpr
+    | expression (UNIT | (LPAREN expression (COMMA expression)* RPAREN)) # FunctionApplicationExpr
     | expression bitOperator expression # BitExpr
     | expression factorOperator expression # FactorExpr
     | expression termOperator expression # TermExpr
@@ -60,7 +61,6 @@ expression
     | THROW LT typeExprInAnnotation GT expression # ThrowExpr
     | IF expression THEN expression ELSE expression # IfElseExpr
     | MATCH expression WITH patternToExpr+ # MatchExpr
-    | expression (UNIT | (LPAREN expression (COMMA expression)* RPAREN)) # FunctionApplicationExpr
     | LBRACE argumentDeclarations ARROW expression RBRACE # FunExpr
     | TRY expression CATCH LowerIdentifier expression # TryCatchExpr
     | VAL (LowerIdentifier | WILDCARD) ASSIGN expression SEMICOLON expression # LetExpr

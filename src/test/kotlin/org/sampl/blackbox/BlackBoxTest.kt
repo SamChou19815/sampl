@@ -22,7 +22,8 @@ class BlackBoxTest {
             "7-int-hello-world",
             // "8-tm-sim",
             "9-div-by-zero",
-            "10-pattern-matching"
+            "10-pattern-matching",
+            "11-fib"
     )
 
     /**

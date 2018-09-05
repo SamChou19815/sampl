@@ -1,11 +1,11 @@
 plugins {
     id 'antlr'
-    id 'org.jetbrains.kotlin.jvm' version '1.2.60'
+    id 'org.jetbrains.kotlin.jvm' version '1.2.61'
     id 'org.jetbrains.dokka' version '0.9.17'
 }
 
 group 'org.sampl'
-version '0.0.5'
+version '0.0.6'
 
 repositories {
     mavenCentral()
