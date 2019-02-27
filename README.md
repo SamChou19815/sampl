@@ -4,15 +4,11 @@
 [![Release](https://jitpack.io/v/SamChou19815/sampl.svg)](https://jitpack.io/#SamChou19815/sampl)
 ![GitHub](https://img.shields.io/github/license/SamChou19815/sampl.svg)
 
-<img src="https://developersam.com/assets/app-icons/sampl.png" alt="SAMPL" width="300" />
-
 **Note: This project will no longer be maintained. Please take a look at its spiritual successor [SAMLANG](https://github.com/SamChou19815/samlang)**.
 
 It is a JVM language that embraces the functional programming paradigm, which currently supports
 immutable data structures, null safety, pattern matching, currying, limited type inference, and
 limited interop with other JVM languages.
-
-Read the docs [here](http://docs.developersam.com/sampl/).
 
 ## Gradle Config
 
